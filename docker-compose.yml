@@ -36,7 +36,7 @@ services:
     # Spring Boot Application Service (Optional - uncomment to use)
     app:
         build:
-            context: .
+            context: ./server
             dockerfile: Dockerfile
         container_name: auth-app
         restart: unless-stopped
@@ -63,8 +63,7 @@ services:
             - "8080:8080"
         networks:
             - auth-network
-        profiles:
-            - app
+
 
     # Frontend Service
     frontend:
@@ -83,8 +82,7 @@ services:
             - "3000:3000"
         networks:
             - auth-network
-        profiles:
-            - app
+
 
     # phpMyAdmin (Optional - for database management)
     phpmyadmin:
@@ -102,8 +100,7 @@ services:
             - "8081:80"
         networks:
             - auth-network
-        profiles:
-            - tools
+
 
 volumes:
     mysql_data:

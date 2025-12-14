@@ -23,7 +23,10 @@ import {
     NotificationDeleteRequest,
 } from "@/types/auth";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const isServer = typeof window === "undefined";
+const API_BASE_URL = isServer
+    ? process.env.BACKEND_URL || "http://localhost:8080"
+    : process.env.NEXT_PUBLIC_API_URL || "";
 
 // Create axios instance
 const api = axios.create({
