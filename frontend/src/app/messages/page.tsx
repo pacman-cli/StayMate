@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import DashboardLayout from "@/components/DashboardLayout";
 import { messageApi, userSearchApi } from "@/lib/api";
+import { socketService } from "@/lib/socket";
 import {
     ConversationResponse,
     MessageResponse,
@@ -166,17 +167,27 @@ export default function MessagesPage() {
         scrollToBottom();
     }, [messages, scrollToBottom]);
 
-    // Polling for new messages
+    // WebSocket connection
     useEffect(() => {
-        const interval = setInterval(() => {
-            if (selectedConversation) {
-                fetchMessages(selectedConversation.id);
-            }
-            fetchConversations();
-        }, 5000);
+        if (isAuthenticated && user?.id) {
+            socketService.connect(user.id, (message: MessageResponse) => {
+                // Handle new message
+                if (selectedConversation && message.conversationId === selectedConversation.id) {
+                    setMessages((prev) => [...prev, message]);
+                    scrollToBottom();
+                    // Mark as read immediately if current conversation is open
+                    messageApi.markConversationAsRead(message.conversationId);
+                }
+                
+                // Refresh conversations list to update last message/unread count
+                fetchConversations();
+            });
+        }
 
-        return () => clearInterval(interval);
-    }, [selectedConversation, fetchMessages, fetchConversations]);
+        return () => {
+            socketService.disconnect();
+        };
+    }, [isAuthenticated, user, selectedConversation, scrollToBottom, fetchConversations]);
 
     // User search with debounce
     useEffect(() => {

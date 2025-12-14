@@ -33,6 +33,7 @@ public class MessageServiceImpl implements MessageService {
         private final MessageRepository messageRepository;
         private final ConversationRepository conversationRepository;
         private final UserRepository userRepository;
+        private final org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
         private final NotificationRepository notificationRepository;
 
         @Transactional(readOnly = true)
@@ -313,6 +314,17 @@ public class MessageServiceImpl implements MessageService {
                                 sender,
                                 conversation.getId(),
                                 content);
+
+                // Broadcast message to recipient via WebSocket
+                try {
+                        MessageResponse response = mapToMessageResponse(message, recipient.getId());
+                        messagingTemplate.convertAndSendToUser(
+                                        String.valueOf(recipient.getId()),
+                                        "/queue/messages",
+                                        response);
+                } catch (Exception e) {
+                        log.warn("Failed to send WebSocket message to user {}: {}", recipient.getId(), e.getMessage());
+                }
 
                 log.info(
                                 "Message {} sent in conversation {} from user {} to user {}",
