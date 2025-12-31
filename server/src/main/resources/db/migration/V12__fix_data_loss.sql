@@ -1,0 +1,10 @@
+UPDATE users SET account_status = 'ACTIVE' WHERE account_status IS NULL OR account_status = '';
+UPDATE users SET auth_provider = 'LOCAL' WHERE (auth_provider IS NULL OR auth_provider = '') AND provider_id IS NULL;
+UPDATE users SET auth_provider = 'GOOGLE' WHERE (auth_provider IS NULL OR auth_provider = '') AND provider_id IS NOT NULL;
+UPDATE messages SET message_type = 'TEXT' WHERE message_type IS NULL OR message_type = '';
+UPDATE reports SET reason = 'OTHER', severity = 'LOW', status = 'PENDING' WHERE reason IS NULL OR reason = '';
+UPDATE applications SET status = 'PENDING' WHERE status IS NULL OR status = '';
+UPDATE bookings SET status = 'PENDING' WHERE status IS NULL OR status = '';
+UPDATE properties SET status = 'Active' WHERE status IS NULL OR status = '';
+UPDATE notifications SET type = 'SYSTEM_ANNOUNCEMENT' WHERE type IS NULL OR type = '';
+UPDATE user_roles SET role = 'ROLE_USER' WHERE role IS NULL OR role = '';
