@@ -1,8 +1,24 @@
 package com.webapp.domain.notification.entity;
 
-import com.webapp.domain.user.entity.User;
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+
+import com.webapp.domain.notification.enums.NotificationType;
+import com.webapp.domain.user.entity.User;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,9 +26,9 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "notifications", indexes = {
-    @Index(name = "idx_notification_user_id", columnList = "user_id"),
-    @Index(name = "idx_notification_read", columnList = "is_read"),
-    @Index(name = "idx_notification_created_at", columnList = "created_at")
+        @Index(name = "idx_notification_user_id", columnList = "user_id"),
+        @Index(name = "idx_notification_read", columnList = "is_read"),
+        @Index(name = "idx_notification_created_at", columnList = "created_at")
 })
 @Data
 @Builder
@@ -29,7 +45,7 @@ public class Notification {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
+    @Column(name = "type", nullable = false, columnDefinition = "varchar(255)")
     private NotificationType type;
 
     @Column(name = "title", nullable = false)
@@ -106,70 +122,5 @@ public class Notification {
     public void markAsUnread() {
         this.read = false;
         this.readAt = null;
-    }
-
-    public enum NotificationType {
-        // Message notifications
-        NEW_MESSAGE("New Message", "message-square", "blue"),
-
-        // Booking notifications
-        BOOKING_REQUEST("Booking Request", "calendar", "purple"),
-        BOOKING_CONFIRMED("Booking Confirmed", "check-circle", "green"),
-        BOOKING_CANCELLED("Booking Cancelled", "x-circle", "red"),
-        BOOKING_REMINDER("Booking Reminder", "clock", "orange"),
-
-        // Property notifications
-        PROPERTY_INQUIRY("Property Inquiry", "help-circle", "cyan"),
-        PROPERTY_APPROVED("Property Approved", "check", "green"),
-        PROPERTY_REJECTED("Property Rejected", "x", "red"),
-        PROPERTY_VIEWED("Property Viewed", "eye", "slate"),
-        LISTING_SAVED("Listing Saved", "heart", "pink"),
-        PRICE_DROP("Price Drop", "trending-down", "green"),
-
-        // Review notifications
-        REVIEW_RECEIVED("Review Received", "star", "yellow"),
-        REVIEW_REPLY("Review Reply", "message-circle", "blue"),
-
-        // User notifications
-        PROFILE_VIEWED("Profile Viewed", "user", "slate"),
-        VERIFICATION_APPROVED("Verification Approved", "shield-check", "green"),
-        VERIFICATION_REQUIRED("Verification Required", "shield-alert", "orange"),
-
-        // Roommate notifications
-        ROOMMATE_MATCH("Roommate Match", "users", "purple"),
-        ROOMMATE_REQUEST("Roommate Request", "user-plus", "blue"),
-
-        // System notifications
-        SYSTEM_ANNOUNCEMENT("Announcement", "megaphone", "blue"),
-        WELCOME("Welcome", "sparkles", "purple"),
-        ACCOUNT_UPDATE("Account Update", "settings", "slate"),
-        SECURITY_ALERT("Security Alert", "alert-triangle", "red"),
-
-        // Payment notifications
-        PAYMENT_RECEIVED("Payment Received", "credit-card", "green"),
-        PAYMENT_FAILED("Payment Failed", "credit-card", "red"),
-        PAYOUT_SENT("Payout Sent", "wallet", "green");
-
-        private final String displayName;
-        private final String defaultIcon;
-        private final String defaultColor;
-
-        NotificationType(String displayName, String defaultIcon, String defaultColor) {
-            this.displayName = displayName;
-            this.defaultIcon = defaultIcon;
-            this.defaultColor = defaultColor;
-        }
-
-        public String getDisplayName() {
-            return displayName;
-        }
-
-        public String getDefaultIcon() {
-            return defaultIcon;
-        }
-
-        public String getDefaultColor() {
-            return defaultColor;
-        }
     }
 }

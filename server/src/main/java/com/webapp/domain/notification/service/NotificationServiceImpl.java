@@ -1,26 +1,34 @@
 package com.webapp.domain.notification.service;
 
-import com.webapp.domain.notification.dto.*;
-import com.webapp.domain.notification.entity.Notification;
-import com.webapp.domain.notification.entity.Notification.NotificationType;
-import com.webapp.domain.notification.repository.NotificationRepository;
-import com.webapp.domain.user.entity.User;
-import com.webapp.domain.user.repository.UserRepository;
-import com.webapp.auth.exception.ResourceNotFoundException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.webapp.auth.exception.ResourceNotFoundException;
+import com.webapp.domain.notification.dto.CreateNotificationRequest;
+import com.webapp.domain.notification.dto.NotificationDeleteRequest;
+import com.webapp.domain.notification.dto.NotificationListResponse;
+import com.webapp.domain.notification.dto.NotificationMarkAsReadRequest;
+import com.webapp.domain.notification.dto.NotificationResponse;
+import com.webapp.domain.notification.dto.NotificationSummary;
+import com.webapp.domain.notification.dto.NotificationUnreadCountResponse;
+import com.webapp.domain.notification.entity.Notification;
+import com.webapp.domain.notification.enums.NotificationType;
+import com.webapp.domain.notification.repository.NotificationRepository;
+import com.webapp.domain.user.entity.User;
+import com.webapp.domain.user.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -94,8 +102,6 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Transactional(readOnly = true)
     public NotificationSummary getNotificationSummary(Long userId) {
-        int totalUnread = notificationRepository.countUnreadByUserId(userId);
-
         // Get counts by category
         List<Object[]> countsByType = notificationRepository.countUnreadGroupedByType(userId);
         int messagesUnread = 0;
@@ -131,10 +137,19 @@ public class NotificationServiceImpl implements NotificationService {
             }
         }
 
-        // Get recent notifications (last 5)
+        // Total unread for Bell Icon should NOT include messages
+        int totalUnread = bookingsUnread + propertyUnread + systemUnread;
+
+        // Get recent notifications (last 5) - EXCLUDING messages
+        // Fetch more than 5 initially to allow filtering in memory, or add a repository
+        // method
+        // For simplicity and to avoid excessive changes, we'll fetch a bit more and
+        // filter
         List<Notification> recentList = notificationRepository.findRecentByUserId(
                 userId, LocalDateTime.now().minusDays(7));
+
         List<NotificationResponse> recent = recentList.stream()
+                .filter(n -> n.getType() != NotificationType.NEW_MESSAGE)
                 .limit(5)
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());

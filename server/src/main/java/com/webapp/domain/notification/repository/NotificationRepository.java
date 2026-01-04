@@ -1,7 +1,7 @@
 package com.webapp.domain.notification.repository;
 
+import com.webapp.domain.notification.enums.NotificationType;
 import com.webapp.domain.notification.entity.Notification;
-import com.webapp.domain.notification.entity.Notification.NotificationType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -39,18 +39,16 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     // Find notifications by type for a user
     @Query("SELECT n FROM Notification n WHERE n.user.id = :userId AND n.type = :type ORDER BY n.createdAt DESC")
     Page<Notification> findByUserIdAndType(
-        @Param("userId") Long userId,
-        @Param("type") NotificationType type,
-        Pageable pageable
-    );
+            @Param("userId") Long userId,
+            @Param("type") NotificationType type,
+            Pageable pageable);
 
     // Find notifications by multiple types for a user
     @Query("SELECT n FROM Notification n WHERE n.user.id = :userId AND n.type IN :types ORDER BY n.createdAt DESC")
     Page<Notification> findByUserIdAndTypeIn(
-        @Param("userId") Long userId,
-        @Param("types") List<NotificationType> types,
-        Pageable pageable
-    );
+            @Param("userId") Long userId,
+            @Param("types") List<NotificationType> types,
+            Pageable pageable);
 
     // Mark a single notification as read
     @Modifying

@@ -1,6 +1,6 @@
 package com.webapp.domain.notification.dto;
 
-import com.webapp.domain.notification.entity.Notification.NotificationType;
+import com.webapp.domain.notification.enums.NotificationType;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

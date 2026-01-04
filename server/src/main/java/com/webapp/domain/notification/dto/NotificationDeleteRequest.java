@@ -14,4 +14,8 @@ public class NotificationDeleteRequest {
     private List<Long> notificationIds;
     private boolean deleteAll;
     private boolean deleteReadOnly;
+
+    public List<Long> getNotificationIds() {
+        return notificationIds;
+    }
 }
