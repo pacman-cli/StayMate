@@ -5,17 +5,15 @@ import com.webapp.auth.dto.request.RegisterRequest;
 import com.webapp.auth.dto.request.TokenRefreshRequest;
 import com.webapp.auth.dto.response.AuthResponse;
 import com.webapp.auth.exception.BadRequestException;
-import com.webapp.auth.exception.ResourceNotFoundException;
 import com.webapp.auth.mapper.AuthResponseMapper;
 import com.webapp.auth.security.JwtTokenProvider;
 import com.webapp.auth.security.UserPrincipal;
 import com.webapp.auth.service.AuthService;
-import com.webapp.domain.notification.entity.Notification.NotificationType;
+import com.webapp.domain.notification.enums.NotificationType;
 import com.webapp.domain.notification.service.NotificationService;
 import com.webapp.domain.user.entity.User;
 import com.webapp.domain.user.repository.UserRepository;
 import com.webapp.domain.user.service.UserService;
-import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,7 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
  * Handles authentication operations: registration, login, and token management.
  *
  * User creation is delegated to UserService to avoid code duplication.
- * Notification creation is delegated to NotificationService to avoid code duplication.
+ * Notification creation is delegated to NotificationService to avoid code
+ * duplication.
  * Role management has been moved to UserService.
  */
 @Slf4j
@@ -45,13 +44,12 @@ public class AuthServiceImpl implements AuthService {
     private final AuthResponseMapper authResponseMapper;
 
     public AuthServiceImpl(
-        UserRepository userRepository,
-        @Lazy UserService userService,
-        @Lazy NotificationService notificationService,
-        JwtTokenProvider jwtTokenProvider,
-        @Lazy AuthenticationManager authenticationManager,
-        AuthResponseMapper authResponseMapper
-    ) {
+            UserRepository userRepository,
+            @Lazy UserService userService,
+            @Lazy NotificationService notificationService,
+            JwtTokenProvider jwtTokenProvider,
+            @Lazy AuthenticationManager authenticationManager,
+            AuthResponseMapper authResponseMapper) {
         this.userRepository = userRepository;
         this.userService = userService;
         this.notificationService = notificationService;
@@ -64,18 +62,16 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         log.info(
-            "Attempting to register user with email: {}",
-            request.getEmail()
-        );
+                "Attempting to register user with email: {}",
+                request.getEmail());
 
         // Delegate user creation to UserService to avoid duplicate code
         User savedUser = userService.registerUser(request);
 
         log.info(
-            "User registered successfully with id: {} and roles: {}",
-            savedUser.getId(),
-            savedUser.getRoles()
-        );
+                "User registered successfully with id: {} and roles: {}",
+                savedUser.getId(),
+                savedUser.getRoles());
 
         // Create welcome notification using NotificationService
         createWelcomeNotification(savedUser);
@@ -83,50 +79,45 @@ public class AuthServiceImpl implements AuthService {
         // Generate tokens
         UserPrincipal userPrincipal = UserPrincipal.create(savedUser);
         String accessToken = jwtTokenProvider.generateAccessToken(
-            userPrincipal
-        );
+                userPrincipal);
         String refreshToken = jwtTokenProvider.generateRefreshToken(
-            userPrincipal
-        );
+                userPrincipal);
 
         return authResponseMapper.toAuthResponse(
-            accessToken,
-            refreshToken,
-            jwtTokenProvider.getAccessTokenExpirationMs() / 1000,
-            savedUser
-        );
+                accessToken,
+                refreshToken,
+                jwtTokenProvider.getAccessTokenExpirationMs() / 1000,
+                savedUser);
     }
 
     /**
      * Create a welcome notification for newly registered users.
-     * Delegates to NotificationService to avoid duplicate notification creation logic.
+     * Delegates to NotificationService to avoid duplicate notification creation
+     * logic.
      */
     private void createWelcomeNotification(User user) {
         try {
             String userName = user.getFirstName() != null
-                ? user.getFirstName()
-                : "there";
+                    ? user.getFirstName()
+                    : "there";
 
-            String welcomeMessage =
-                "Hi " +
-                userName +
-                "! Your account has been created successfully. " +
-                "Start exploring properties or find your perfect roommate today!";
+            String welcomeMessage = "Hi " +
+                    userName +
+                    "! Your account has been created successfully. " +
+                    "Start exploring properties or find your perfect roommate today!";
 
             notificationService.createNotificationForUser(
-                user.getId(),
-                NotificationType.WELCOME,
-                "Welcome to RentMate! 🎉",
-                welcomeMessage,
-                "/dashboard"
-            );
+                    user.getId(),
+                    NotificationType.WELCOME,
+                    "Welcome to RentMate! 🎉",
+                    welcomeMessage,
+                    "/dashboard");
 
             log.debug("Created welcome notification for user {}", user.getId());
         } catch (Exception e) {
             log.warn(
-                "Failed to create welcome notification: {}",
-                e.getMessage()
-            );
+                    "Failed to create welcome notification: {}",
+                    e.getMessage());
             // Don't fail registration if notification creation fails
         }
     }
@@ -137,16 +128,13 @@ public class AuthServiceImpl implements AuthService {
         log.info("Attempting login for user: {}", request.getEmail());
 
         Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                request.getEmail(),
-                request.getPassword()
-            )
-        );
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        UserPrincipal userPrincipal =
-            (UserPrincipal) authentication.getPrincipal();
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
         // Update last login time using UserService
         userService.updateLastLogin(userPrincipal.getId());
@@ -155,24 +143,20 @@ public class AuthServiceImpl implements AuthService {
         User user = userService.getUserById(userPrincipal.getId());
 
         String accessToken = jwtTokenProvider.generateAccessToken(
-            authentication
-        );
+                authentication);
         String refreshToken = jwtTokenProvider.generateRefreshToken(
-            authentication
-        );
+                authentication);
 
         log.info(
-            "User logged in successfully: {} with roles: {}",
-            request.getEmail(),
-            user.getRoles()
-        );
+                "User logged in successfully: {} with roles: {}",
+                request.getEmail(),
+                user.getRoles());
 
         return authResponseMapper.toAuthResponse(
-            accessToken,
-            refreshToken,
-            jwtTokenProvider.getAccessTokenExpirationMs() / 1000,
-            user
-        );
+                accessToken,
+                refreshToken,
+                jwtTokenProvider.getAccessTokenExpirationMs() / 1000,
+                user);
     }
 
     @Override
@@ -197,33 +181,28 @@ public class AuthServiceImpl implements AuthService {
 
         UserPrincipal userPrincipal = UserPrincipal.create(user);
         String newAccessToken = jwtTokenProvider.generateAccessToken(
-            userPrincipal
-        );
+                userPrincipal);
         String newRefreshToken = jwtTokenProvider.generateRefreshToken(
-            userPrincipal
-        );
+                userPrincipal);
 
         log.info("Token refreshed for user: {}", user.getEmail());
 
         return authResponseMapper.toAuthResponse(
-            newAccessToken,
-            newRefreshToken,
-            jwtTokenProvider.getAccessTokenExpirationMs() / 1000,
-            user
-        );
+                newAccessToken,
+                newRefreshToken,
+                jwtTokenProvider.getAccessTokenExpirationMs() / 1000,
+                user);
     }
 
     @Override
     public User getCurrentUser() {
-        Authentication authentication =
-            SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new BadRequestException("No authenticated user found");
         }
 
-        UserPrincipal userPrincipal =
-            (UserPrincipal) authentication.getPrincipal();
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
         return userService.getUserById(userPrincipal.getId());
     }
