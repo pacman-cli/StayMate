@@ -1,0 +1,13 @@
+package com.webapp.domain.setting.repository;
+
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.webapp.domain.setting.entity.SystemSetting;
+
+@Repository
+public interface SystemSettingRepository extends JpaRepository<SystemSetting, String> {
+  Optional<SystemSetting> findByKey(String key);
+}
