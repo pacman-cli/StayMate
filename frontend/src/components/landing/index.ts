@@ -1,0 +1,10 @@
+export { default as AmenitiesSection } from "./AmenitiesSection"
+export { default as FAQSection } from "./FAQSection"
+export { default as FeaturesSection } from "./FeaturesSection"
+export { default as HeroSection } from "./HeroSection"
+export { default as HexPatternBackground } from "./HexPatternBackground"
+export { default as HowItWorksSection } from "./HowItWorksSection"
+export { default as ProblemsSection } from "./ProblemsSection"
+export { default as TestimonialsSection } from "./TestimonialsSection"
+export { default as UserTypesSection } from "./UserTypesSection"
+

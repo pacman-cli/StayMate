@@ -1,258 +1,177 @@
-"use client";
+"use client"
 
-import React, { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
-import { useTheme } from "@/context/ThemeContext";
-import DashboardLayout from "@/components/DashboardLayout";
-import { userSearchApi } from "@/lib/api";
-import { User } from "@/types/auth";
-import {
-    Search,
-    MapPin,
-    User as UserIcon,
-    Loader2,
-    MessageSquare,
-    Shield
-} from "lucide-react";
+import DashboardLayout from "@/components/DashboardLayout"
+import RoommateCard from "@/components/roommates/RoommateCard"
+import { useTheme } from "@/context/ThemeContext"
+import { roommateApi } from "@/lib/api"
+import { Filter, Search } from "lucide-react"
+import Link from "next/link"
+import { useEffect, useState } from "react"
+import { useDebounce } from "use-debounce"
 
-export default function FindRoommatesPage() {
-    const router = useRouter();
-    const { isAuthenticated, isLoading: authLoading } = useAuth();
-    const { isDark } = useTheme();
+export default function RoommatesPage() {
+    const { isDark } = useTheme()
 
-    const [searchQuery, setSearchQuery] = useState("");
-    const [users, setUsers] = useState<User[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [hasSearched, setHasSearched] = useState(false);
+    // Filter States
+    const [location, setLocation] = useState("")
+    const [debouncedLocation] = useDebounce(location, 500)
+    const [minBudget, setMinBudget] = useState("")
+    const [maxBudget, setMaxBudget] = useState("")
+    const [genderPref, setGenderPref] = useState("")
 
-    // Initial check
+    const [posts, setPosts] = useState([])
+    const [loading, setLoading] = useState(true)
+
     useEffect(() => {
-        if (!authLoading && !isAuthenticated) {
-            router.push("/login");
+        const fetchPosts = async () => {
+            setLoading(true)
+            try {
+                const data = await roommateApi.getAll({
+                    location: debouncedLocation || undefined,
+                    minBudget: minBudget || undefined,
+                    maxBudget: maxBudget || undefined,
+                    genderPreference: genderPref || undefined
+                })
+                setPosts(data)
+            } catch (err) {
+                console.error("Failed to fetch roommates", err)
+            } finally {
+                setLoading(false)
+            }
         }
-    }, [authLoading, isAuthenticated, router]);
-
-    // Handle search
-    const handleSearch = useCallback(async (e?: React.FormEvent) => {
-        if (e) e.preventDefault();
-        
-        if (!searchQuery.trim()) return;
-
-        try {
-            setIsLoading(true);
-            const results = await userSearchApi.searchUsers(searchQuery);
-            setUsers(results);
-            setHasSearched(true);
-        } catch (error) {
-            console.error("Failed to search users:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [searchQuery]);
-
-    // Initial search or random suggestions could go here
-    // For now, we'll just wait for user input or show a clean state
-
-    if (authLoading) {
-        return (
-            <DashboardLayout>
-                <div className="flex items-center justify-center h-[calc(100vh-120px)]">
-                    <Loader2 className={`w-8 h-8 animate-spin ${isDark ? "text-primary-400" : "text-primary-600"}`} />
-                </div>
-            </DashboardLayout>
-        );
-    }
+        fetchPosts()
+    }, [debouncedLocation, minBudget, maxBudget, genderPref])
 
     return (
         <DashboardLayout>
-            <div
-                className={`h-[calc(100vh-120px)] flex flex-col rounded-xl overflow-hidden border ${
-                    isDark ? "bg-dark-800/50 border-white/10" : "bg-white border-slate-200"
-                }`}
-            >
-                {/* Header Section */}
-                <div className={`flex-shrink-0 border-b ${isDark ? "border-white/10" : "border-slate-200"}`}>
-                    <div className="p-4 flex flex-col gap-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h1 className={`text-xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
-                                    Find Roommates
-                                </h1>
-                                <p className={`text-sm ${isDark ? "text-slate-500" : "text-slate-500"}`}>
-                                    Search for compatible roommates in your area
-                                </p>
-                            </div>
-                        </div>
+            <div className={`min-h-screen ${isDark ? "bg-dark-900" : "bg-slate-50"}`}>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-                        {/* Search Bar */}
-                        <form onSubmit={handleSearch} className="relative">
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search by name, location, or interests..."
-                                className={`w-full pl-10 pr-4 py-2.5 rounded-xl border outline-none transition-all ${
-                                    isDark
-                                        ? "bg-dark-900/50 border-white/10 text-white placeholder-slate-500 focus:border-primary-500/50"
-                                        : "bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-primary-500"
-                                }`}
-                            />
-                            <Search
-                                className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 ${
-                                    isDark ? "text-slate-500" : "text-slate-400"
-                                }`}
-                            />
-                            <button
-                                type="submit"
-                                className={`absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                                    isDark
-                                        ? "bg-primary-600 hover:bg-primary-500 text-white"
-                                        : "bg-primary-600 hover:bg-primary-700 text-white"
-                                }`}
-                            >
-                                Search
-                            </button>
-                        </form>
-                    </div>
-
-                    {/* Filters - Placeholder for now */}
-                    <div className="px-4 pb-3 flex items-center gap-2 overflow-x-auto scrollbar-hide">
-                        <button
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                                isDark
-                                    ? "bg-primary-500 text-white"
-                                    : "bg-slate-900 text-white"
-                            }`}
-                        >
-                            All
-                        </button>
-                        <button
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                                isDark
-                                    ? "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white"
-                                    : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
-                            }`}
-                        >
-                            Verified
-                        </button>
-                        <button
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                                isDark
-                                    ? "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white"
-                                    : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
-                            }`}
-                        >
-                            Students
-                        </button>
-                    </div>
-                </div>
-
-                {/* Content Area */}
-                <div className={`flex-1 overflow-y-auto p-4 ${isDark ? "bg-dark-900/20" : "bg-slate-50/50"}`}>
-                    {isLoading ? (
-                        <div className="flex flex-col items-center justify-center h-full">
-                            <Loader2 className={`w-8 h-8 animate-spin mb-2 ${isDark ? "text-primary-400" : "text-primary-600"}`} />
-                            <p className={`text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                                Searching roommates...
+                    {/* Header */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                        <div>
+                            <h1 className={`text-3xl font-bold mb-2 ${isDark ? "text-white" : "text-slate-900"}`}>
+                                Find Your Perfect Roommate
+                            </h1>
+                            <p className={isDark ? "text-slate-400" : "text-slate-600"}>
+                                Connect with verified people looking for shared accommodation.
                             </p>
                         </div>
-                    ) : users.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {users.map((user) => (
-                                <div
-                                    key={user.id}
-                                    className={`p-4 rounded-xl border transition-all ${
-                                        isDark
-                                            ? "bg-dark-800/50 border-white/10 hover:border-white/20"
-                                            : "bg-white border-slate-200 hover:border-primary-200 hover:shadow-sm"
-                                    }`}
-                                >
-                                    <div className="flex items-start gap-3">
-                                        <div className="relative">
-                                            {user.profilePictureUrl ? (
-                                                <img
-                                                    src={user.profilePictureUrl}
-                                                    alt={user.firstName || "User"}
-                                                    className="w-12 h-12 rounded-full object-cover"
-                                                />
-                                            ) : (
-                                                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                                                    isDark ? "bg-white/10" : "bg-slate-100"
-                                                }`}>
-                                                    <UserIcon className={`w-6 h-6 ${isDark ? "text-slate-400" : "text-slate-500"}`} />
-                                                </div>
-                                            )}
-                                            {/* Online Status (Mock) */}
-                                            <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-white dark:border-dark-800" />
-                                        </div>
-                                        
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center justify-between">
-                                                <h3 className={`font-semibold truncate ${isDark ? "text-white" : "text-slate-900"}`}>
-                                                    {user.firstName} {user.lastName}
-                                                </h3>
-                                                {/* Verification Badge (Mock logic needed if not in User type) */}
-                                                <Shield className="w-4 h-4 text-blue-500" />
-                                            </div>
-                                            
-                                            <div className="flex items-center gap-1 mt-1 text-xs text-slate-500">
-                                                <MapPin className="w-3 h-3" />
-                                                <span>New York, NY</span> {/* Mock Location */}
-                                            </div>
-                                        </div>
-                                    </div>
+                        <Link
+                            href="/roommates/create"
+                            className="px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all text-center"
+                        >
+                            Post an Ad
+                        </Link>
+                    </div>
 
-                                    {/* Tags/Interests */}
-                                    <div className="mt-4 flex flex-wrap gap-2">
-                                        {["Quiet", "Pet-friendly", "Student"].map((tag, idx) => (
-                                            <span
-                                                key={idx}
-                                                className={`px-2 py-1 rounded-md text-xs font-medium ${
-                                                    isDark
-                                                        ? "bg-white/5 text-slate-400"
-                                                        : "bg-slate-100 text-slate-600"
-                                                }`}
-                                            >
-                                                {tag}
-                                            </span>
-                                        ))}
-                                    </div>
+                    <div className="flex flex-col lg:flex-row gap-8">
 
-                                    {/* Action Button */}
-                                    <button
-                                        onClick={() => router.push(`/messages?userId=${user.id}`)}
-                                        className={`mt-4 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                            isDark
-                                                ? "bg-white/10 text-white hover:bg-white/20"
-                                                : "bg-slate-100 text-slate-900 hover:bg-slate-200"
-                                        }`}
-                                    >
-                                        <MessageSquare className="w-4 h-4" />
-                                        Message
-                                    </button>
+                        {/* Filters Sidebar */}
+                        <div className="lg:w-80 flex-shrink-0">
+                            <div className={`p-6 rounded-2xl border sticky top-24 ${isDark ? "bg-dark-800 border-white/10" : "bg-white border-slate-200"
+                                }`}>
+                                <div className="flex items-center gap-2 font-bold mb-6 text-lg">
+                                    <Filter className="w-5 h-5" />
+                                    <span>Filters</span>
                                 </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center h-full text-center p-6">
-                            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
-                                isDark ? "bg-white/5" : "bg-slate-100"
-                            }`}>
-                                <Search className={`w-8 h-8 ${isDark ? "text-slate-500" : "text-slate-400"}`} />
+
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="text-sm font-medium mb-2 block">Location</label>
+                                        <div className="relative">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                            <input
+                                                type="text"
+                                                placeholder="City, Area, or Zip"
+                                                value={location}
+                                                onChange={(e) => setLocation(e.target.value)}
+                                                className={`w-full pl-9 pr-4 py-2.5 rounded-xl border text-sm ${isDark
+                                                        ? "bg-white/5 border-white/10 focus:border-primary-500/50 text-white"
+                                                        : "bg-slate-50 border-slate-200 focus:border-primary-500 text-slate-900"
+                                                    } focus:outline-none`}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-sm font-medium mb-2 block">Monthly Budget</label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <input
+                                                type="number"
+                                                placeholder="Min"
+                                                value={minBudget}
+                                                onChange={(e) => setMinBudget(e.target.value)}
+                                                className={`w-full px-3 py-2.5 rounded-xl border text-sm ${isDark
+                                                        ? "bg-white/5 border-white/10 focus:border-primary-500/50 text-white"
+                                                        : "bg-slate-50 border-slate-200 focus:border-primary-500 text-slate-900"
+                                                    } focus:outline-none`}
+                                            />
+                                            <input
+                                                type="number"
+                                                placeholder="Max"
+                                                value={maxBudget}
+                                                onChange={(e) => setMaxBudget(e.target.value)}
+                                                className={`w-full px-3 py-2.5 rounded-xl border text-sm ${isDark
+                                                        ? "bg-white/5 border-white/10 focus:border-primary-500/50 text-white"
+                                                        : "bg-slate-50 border-slate-200 focus:border-primary-500 text-slate-900"
+                                                    } focus:outline-none`}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-sm font-medium mb-2 block">Gender Preference</label>
+                                        <select
+                                            value={genderPref}
+                                            onChange={(e) => setGenderPref(e.target.value)}
+                                            className={`w-full px-3 py-2.5 rounded-xl border text-sm ${isDark
+                                                    ? "bg-white/5 border-white/10 focus:border-primary-500/50 text-white"
+                                                    : "bg-slate-50 border-slate-200 focus:border-primary-500 text-slate-900"
+                                                } focus:outline-none`}
+                                        >
+                                            <option value="">Any</option>
+                                            <option value="MALE">Male</option>
+                                            <option value="FEMALE">Female</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
-                            <h3 className={`text-lg font-semibold mb-2 ${isDark ? "text-white" : "text-slate-900"}`}>
-                                {hasSearched ? "No roommates found" : "Find your perfect roommate"}
-                            </h3>
-                            <p className={`text-sm max-w-sm ${isDark ? "text-slate-500" : "text-slate-500"}`}>
-                                {hasSearched
-                                    ? "Try adjusting your search terms or filters to find more results."
-                                    : "Enter a location, name, or keyword to start searching for potential roommates."}
-                            </p>
                         </div>
-                    )}
+
+                        {/* Results Grid */}
+                        <div className="flex-1">
+                            {loading ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                    {[...Array(6)].map((_, i) => (
+                                        <div key={i} className={`h-[300px] rounded-2xl animate-pulse ${isDark ? "bg-white/5" : "bg-slate-200"
+                                            }`} />
+                                    ))}
+                                </div>
+                            ) : posts.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                    {posts.map((post: any) => (
+                                        <RoommateCard key={post.id} post={post} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-20">
+                                    <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isDark ? "bg-white/5" : "bg-slate-100"
+                                        }`}>
+                                        <Search className="w-8 h-8 text-slate-400" />
+                                    </div>
+                                    <h3 className={`text-xl font-bold mb-2 ${isDark ? "text-white" : "text-slate-900"}`}>
+                                        No roommates found
+                                    </h3>
+                                    <p className="text-slate-500">
+                                        Try adjusting your filters to see more results.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
         </DashboardLayout>
-    );
+    )
 }

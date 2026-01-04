@@ -171,6 +171,7 @@ export default function MessagesPage() {
     useEffect(() => {
         if (isAuthenticated && user?.id) {
             socketService.connect(user.id, (message: MessageResponse) => {
+                console.log("WebSocket Message Received:", message);
                 // Handle new message
                 if (selectedConversation && message.conversationId === selectedConversation.id) {
                     setMessages((prev) => [...prev, message]);
@@ -704,31 +705,19 @@ export default function MessagesPage() {
                                                         <div
                                                             className={`flex items-end gap-2 max-w-[75%] ${msg.isOwnMessage ? "flex-row-reverse" : ""}`}
                                                         >
-                                                            {/* Avatar for other user */}
+                                                            {/* Avatar - Only for other user */}
                                                             {!msg.isOwnMessage && (
                                                                 <div className="flex-shrink-0">
                                                                     {msg.senderProfilePicture ? (
                                                                         <img
-                                                                            src={
-                                                                                msg.senderProfilePicture
-                                                                            }
-                                                                            alt={
-                                                                                msg.senderName
-                                                                            }
+                                                                            src={msg.senderProfilePicture}
+                                                                            alt={msg.senderName}
                                                                             className="w-8 h-8 rounded-full object-cover"
                                                                         />
                                                                     ) : (
-                                                                        <div
-                                                                            className={`w-8 h-8 rounded-full flex items-center justify-center ${isDark ? "bg-white/10" : "bg-slate-200"}`}
-                                                                        >
-                                                                            <span
-                                                                                className={`text-sm font-medium ${isDark ? "text-slate-400" : "text-slate-600"}`}
-                                                                            >
-                                                                                {msg.senderName
-                                                                                    .charAt(
-                                                                                        0,
-                                                                                    )
-                                                                                    .toUpperCase()}
+                                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isDark ? "bg-white/10" : "bg-slate-200"}`}>
+                                                                            <span className={`text-sm font-medium ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                                                                                {msg.senderName.charAt(0).toUpperCase()}
                                                                             </span>
                                                                         </div>
                                                                     )}
@@ -737,12 +726,12 @@ export default function MessagesPage() {
 
                                                             {/* Message Bubble */}
                                                             <div
-                                                                className={`px-4 py-2.5 rounded-2xl ${
+                                                                className={`px-4 py-2.5 max-w-full shadow-sm ${
                                                                     msg.isOwnMessage
-                                                                        ? "bg-primary-500 text-white rounded-br-md"
+                                                                        ? "bg-primary-600 text-white rounded-2xl rounded-tr-none ml-auto"
                                                                         : isDark
-                                                                          ? "bg-white/10 text-white rounded-bl-md"
-                                                                          : "bg-white text-slate-900 rounded-bl-md shadow-sm"
+                                                                          ? "bg-slate-800 text-white rounded-2xl rounded-tl-none mr-auto border border-slate-700"
+                                                                          : "bg-white text-slate-800 rounded-2xl rounded-tl-none mr-auto border border-slate-200"
                                                                 }`}
                                                             >
                                                                 <p className="text-sm whitespace-pre-wrap break-words">

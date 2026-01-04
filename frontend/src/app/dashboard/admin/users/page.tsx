@@ -77,7 +77,11 @@ export default function UserManagementPage() {
             if (reset) {
                 setUsers(data.content)
             } else {
-                setUsers(prev => [...prev, ...data.content])
+                setUsers(prev => {
+                    const existingIds = new Set(prev.map(u => u.id))
+                    const newUsers = data.content.filter(u => !existingIds.has(u.id))
+                    return [...prev, ...newUsers]
+                })
             }
 
             setTotalPages(data.totalPages)
@@ -137,6 +141,38 @@ export default function UserManagementPage() {
             fetchUsers(true)
         } catch (error) {
             toast.error("Failed to cancel deletion")
+        }
+    }
+
+    const handleBanUser = async (user: User) => {
+        if (!confirm(`Are you sure you want to BAN ${user.firstName}?`)) return
+        try {
+            await adminApi.updateUserStatus(user.id, "BANNED")
+            toast.success("User banned")
+            fetchUsers(true)
+        } catch (error) {
+            toast.error("Failed to ban user")
+        }
+    }
+
+    const handleWarnUser = async (user: User) => {
+        if (!confirm(`Issue a warning to ${user.firstName}?`)) return
+        try {
+            await adminApi.updateUserStatus(user.id, "WARNING")
+            toast.success("User warned")
+            fetchUsers(true)
+        } catch (error) {
+            toast.error("Failed to warn user")
+        }
+    }
+
+    const handleActivateUser = async (user: User) => {
+        try {
+            await adminApi.updateUserStatus(user.id, "ACTIVE")
+            toast.success("User activated")
+            fetchUsers(true)
+        } catch (error) {
+            toast.error("Failed to activate user")
         }
     }
 
@@ -305,12 +341,20 @@ export default function UserManagementPage() {
                                                         Pending Deletion
                                                     </div>
                                                 ) : (
-                                                    <div className={`hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${user.enabled
-                                                        ? (isDark ? "text-emerald-400 bg-emerald-500/10" : "text-emerald-700 bg-emerald-50")
-                                                        : (isDark ? "text-red-400 bg-red-500/10" : "text-red-700 bg-red-50")
+                                                    <div className={`hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${user.accountStatus === 'BANNED' ? 'text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400' :
+                                                            user.accountStatus === 'WARNING' ? 'text-amber-700 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400' :
+                                                                user.accountStatus === 'SUSPENDED' ? 'text-orange-700 bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400' :
+                                                                    user.enabled
+                                                                        ? (isDark ? "text-emerald-400 bg-emerald-500/10" : "text-emerald-700 bg-emerald-50")
+                                                                        : (isDark ? "text-red-400 bg-red-500/10" : "text-red-700 bg-red-50")
                                                         }`}>
-                                                        {user.enabled ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                                                        {user.enabled ? "Active" : "Disabled"}
+                                                        {user.accountStatus === 'BANNED' ? <XCircle className="w-3 h-3" /> :
+                                                            user.accountStatus === 'WARNING' ? <AlertTriangle className="w-3 h-3" /> :
+                                                                user.enabled ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                                                        {user.accountStatus === 'BANNED' ? "Banned" :
+                                                            user.accountStatus === 'WARNING' ? "Warning" :
+                                                                user.accountStatus === 'SUSPENDED' ? "Suspended" :
+                                                                    user.enabled ? "Active" : "Disabled"}
                                                     </div>
                                                 )}
 
@@ -342,6 +386,25 @@ export default function UserManagementPage() {
                                                                 <Trash2 className="w-4 h-4" />
                                                             </button>
                                                         )
+                                                    )}
+
+                                                    {user.accountStatus !== 'BANNED' && (
+                                                        <button
+                                                            onClick={() => handleBanUser(user)}
+                                                            className={`p-1.5 rounded transition-colors ${isDark ? "hover:bg-red-500/20 text-slate-400 hover:text-red-400" : "hover:bg-red-100 text-slate-500 hover:text-red-600"}`}
+                                                            title="Ban User"
+                                                        >
+                                                            <XCircle className="w-4 h-4" />
+                                                        </button>
+                                                    )}
+                                                    {user.accountStatus === 'BANNED' && (
+                                                        <button
+                                                            onClick={() => handleActivateUser(user)}
+                                                            className={`p-1.5 rounded transition-colors ${isDark ? "hover:bg-emerald-500/20 text-slate-400 hover:text-emerald-400" : "hover:bg-emerald-100 text-slate-500 hover:text-emerald-600"}`}
+                                                            title="Activate User"
+                                                        >
+                                                            <CheckCircle className="w-4 h-4" />
+                                                        </button>
                                                     )}
                                                 </div>
                                             </div>

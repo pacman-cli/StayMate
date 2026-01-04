@@ -1,10 +1,12 @@
 "use client"
 
-import { ArrowDownRight, ArrowUpRight, DollarSign, Users, Activity, UserPlus, MousePointerClick, UserMinus } from "lucide-react"
+import { Activity, ArrowDownRight, ArrowUpRight, DollarSign, MousePointerClick, UserMinus, UserPlus, Users } from "lucide-react"
 import { Area, AreaChart, ResponsiveContainer } from "recharts"
 
+import { AdminDashboardDTO } from "@/types/auth"
+
 interface KPIStatsGridProps {
-  data?: any // We'll type this properly later when backend is ready
+  data?: AdminDashboardDTO | null
 }
 
 export function KPIStatsGrid({ data }: KPIStatsGridProps) {
@@ -18,58 +20,55 @@ export function KPIStatsGrid({ data }: KPIStatsGridProps) {
 
   const metrics = [
     {
-      label: "Monthly Active Users",
-      value: "12,450",
-      change: "+12.5%",
-      trend: "up",
+      label: "Total Users",
+      value: data?.totalUsers?.toLocaleString() || "0",
+      change: "+0%", // TODO: Calculate growth
+      trend: "neutral",
       icon: Users,
       color: "blue",
       data: sparklineData
     },
     {
-      label: "Daily Active Users",
-      value: "1,203",
-      change: "+5.2%",
+      label: "Total Listings",
+      value: data?.totalListings?.toLocaleString() || "0",
+      change: `Pending: ${data?.pendingVerificationsCount || 0}`,
       trend: "up",
       icon: Activity,
       color: "emerald",
       data: sparklineData
     },
     {
-      label: "New Signups (30d)",
-      value: "450",
-      change: "+18.2%",
+      label: "Occupancy Rate",
+      value: `${data?.seatOccupancyRate?.toFixed(1) || 0}%`,
+      change: "Active Beds",
       trend: "up",
       icon: UserPlus,
       color: "indigo",
       data: sparklineData
     },
     {
-      label: "Total Revenue (Mo)",
-      value: "BDT 450k",
-      change: "+8.4%",
+      label: "Total Bookings",
+      value: data?.totalBookings?.toLocaleString() || "0",
+      change: `Confirmed: ${data?.confirmedBookings || 0}`,
       trend: "up",
       icon: DollarSign,
       color: "violet",
       data: sparklineData
     },
     {
-      label: "Conversion Rate",
-      value: "3.2%",
-      change: "-0.4%",
+      label: "Emergancy Rooms",
+      value: data?.totalEmergencyRoomsAvailable?.toLocaleString() || "0",
+      change: "Available Now",
       trend: "down",
       icon: MousePointerClick,
       color: "amber",
       data: sparklineDataDown
     },
     {
-      label: "Churn Rate",
-      value: "0.8%",
-      change: "-0.1%",
-      trend: "up", // Churn going down is good (metrics usually show direction of number though) -> "up" means metric value increased? Or good/bad?
-      // Usually green "down" arrow for churn is good.
-      // Let's stick to visual "red down" for negative change in value, but we might want to color logic differently.
-      // For now, let's say Churn IMPROVED (went down 0.1%).
+      label: "Risk Alerts",
+      value: data?.recentFraudAlerts?.length.toString() || "0",
+      change: `${data?.bannedUsersCount || 0} Banned`,
+      trend: "up",
       icon: UserMinus,
       color: "rose",
       data: sparklineDataDown,
@@ -89,8 +88,8 @@ export function KPIStatsGrid({ data }: KPIStatsGridProps) {
 function Card({ metric }: { metric: any }) {
   const isPositive = metric.change.startsWith("+")
   // For churn, negative change is good (green), positive is bad (red) -> logic handled by styling
-  
-  const trendColor = metric.inverseTrend 
+
+  const trendColor = metric.inverseTrend
     ? (isPositive ? "text-red-600 bg-red-50" : "text-emerald-600 bg-emerald-50")
     : (isPositive ? "text-emerald-600 bg-emerald-50" : "text-red-600 bg-red-50")
 
@@ -109,7 +108,7 @@ function Card({ metric }: { metric: any }) {
         <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate">{metric.label}</p>
         <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-1">{metric.value}</h3>
       </div>
-      
+
       {/* Sparkline */}
       <div className="h-10 mt-3 -mx-2">
         <ResponsiveContainer width="100%" height="100%">
@@ -120,12 +119,12 @@ function Card({ metric }: { metric: any }) {
                 <stop offset="100%" stopColor={isPositive ? "#10b981" : "#f43f5e"} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <Area 
-              type="monotone" 
-              dataKey="value" 
-              stroke={isPositive ? "#10b981" : "#f43f5e"} 
+            <Area
+              type="monotone"
+              dataKey="value"
+              stroke={isPositive ? "#10b981" : "#f43f5e"}
               strokeWidth={2}
-              fill={`url(#gradient-${metric.label})`} 
+              fill={`url(#gradient-${metric.label})`}
             />
           </AreaChart>
         </ResponsiveContainer>

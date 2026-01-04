@@ -17,7 +17,12 @@ class SocketService {
             return;
         }
 
-        const token = Cookies.get('auth_token'); // Ensure this matches your cookie name
+        const token = Cookies.get('accessToken');
+
+        if (!token) {
+            console.error('WebSocket connection failed: No access token found');
+            return;
+        }
 
         this.client = new Client({
             webSocketFactory: () => new SockJS(SOCKET_URL),
