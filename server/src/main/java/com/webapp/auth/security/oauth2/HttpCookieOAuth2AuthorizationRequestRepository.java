@@ -1,17 +1,18 @@
 package com.webapp.auth.security.oauth2;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Base64;
+
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.stereotype.Component;
-import org.springframework.util.SerializationUtils;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Cookie-based repository for storing OAuth2 authorization requests.
@@ -20,7 +21,7 @@ import org.springframework.util.SerializationUtils;
  */
 @Component
 public class HttpCookieOAuth2AuthorizationRequestRepository
-    implements AuthorizationRequestRepository<OAuth2AuthorizationRequest> {
+        implements AuthorizationRequestRepository<OAuth2AuthorizationRequest> {
 
     public static final String OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME = "oauth2_auth_request";
     public static final String REDIRECT_URI_COOKIE_NAME = "redirect_uri";
@@ -37,10 +38,9 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
 
     @Override
     public void saveAuthorizationRequest(
-        OAuth2AuthorizationRequest authorizationRequest,
-        HttpServletRequest request,
-        HttpServletResponse response
-    ) {
+            OAuth2AuthorizationRequest authorizationRequest,
+            HttpServletRequest request,
+            HttpServletResponse response) {
         if (authorizationRequest == null) {
             deleteCookie(request, response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME);
             deleteCookie(request, response, REDIRECT_URI_COOKIE_NAME);
@@ -59,9 +59,8 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
 
     @Override
     public OAuth2AuthorizationRequest removeAuthorizationRequest(
-        HttpServletRequest request,
-        HttpServletResponse response
-    ) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
         OAuth2AuthorizationRequest authorizationRequest = loadAuthorizationRequest(request);
         if (authorizationRequest != null) {
             deleteCookie(request, response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME);
@@ -73,9 +72,8 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
      * Removes the redirect_uri cookie after OAuth2 authentication completes.
      */
     public void removeAuthorizationRequestCookies(
-        HttpServletRequest request,
-        HttpServletResponse response
-    ) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
         deleteCookie(request, response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME);
         deleteCookie(request, response, REDIRECT_URI_COOKIE_NAME);
     }

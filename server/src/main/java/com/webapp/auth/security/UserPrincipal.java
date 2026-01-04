@@ -1,10 +1,12 @@
 package com.webapp.auth.security;
 
 import com.webapp.domain.user.entity.User;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,10 +15,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
+// Implements UserDetails and OAuth2User for unified authentication
+
 @Data
 @Builder
 @AllArgsConstructor
 public class UserPrincipal implements UserDetails, OAuth2User {
+
+    private static final long serialVersionUID = 1L;
 
     private Long id;
     private String email;
@@ -29,26 +35,25 @@ public class UserPrincipal implements UserDetails, OAuth2User {
 
     public static UserPrincipal create(User user) {
         List<GrantedAuthority> authorities = user
-            .getRoles()
-            .stream()
-            .map(role -> new SimpleGrantedAuthority(role.name()))
-            .collect(Collectors.toList());
+                .getRoles()
+                .stream()
+                .map(role -> new SimpleGrantedAuthority(role.name()))
+                .collect(Collectors.toList());
 
         return UserPrincipal.builder()
-            .id(user.getId())
-            .email(user.getEmail())
-            .password(user.getPassword())
-            .firstName(user.getFirstName())
-            .lastName(user.getLastName())
-            .enabled(user.isEnabled())
-            .authorities(authorities)
-            .build();
+                .id(user.getId())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .enabled(user.isEnabled())
+                .authorities(authorities)
+                .build();
     }
 
     public static UserPrincipal create(
-        User user,
-        Map<String, Object> attributes
-    ) {
+            User user,
+            Map<String, Object> attributes) {
         UserPrincipal userPrincipal = create(user);
         userPrincipal.setAttributes(attributes);
         return userPrincipal;
@@ -97,17 +102,15 @@ public class UserPrincipal implements UserDetails, OAuth2User {
 
     @Override
     public String getName() {
-        return String.valueOf(id);
+        return email;
     }
 
     public String getFullName() {
         if (firstName == null && lastName == null) {
             return null;
         }
-        return (
-            (firstName != null ? firstName : "") +
-            " " +
-            (lastName != null ? lastName : "")
-        ).trim();
+        return ((firstName != null ? firstName : "") +
+                " " +
+                (lastName != null ? lastName : "")).trim();
     }
 }
