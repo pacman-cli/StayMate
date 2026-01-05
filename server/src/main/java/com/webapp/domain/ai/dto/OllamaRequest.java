@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OllamaRequest {
 
-  @Builder.Default
-  private String model = "llama2"; // Default, can be overridden
+    @Builder.Default
+    private String model = "llama3.2"; // Default can be overridden
 
-  private String prompt;
+    private String prompt;
 
-  @Builder.Default
-  private boolean stream = false;
+    @Builder.Default
+    private boolean stream = false;
 }

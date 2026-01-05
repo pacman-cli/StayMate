@@ -65,6 +65,18 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
         @org.springframework.data.jpa.repository.Query("SELECT SUM(p.beds) FROM Property p WHERE p.status = 'Rented'")
         Long sumRentedBeds();
 
+        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "owner" })
+        List<Property> findTop5ByOwnerIdOrderByCreatedAtDesc(Long ownerId);
+
+        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "owner" })
+        List<Property> findTop5ByStatusOrderByPriceAmountAsc(String status);
+
         @org.springframework.data.jpa.repository.Query("SELECT SUM(p.beds) FROM Property p")
         Long sumTotalBeds();
+
+        @org.springframework.data.jpa.repository.Query("SELECT p.propertyType, COUNT(p) FROM Property p GROUP BY p.propertyType")
+        List<Object[]> countPropertiesByType();
+
+        @org.springframework.data.jpa.repository.Query("SELECT p.location, SUM(CASE WHEN p.status = 'Rented' THEN 1 ELSE 0 END), COUNT(p) FROM Property p GROUP BY p.location")
+        List<Object[]> findOccupancyByLocation();
 }

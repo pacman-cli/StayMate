@@ -59,6 +59,9 @@ public class User {
     @Column(name = "bio", length = 500)
     private String bio;
 
+    @Column(name = "gender")
+    private String gender;
+
     @Column(name = "address")
     private String address;
 

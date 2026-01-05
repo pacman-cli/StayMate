@@ -44,7 +44,7 @@ public class VerificationService {
         .documentType(documentType)
         .status(VerificationRequest.VerificationStatus.PENDING)
         .build();
-    return verificationRepository.save(request);
+    return java.util.Objects.requireNonNull(verificationRepository.save(request));
   }
 
   @Transactional
@@ -60,9 +60,9 @@ public class VerificationService {
     // Assuming there's a field for verification or we just rely on this request
     // history
     // user.setIdentityVerified(true); // If this field exists
-    userRepository.save(user);
+    java.util.Objects.requireNonNull(userRepository.save(user));
 
-    return verificationRepository.save(request);
+    return java.util.Objects.requireNonNull(verificationRepository.save(request));
   }
 
   @Transactional
@@ -74,6 +74,6 @@ public class VerificationService {
     request.setRejectionReason(reason);
     request.setUpdatedAt(LocalDateTime.now());
 
-    return verificationRepository.save(request);
+    return java.util.Objects.requireNonNull(verificationRepository.save(request));
   }
 }

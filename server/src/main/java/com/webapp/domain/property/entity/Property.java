@@ -47,6 +47,9 @@ public class Property {
     @Column(nullable = false)
     private String location;
 
+    private Double latitude;
+    private Double longitude;
+
     @Column(nullable = false)
     private String price; // Storing as String for display, e.g. "$1,200/mo"
 

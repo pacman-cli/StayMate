@@ -14,6 +14,7 @@ SELECT 'puspopuspo520@gmail.com',
        true,
        NOW(),
        NOW()
+FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'puspopuspo520@gmail.com');
 
 -- Landlord User
@@ -30,6 +31,7 @@ SELECT 'landlord@staymate.com',
        true,
        NOW(),
        NOW()
+FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'landlord@staymate.com');
 
 -- Tenant User
@@ -46,6 +48,7 @@ SELECT 'tenant@staymate.com',
        true,
        NOW(),
        NOW()
+FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'tenant@staymate.com');
 
 -- Seed Roles
@@ -97,6 +100,7 @@ SELECT @landlord_id,
        'Active',
        NOW(),
        NOW()
+FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM properties WHERE title = 'Modern Downtown Loft');
 
 INSERT INTO properties (owner_id, title, description, location, price, price_amount, beds, baths, sqft, rating,
@@ -117,6 +121,7 @@ SELECT @landlord_id,
        'Active',
        NOW(),
        NOW()
+FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM properties WHERE title = 'Cozy Suburban Home');
 
 INSERT INTO properties (owner_id, title, description, location, price, price_amount, beds, baths, sqft, rating,
@@ -137,6 +142,7 @@ SELECT @landlord_id,
        'Active',
        NOW(),
        NOW()
+FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM properties WHERE title = 'Luxury Beachfront Villa');
 
 INSERT INTO properties (owner_id, title, description, location, price, price_amount, beds, baths, sqft, rating,
@@ -157,6 +163,7 @@ SELECT @landlord_id,
        'Active',
        NOW(),
        NOW()
+FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM properties WHERE title = 'Affordable Studio');
 
 INSERT INTO properties (owner_id, title, description, location, price, price_amount, beds, baths, sqft, rating,
@@ -177,4 +184,5 @@ SELECT @landlord_id,
        'Rented',
        NOW(),
        NOW()
+FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM properties WHERE title = 'Renovated Historic Condo');

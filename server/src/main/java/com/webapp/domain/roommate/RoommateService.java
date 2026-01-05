@@ -39,7 +39,10 @@ public class RoommateService {
         .genderPreference(request.getGenderPreference())
         .smoking(request.getSmoking())
         .pets(request.getPets())
+        .pets(request.getPets())
         .occupation(request.getOccupation())
+        .latitude(request.getLatitude())
+        .longitude(request.getLongitude())
         .build();
 
     RoommatePost savedPost = roommatePostRepository.save(post);
@@ -123,9 +126,74 @@ public class RoommateService {
         .genderPreference(post.getGenderPreference())
         .smoking(post.getSmoking())
         .pets(post.getPets())
+        .pets(post.getPets())
         .occupation(post.getOccupation())
+        .latitude(post.getLatitude())
+        .longitude(post.getLongitude())
         .status(post.getStatus())
         .createdAt(post.getCreatedAt().toString())
         .build();
+  }
+
+  @Transactional(readOnly = true)
+  public List<RoommatePostDto> getMatches(@NonNull Long userId) {
+    // 1. Get current user's post preferences
+    List<RoommatePost> myPosts = roommatePostRepository.findByUserId(userId);
+    if (myPosts.isEmpty()) {
+      return java.util.Collections.emptyList();
+    }
+    RoommatePost myPost = myPosts.get(0); // Assume primary post
+
+    // 2. Get all other active posts
+    List<RoommatePost> allPosts = roommatePostRepository.findAll();
+
+    // 3. Score and Filter
+    return allPosts.stream()
+        .filter(post -> !post.getUser().getId().equals(userId)) // Exclude self
+        .filter(post -> post.getStatus() == RoommatePostStatus.APPROVED)
+        .map(post -> {
+          int score = calculateMatchScore(myPost, post);
+          return new java.util.AbstractMap.SimpleEntry<>(post, score);
+        })
+        .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue())) // Sort by score desc
+        .map(entry -> {
+          RoommatePostDto dto = mapToDto(entry.getKey());
+          dto.setMatchScore(entry.getValue()); // Ensure DTO has this field or add it
+          return dto;
+        })
+        .collect(Collectors.toList());
+  }
+
+  private int calculateMatchScore(RoommatePost myPost, RoommatePost otherPost) {
+    int score = 0;
+
+    // Location (City level mostly) - Simple string match for now
+    if (myPost.getLocation() != null && otherPost.getLocation() != null &&
+        myPost.getLocation().equalsIgnoreCase(otherPost.getLocation())) {
+      score += 30;
+    }
+
+    // Budget (Overlap check)
+    if (myPost.getBudget() != null && otherPost.getBudget() != null) {
+      double diff = Math.abs(myPost.getBudget() - otherPost.getBudget());
+      if (diff <= 200)
+        score += 30; // Close budget
+      else if (diff <= 500)
+        score += 10;
+    }
+
+    // Gender Preference
+    if (myPost.getGenderPreference() != null && otherPost.getUser().getGender() != null) {
+      if (myPost.getGenderPreference().equalsIgnoreCase("ANY") ||
+          myPost.getGenderPreference().equalsIgnoreCase(otherPost.getUser().getGender())) {
+        score += 10;
+      }
+    }
+    if (myPost.getSmoking() == otherPost.getSmoking())
+      score += 10;
+    if (myPost.getPets() == otherPost.getPets())
+      score += 10;
+
+    return score;
   }
 }

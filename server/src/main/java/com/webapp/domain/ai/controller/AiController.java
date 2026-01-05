@@ -26,32 +26,35 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AiController {
 
-  private final AiService aiService;
-  private final MatchingService matchingService;
-  private final UserService userService;
+    private final AiService aiService;
+    private final MatchingService matchingService;
+    private final UserService userService;
 
-  @GetMapping("/status")
-  public ResponseEntity<Map<String, Object>> getAiStatus() {
-    boolean isUp = aiService.checkHealth();
-    return ResponseEntity.ok(Map.of(
-        "status", isUp ? "UP" : "DOWN",
-        "provider", "Ollama",
-        "model", "llama3" // hardcoded for now or fetch from config
-    ));
-  }
-
-  @PostMapping("/match")
-  public ResponseEntity<List<AiMatchRecommendation>> triggerMatching(
-      @AuthenticationPrincipal UserPrincipal userPrincipal) {
-    if (userPrincipal == null) {
-      return ResponseEntity.status(401).build();
+    @GetMapping("/status")
+    public ResponseEntity<Map<String, Object>> getAiStatus() {
+        boolean isUp = aiService.checkHealth();
+        return ResponseEntity.ok(Map.of(
+                "status", isUp ? "UP" : "DOWN",
+                "provider", "Ollama",
+                "model", "llama3" // hardcoded for now or fetch from config
+        ));
     }
 
-    log.info("Triggering AI matching for user: {}", userPrincipal.getEmail());
+    /**
+     * Authenticates user; returns AI matches for user
+     */
+    @PostMapping("/match")
+    public ResponseEntity<List<AiMatchRecommendation>> triggerMatching(
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        if (userPrincipal == null) {
+            return ResponseEntity.status(401).build();
+        }
 
-    User user = userService.getUserById(userPrincipal.getId());
-    List<AiMatchRecommendation> matches = matchingService.findMatches(user);
+        log.info("Triggering AI matching for user: {}", userPrincipal.getEmail());
 
-    return ResponseEntity.ok(matches);
-  }
+        User user = userService.getUserById(userPrincipal.getId());
+        List<AiMatchRecommendation> matches = matchingService.findMatches(user);
+
+        return ResponseEntity.ok(matches);
+    }
 }

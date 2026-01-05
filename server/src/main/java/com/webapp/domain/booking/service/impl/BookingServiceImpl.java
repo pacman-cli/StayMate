@@ -50,6 +50,17 @@ public class BookingServiceImpl implements BookingService {
             throw new IllegalArgumentException("You cannot book your own property");
         }
 
+        // Check for overlapping bookings
+        boolean hasOverlap = bookingRepository.existsOverlapping(
+                property.getId(),
+                java.util.List.of(BookingStatus.CONFIRMED),
+                request.getStartDate(),
+                request.getEndDate());
+
+        if (hasOverlap) {
+            throw new IllegalStateException("Property is already booked for these dates");
+        }
+
         Booking booking = Booking.builder()
                 .tenant(tenant)
                 .landlord(landlord)

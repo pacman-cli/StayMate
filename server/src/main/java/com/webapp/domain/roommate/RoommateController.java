@@ -28,7 +28,7 @@ public class RoommateController {
   @PostMapping
   public ResponseEntity<RoommatePostDto> createPost(
       @AuthenticationPrincipal UserPrincipal userPrincipal,
-      @RequestBody RoommatePostDto request) {
+      @jakarta.validation.Valid @RequestBody RoommatePostDto request) {
     return ResponseEntity.ok(roommateService.createPost(userPrincipal.getId(), request));
   }
 
@@ -50,6 +50,12 @@ public class RoommateController {
   public ResponseEntity<List<RoommatePostDto>> getMyPosts(
       @AuthenticationPrincipal UserPrincipal userPrincipal) {
     return ResponseEntity.ok(roommateService.getMyPosts(userPrincipal.getId()));
+  }
+
+  @GetMapping("/matches")
+  public ResponseEntity<List<RoommatePostDto>> getMatches(
+      @AuthenticationPrincipal UserPrincipal userPrincipal) {
+    return ResponseEntity.ok(roommateService.getMatches(userPrincipal.getId()));
   }
 
   @PutMapping("/{id}")

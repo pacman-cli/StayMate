@@ -33,6 +33,12 @@ public class AdminController {
     private final com.webapp.domain.verification.service.VerificationService verificationService;
     private final com.webapp.domain.report.service.ReportService reportService;
     private final com.webapp.domain.setting.service.SystemSettingService settingService;
+    private final com.webapp.domain.booking.repository.BookingRepository bookingRepository;
+    // bookingRepository is declared below but needs to be in constructor/Lombok
+    // args
+    // We will rely on Lombok @RequiredArgsConstructor but need to remove the field
+    // declaration below and move it up,
+    // OR just move it up now to be safe. I'll move it up.
 
     // ==================== Dashboard Stats ====================
 
@@ -73,13 +79,38 @@ public class AdminController {
 
     // ==================== Analytics (Stub) ====================
 
+    // ==================== Analytics (Real) ====================
+
     @GetMapping("/analytics/revenue")
     public ResponseEntity<Map<String, Object>> getRevenueAnalytics() {
-        // Mock data for now
-        Map<String, Object> data = new HashMap<>();
-        data.put("labels", List.of("Jan", "Feb", "Mar", "Apr", "May", "Jun"));
-        data.put("data", List.of(1000, 1500, 1200, 1800, 2000, 2500));
-        return ResponseEntity.ok(data);
+        // Fetch revenue for the last 6 months
+        java.time.LocalDateTime sixMonthsAgo = java.time.LocalDateTime.now().minusMonths(6);
+        List<Object[]> monthlyRevenue = bookingRepository.getMonthlyRevenue(sixMonthsAgo);
+
+        List<String> labels = new java.util.ArrayList<>();
+        List<java.math.BigDecimal> data = new java.util.ArrayList<>();
+
+        // Initialize map with 0s for last 6 months to ensure continuous graph
+        Map<Integer, java.math.BigDecimal> revenueMap = new java.util.HashMap<>();
+        for (Object[] row : monthlyRevenue) {
+            revenueMap.put((Integer) row[0], (java.math.BigDecimal) row[1]);
+        }
+
+        java.time.format.DateTimeFormatter monthFormatter = java.time.format.DateTimeFormatter.ofPattern("MMM");
+
+        for (int i = 5; i >= 0; i--) {
+            java.time.LocalDateTime date = java.time.LocalDateTime.now().minusMonths(i);
+            int monthValue = date.getMonthValue();
+
+            labels.add(date.format(monthFormatter));
+            data.add(revenueMap.getOrDefault(monthValue, java.math.BigDecimal.ZERO));
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("labels", labels);
+        response.put("data", data);
+
+        return ResponseEntity.ok(response);
     }
 
     // ==================== Reports (Stub) ====================

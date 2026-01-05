@@ -1,5 +1,6 @@
 package com.webapp.domain.booking.repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -80,6 +81,16 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
         @Query("SELECT SUM(p.priceAmount) FROM Booking b JOIN b.property p WHERE b.status = 'CONFIRMED' AND b.createdAt >= :startDate")
         java.math.BigDecimal sumRevenueSince(@Param("startDate") LocalDateTime startDate);
+
+        @Query("SELECT FUNCTION('MONTH', b.createdAt) as month, SUM(p.priceAmount) as revenue FROM Booking b JOIN b.property p WHERE b.status = 'CONFIRMED' AND b.createdAt >= :startDate GROUP BY FUNCTION('MONTH', b.createdAt) ORDER BY month")
+        List<Object[]> getMonthlyRevenue(@Param("startDate") LocalDateTime startDate);
+
+        @Query("SELECT COUNT(b) > 0 FROM Booking b WHERE b.property.id = :propertyId AND b.status IN :statuses AND b.startDate < :endDate AND b.endDate > :startDate")
+        boolean existsOverlapping(@Param("propertyId") Long propertyId, @Param("statuses") List<BookingStatus> statuses,
+                        @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+        @Query("SELECT b FROM Booking b LEFT JOIN FETCH b.tenant LEFT JOIN FETCH b.property WHERE b.landlord.id = :landlordId AND b.status = 'PENDING' ORDER BY b.createdAt DESC")
+        List<Booking> findIncomingRequests(@Param("landlordId") Long landlordId, Pageable pageable);
 
         long countByStatus(BookingStatus status);
 }

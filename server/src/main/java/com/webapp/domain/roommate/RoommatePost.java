@@ -46,6 +46,9 @@ public class RoommatePost {
   @Column(name = "move_in_date")
   private LocalDate moveInDate;
 
+  private Double latitude;
+  private Double longitude;
+
   @Column(columnDefinition = "TEXT")
   private String bio;
 

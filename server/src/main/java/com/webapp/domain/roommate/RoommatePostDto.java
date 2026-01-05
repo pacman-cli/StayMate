@@ -2,6 +2,9 @@ package com.webapp.domain.roommate;
 
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
@@ -13,9 +16,16 @@ public class RoommatePostDto {
   private String userName;
   private String userAvatar;
 
+  @NotBlank(message = "Location is required")
   private String location;
+
+  @NotNull(message = "Budget is required")
+  @Min(value = 0, message = "Budget must be positive")
   private Double budget;
+
+  @NotNull(message = "Move-in date is required")
   private LocalDate moveInDate;
+
   private String bio;
 
   private String genderPreference;
@@ -23,6 +33,10 @@ public class RoommatePostDto {
   private Boolean pets;
   private String occupation;
 
+  private Double latitude;
+  private Double longitude;
+
   private String createdAt;
   private RoommatePostStatus status;
+  private Integer matchScore;
 }

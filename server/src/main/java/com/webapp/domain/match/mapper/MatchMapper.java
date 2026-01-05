@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class MatchMapper {
 
+    /**
+     * Converts match entity to match response DTO
+     */
     public MatchResponse toResponse(Match match, Long currentUserId) {
         if (match == null) {
             return null;
@@ -15,6 +18,7 @@ public class MatchMapper {
         User matchedUser = match.getUser1().getId().equals(currentUserId) ? match.getUser2() : match.getUser1();
         User currentUser = match.getUser1().getId().equals(currentUserId) ? match.getUser1() : match.getUser2();
 
+        // Populates response with current user information
         return MatchResponse.builder()
                 .id(match.getId())
                 .userId(currentUser.getId())

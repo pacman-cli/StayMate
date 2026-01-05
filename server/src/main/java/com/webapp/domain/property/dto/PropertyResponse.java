@@ -27,4 +27,6 @@ public class PropertyResponse {
     private String ownerName;
     private Long ownerId;
     private String imageUrl;
+    private Double latitude;
+    private Double longitude;
 }

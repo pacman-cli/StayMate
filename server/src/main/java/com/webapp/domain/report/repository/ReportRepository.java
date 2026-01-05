@@ -18,6 +18,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     @Query("SELECT COUNT(r) FROM Report r WHERE r.severity IN ('HIGH', 'CRITICAL') AND r.status = 'PENDING'")
     long countHighRiskReports();
 
+    @Query("SELECT r FROM Report r WHERE r.severity IN ('HIGH', 'CRITICAL') AND r.status IN ('PENDING', 'INVESTIGATING') ORDER BY r.createdAt DESC")
     org.springframework.data.domain.Page<Report> findRecentRiskyReports(
             org.springframework.data.domain.Pageable pageable);
 
