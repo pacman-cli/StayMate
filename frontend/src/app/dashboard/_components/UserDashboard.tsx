@@ -16,7 +16,6 @@ import {
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { ActionCard } from "./ActionCard"
-import { AICompatibilityChart } from "./AICompatibilityChart"
 import { QuickStatCard } from "./QuickStatCard"
 
 interface UserDashboardProps {
@@ -60,14 +59,11 @@ export function UserDashboard({ user, stats, isDark }: UserDashboardProps) {
   fetchAdditionalData()
  }, [])
 
- // AI Data for the chart
- const aiData = [
-  { subject: "Lifestyle", A: 85, fullMark: 100 },
-  { subject: "Habits", A: stats.compatibilityMatchStats || 75, fullMark: 100 },
-  { subject: "Budget", A: 90, fullMark: 100 },
-  { subject: "Location", A: 60, fullMark: 100 },
-  { subject: "Social", A: 80, fullMark: 100 },
- ]
+ const params = (score: number) => {
+  if (score >= 80) return { color: "bg-emerald-100 text-emerald-700", label: "High" }
+  if (score >= 50) return { color: "bg-amber-100 text-amber-700", label: "Medium" }
+  return { color: "bg-red-100 text-red-700", label: "Low" }
+ }
 
  return (
   <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-10">
@@ -203,9 +199,22 @@ export function UserDashboard({ user, stats, isDark }: UserDashboardProps) {
     {/* Right Column: Roommates & Compatibility */}
     <div className="space-y-6">
 
-     {/* Compatibility Chart */}
-     <div className="h-[350px]">
-      <AICompatibilityChart data={aiData} />
+     {/* Compatibility Score Card (Real) */}
+     <div className={`p-6 rounded-2xl border ${isDark ? "bg-slate-900/50 border-white/10" : "bg-white border-slate-100"} backdrop-blur-xl mb-6`}>
+      <div className="flex items-center justify-between mb-4">
+       <h3 className={`font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
+        Match Quality
+       </h3>
+       <span className={`text-xs font-bold px-2 py-1 rounded-full ${params(stats.compatibilityMatchStats || 0).color}`}>
+        {params(stats.compatibilityMatchStats || 0).label}
+       </span>
+      </div>
+      <div className="flex flex-col items-center justify-center h-[200px]">
+       <div className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500">
+        {Math.round(stats.compatibilityMatchStats || 0)}%
+       </div>
+       <p className="text-sm text-slate-500 mt-2">Average Compatibility Score</p>
+      </div>
      </div>
 
      {/* Recommended Roommates List */}

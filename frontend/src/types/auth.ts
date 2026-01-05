@@ -225,6 +225,9 @@ export interface AdminDashboardDTO {
     bannedUsersCount: number
     warningUsersCount: number
     totalEmergencyRoomsAvailable: number
+
+    propertyTypeStats?: { name: string; value: number }[]
+    locationOccupancyStats?: { name: string; occupied: number; vacant: number }[]
 }
 
 export interface LandlordDashboardDTO {
@@ -535,7 +538,7 @@ export interface ApplicationResponse {
     senderId: number
     senderName: string
     senderEmail: string
-    senderProfilePicture: string | null
+    senderProfilePictureUrl: string | null
     receiverId: number
     propertyId: number
     propertyTitle: string

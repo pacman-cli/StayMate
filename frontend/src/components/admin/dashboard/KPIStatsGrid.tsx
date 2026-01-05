@@ -1,7 +1,6 @@
 "use client"
 
 import { Activity, ArrowDownRight, ArrowUpRight, DollarSign, MousePointerClick, UserMinus, UserPlus, Users } from "lucide-react"
-import { Area, AreaChart, ResponsiveContainer } from "recharts"
 
 import { AdminDashboardDTO } from "@/types/auth"
 
@@ -107,27 +106,6 @@ function Card({ metric }: { metric: any }) {
       <div>
         <p className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate">{metric.label}</p>
         <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-1">{metric.value}</h3>
-      </div>
-
-      {/* Sparkline */}
-      <div className="h-10 mt-3 -mx-2">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={metric.data}>
-            <defs>
-              <linearGradient id={`gradient-${metric.label}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={isPositive ? "#10b981" : "#f43f5e"} stopOpacity={0.2} />
-                <stop offset="100%" stopColor={isPositive ? "#10b981" : "#f43f5e"} stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <Area
-              type="monotone"
-              dataKey="value"
-              stroke={isPositive ? "#10b981" : "#f43f5e"}
-              strokeWidth={2}
-              fill={`url(#gradient-${metric.label})`}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
       </div>
     </div>
   )

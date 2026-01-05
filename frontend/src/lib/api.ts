@@ -652,7 +652,8 @@ export const bookingApi = {
         return api.post("/api/bookings", data)
     },
     getMyBookings: async () => {
-        return api.get("/api/bookings/my-bookings")
+        const response = await api.get("/api/bookings/my-bookings")
+        return response.data
     },
     getBookingRequests: async () => {
         return api.get("/api/bookings/requests")
@@ -774,6 +775,7 @@ export const roommateApi = {
     delete: (id: number) => api.delete(`/api/roommates/${id}`),
     getAllAdmin: () => api.get<any[]>("/api/roommates/all").then((res) => res.data),
     updateStatus: (id: number, status: string) => api.put<any>(`/api/roommates/${id}/status`, null, { params: { status } }).then((res) => res.data),
+    getMatches: () => api.get<any[]>("/api/roommates/matches").then((res) => res.data),
 }
 
 export const savedApi = {
@@ -801,9 +803,28 @@ export const savedApi = {
     removeRoommate: async (id: number) => {
         return api.delete(`/api/saved/roommates/${id}`)
     },
+
     isRoommateSaved: async (id: number): Promise<boolean> => {
         const response = await api.get<{ isSaved: boolean }>(`/api/saved/roommates/${id}/check`)
         return response.data.isSaved
+    }
+}
+
+export const reviewApi = {
+    create: async (data: { propertyId?: number; receiverId?: number; rating: number; comment: string }) => {
+        const response = await api.post('/api/reviews', data)
+        return response.data
+    },
+    getByUser: async (userId: number, page = 0) => {
+        const response = await api.get(`/api/reviews/user/${userId}?page=${page}`)
+        return response.data
+    },
+    getByProperty: async (propertyId: number, page = 0) => {
+        const response = await api.get(`/api/reviews/property/${propertyId}?page=${page}`)
+        return response.data
+    },
+    delete: async (id: number) => {
+        await api.delete(`/api/reviews/${id}`)
     }
 }
 

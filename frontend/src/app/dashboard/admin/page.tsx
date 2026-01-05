@@ -11,7 +11,6 @@ import { UserGrowthChart } from "@/components/admin/dashboard/UserGrowthChart"
 import { useAuth } from "@/context/AuthContext"
 import { Calendar, Download, Sparkles } from "lucide-react"
 
-import { UserBehaviorAnalytics } from "@/components/admin/dashboard/UserBehaviorAnalytics"
 import { dashboardApi } from "@/lib/api"
 import { AdminDashboardDTO } from "@/types/auth"
 import { useEffect, useState } from "react"
@@ -80,14 +79,11 @@ export default function AdminDashboardPage() {
 
       {/* 3. Property & Revenue Insights */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        <PropertyInsights />
+        <PropertyInsights data={data} />
         <RevenueAnalytics />
       </div>
 
-      {/* 4. User Behavior & Engagement (New Section) */}
-      <section>
-        <UserBehaviorAnalytics />
-      </section>
+
 
       {/* 5. Activity & Data Tables */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -110,7 +106,7 @@ export default function AdminDashboardPage() {
             <h3 className="text-xl font-bold">AI Insights (Beta)</h3>
           </div>
           <p className="text-indigo-100 max-w-2xl mb-6">
-            Our upcoming AI module will predict rental demand surges in <span className="font-semibold text-white">Gulshan</span> and identify potential <span className="font-semibold text-white">churn risk</span> for 12% of users based on recent inactivity patterns.
+            Our upcoming AI module will predict rental demand surges and identify potential churn risk based on user activity patterns.
           </p>
           <button className="px-6 py-2 bg-white text-indigo-600 rounded-lg font-bold text-sm hover:bg-indigo-50 transition">
             Join Waitlist

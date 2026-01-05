@@ -6,9 +6,42 @@ import SearchFilters from "@/components/search/SearchFilters"
 import { useAuth } from "@/context/AuthContext"
 import { useTheme } from "@/context/ThemeContext"
 import { propertyApi } from "@/lib/api"
+import GoogleMapReact from 'google-map-react' // eslint-disable-line
 import { Loader2, Map as MapIcon, Search } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
+
+const Marker = ({ price, selected }: { lat: number; lng: number; price: string; selected: boolean }) => (
+    <div className={`relative -translate-x-1/2 -translate-y-full cursor-pointer hover:z-10 group`}>
+        <div className={`px-2 py-1 rounded-lg font-bold text-xs shadow-md transition-all ${selected
+                ? 'bg-primary-600 text-white scale-110'
+                : 'bg-white text-slate-900 group-hover:scale-105 group-hover:bg-primary-50'
+            }`}>
+            {price}
+        </div>
+        <div className={`w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] mx-auto ${selected ? 'border-t-primary-600' : 'border-t-white'
+            }`} />
+    </div>
+)
+
+const darkMapStyle = [
+    { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+    { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+    { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
+    { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#263c3f" }] },
+    { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#6b9a76" }] },
+    { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
+    { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37" }] },
+    { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#9ca5b3" }] },
+    { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#746855" }] },
+    { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#1f2835" }] },
+    { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#f3d19c" }] },
+    { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
+    { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d" }] },
+    { featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#17263c" }] }
+]
 
 export default function SearchRentalsPage() {
     const router = useRouter()
@@ -92,8 +125,8 @@ export default function SearchRentalsPage() {
                             <button
                                 onClick={() => setShowMobileMap(true)}
                                 className={`lg:hidden flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium ${isDark
-                                        ? "bg-white/10 text-white"
-                                        : "bg-slate-100 text-slate-900"
+                                    ? "bg-white/10 text-white"
+                                    : "bg-slate-100 text-slate-900"
                                     }`}
                             >
                                 <MapIcon className="w-4 h-4" />
@@ -152,21 +185,31 @@ export default function SearchRentalsPage() {
                             </svg>
                         </button>
 
-                        {/* Map Placeholder */}
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <div className="text-center opacity-30">
-                                <MapIcon className="w-16 h-16 mx-auto mb-2 text-slate-500" />
-                                <p className="font-semibold text-slate-500">Interactive Map View</p>
-                                <p className="text-xs text-slate-500">Coming Soon</p>
-                            </div>
+                        <div className="w-full h-full">
+                            <GoogleMapReact
+                                bootstrapURLKeys={{ key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "" }}
+                                defaultCenter={{ lat: 23.8103, lng: 90.4125 }} // Dhaka default
+                                center={properties.length > 0 && properties[0].latitude ? { lat: properties[0].latitude!, lng: properties[0].longitude! } : undefined}
+                                defaultZoom={13}
+                                options={{
+                                    styles: isDark ? darkMapStyle : [],
+                                    disableDefaultUI: true,
+                                    zoomControl: true,
+                                }}
+                            >
+                                {properties.map((property) => (
+                                    property.latitude && property.longitude ? (
+                                        <Marker
+                                            key={property.id}
+                                            lat={property.latitude}
+                                            lng={property.longitude}
+                                            price={property.price}
+                                            selected={false} // TODO: Add selection state
+                                        />
+                                    ) : null
+                                ))}
+                            </GoogleMapReact>
                         </div>
-
-                        {/* Fake Map Pattern */}
-                        <div className="absolute inset-0 opacity-[0.03]"
-                            style={{
-                                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-                            }}
-                        />
                     </div>
                 </div>
             </div>

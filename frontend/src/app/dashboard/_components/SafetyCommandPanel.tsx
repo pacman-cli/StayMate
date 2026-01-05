@@ -12,13 +12,9 @@ interface SafetyCommandPanelProps {
 export function SafetyCommandPanel({ stats, isDark }: SafetyCommandPanelProps) {
   const { safetyStats } = stats
 
-  // Mocking the alerts list for now as metrics only provide counts.
-  // In a real implementation, we'd fetch actual alerts.
-  const alerts = [
-    { id: 1, type: "Report", message: "Suspicious listing content detected", severity: "high", time: "10m ago" },
-    { id: 2, type: "User", message: "Multiple reports against user John Doe", severity: "critical", time: "1h ago" },
-    { id: 3, type: "Review", message: "Potential review bombing detected", severity: "medium", time: "2h ago" },
-  ]
+  // Use real data from stats
+  // We map the ReportResponse to the format expected by the UI or adjust UI to use ReportResponse fields directly.
+  const alerts = safetyStats?.recentReports || []
 
   return (
     <div className={`p-6 rounded-2xl border ${isDark ? "bg-slate-900/50 border-white/10" : "bg-white border-slate-100"
@@ -37,13 +33,13 @@ export function SafetyCommandPanel({ stats, isDark }: SafetyCommandPanelProps) {
       </div>
 
       <div className="space-y-3">
-        {(!safetyStats?.recentReports || safetyStats.recentReports.length === 0) && (
+        {(!alerts || alerts.length === 0) && (
           <div className={`p-4 rounded-xl text-center border-dashed border ${isDark ? "border-slate-800" : "border-slate-200"}`}>
             <CheckCircle className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
             <p className={isDark ? "text-slate-400" : "text-slate-500"}>System Secure. No active threats.</p>
           </div>
         )}
-        {safetyStats?.recentReports?.map((report) => (
+        {alerts.map((report) => (
           <div key={report.id} className={`p-3 rounded-xl border flex items-start gap-3 ${isDark ? "bg-white/5 border-white/5" : "bg-slate-50 border-slate-100"
             }`}>
             <AlertCircle className={`w-5 h-5 mt-0.5 ${report.severity === 'CRITICAL' ? 'text-red-500' :
@@ -52,7 +48,7 @@ export function SafetyCommandPanel({ stats, isDark }: SafetyCommandPanelProps) {
             <div className="flex-1">
               <div className="flex justify-between items-start">
                 <h4 className={`text-sm font-medium ${isDark ? "text-white" : "text-slate-900"}`}>
-                  {report.reason.replace("_", " ")}
+                  {report.reason ? report.reason.replace("_", " ") : "Report Details"}
                 </h4>
                 <span className={`text-[10px] ${isDark ? "text-slate-500" : "text-slate-400"}`}>
                   {formatDistanceToNow(new Date(report.createdAt), { addSuffix: true })}
