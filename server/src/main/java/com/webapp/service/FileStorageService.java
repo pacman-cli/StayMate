@@ -44,6 +44,7 @@ public class FileStorageService {
         originalFileName = StringUtils.cleanPath(originalFileName);
         String fileExtension = "";
 
+        // Stores file; throws exception on failure or invalid name
         try {
             if (originalFileName.contains("..")) {
                 throw new RuntimeException("Sorry! Filename contains invalid path sequence " + originalFileName);
@@ -65,6 +66,7 @@ public class FileStorageService {
     }
 
     public Resource loadFileAsResource(String fileName) {
+        // Loads a file as a resource; throws exception if not found
         try {
             Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
             Resource resource = new UrlResource(filePath.toUri());
