@@ -13,6 +13,7 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
+                // Configures API metadata: title, version, description, contact
                 .info(new Info()
                         .title("Software Project API")
                         .version("1.0")
