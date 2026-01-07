@@ -123,6 +123,25 @@ export default function MyBookingsPage() {
                                             <span className="text-sm text-slate-500">Host: {booking.landlordName}</span>
                                         </div>
                                         <div className="flex gap-3">
+                                            {/* Cancel Button for Pending bookings */}
+                                            {booking.status === 'PENDING' && (
+                                                <button
+                                                    onClick={async () => {
+                                                        if (confirm("Are you sure you want to cancel this booking request?")) {
+                                                            try {
+                                                                await bookingApi.updateStatus(booking.id, "CANCELLED")
+                                                                fetchBookings()
+                                                            } catch (e) {
+                                                                console.error("Failed to cancel booking", e)
+                                                            }
+                                                        }
+                                                    }}
+                                                    className="text-sm font-medium text-red-600 hover:underline"
+                                                >
+                                                    Cancel Request
+                                                </button>
+                                            )}
+
                                             {/* Add Review Button for Confirmed/Past bookings */}
                                             {booking.status === 'CONFIRMED' && (
                                                 <button className="text-sm font-medium text-blue-600 hover:underline">

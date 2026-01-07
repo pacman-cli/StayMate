@@ -5,10 +5,12 @@ import PropertyCard, { PropertyCardProps } from "@/components/search/PropertyCar
 import SearchFilters from "@/components/search/SearchFilters"
 import { useAuth } from "@/context/AuthContext"
 import { useTheme } from "@/context/ThemeContext"
-import { propertyApi } from "@/lib/api"
+import { propertyApi, savedApi } from "@/lib/api"
 import { Loader2, Map as MapIcon, Search } from "lucide-react"
+import dynamic from "next/dynamic"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
+import { toast } from "react-hot-toast"
 
 
 const Map = dynamic(() => import("@/components/Map"), {
@@ -66,10 +68,36 @@ export default function SearchRentalsPage() {
         }
     }, [searchParams, isAuthenticated])
 
-    const handleToggleSave = (id: number) => {
+    const handleToggleSave = async (id: number) => {
+        if (!isAuthenticated) {
+            router.push("/login")
+            return
+        }
+
+        // Optimistic update
         setProperties(prev => prev.map(p =>
             p.id === id ? { ...p, isSaved: !p.isSaved } : p
         ))
+
+        const property = properties.find(p => p.id === id)
+        const isCurrentlySaved = property?.isSaved
+
+        try {
+            if (isCurrentlySaved) {
+                await savedApi.removeProperty(id)
+                toast.success("Removed from saved items")
+            } else {
+                await savedApi.saveProperty(id)
+                toast.success("Saved to your list")
+            }
+        } catch (error) {
+            console.error("Failed to toggle save", error)
+            toast.error("Failed to update saved status")
+            // Revert optimistic update
+            setProperties(prev => prev.map(p =>
+                p.id === id ? { ...p, isSaved: isCurrentlySaved } : p
+            ))
+        }
     }
 
     if (authLoading) return null

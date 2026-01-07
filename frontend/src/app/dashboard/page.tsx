@@ -1,16 +1,14 @@
 "use client"
 
-import DashboardLayout from "@/components/DashboardLayout"
 import { useAuth } from "@/context/AuthContext"
 import { useTheme } from "@/context/ThemeContext"
-import { dashboardApi } from "@/lib/api" // Import API
+import { dashboardApi } from "@/lib/api"
+import { AdminDashboardDTO, LandlordDashboardDTO, UserDashboardDTO } from "@/types/auth"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { AdminDashboard } from "./_components/AdminDashboard"
 import { LandlordDashboard } from "./_components/LandlordDashboard"
 import { UserDashboard } from "./_components/UserDashboard"
-
-import { AdminDashboardDTO, LandlordDashboardDTO, UserDashboardDTO } from "@/types/auth"
 
 export default function DashboardPage() {
     const router = useRouter()
@@ -25,8 +23,6 @@ export default function DashboardPage() {
     } = useAuth()
     const { isDark } = useTheme()
 
-    // Use union type or any. Using any for simplicity in rendering conditionals,
-    // but fetching is typed.
     const [stats, setStats] = useState<any>(null)
 
     useEffect(() => {
@@ -37,7 +33,6 @@ export default function DashboardPage() {
         }
     }, [isAuthenticated, isLoading, needsRoleSelection, router])
 
-    // Fetch stats based on role
     useEffect(() => {
         const fetchStats = async () => {
             if (isAuthenticated && user) {
@@ -82,7 +77,7 @@ export default function DashboardPage() {
     }
 
     return (
-        <DashboardLayout>
+        <>
             {/* Welcome Section */}
             <div className="mb-8">
                 <h1 className={`text-2xl sm:text-3xl font-semibold ${isDark ? "text-white" : "text-slate-900"}`}>
@@ -112,6 +107,6 @@ export default function DashboardPage() {
                     <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
                 </div>
             )}
-        </DashboardLayout>
+        </>
     )
 }

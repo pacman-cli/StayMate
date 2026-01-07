@@ -3,7 +3,7 @@
 import { AdminDashboardDTO } from "@/types/auth"
 import { Building, CheckCircle, ShieldAlert, Users } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-import { PendingVerificationsWidget } from "./PendingVerificationsWidget"
+import { AdminVerificationQueue } from "./AdminVerificationQueue"
 
 interface AdminDashboardProps {
   stats: AdminDashboardDTO
@@ -140,7 +140,7 @@ export function AdminDashboard({ stats, isDark }: AdminDashboardProps) {
         {/* Recent Verification Requests (Table/Widget) */}
         <div className="lg:col-span-1">
           {/* Using existing widget but strictly for Pending Users per requirements */}
-          <PendingVerificationsWidget users={stats.pendingVerificationUsers || []} isDark={isDark} />
+          <AdminVerificationQueue isDark={isDark} />
         </div>
       </div>
 

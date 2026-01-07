@@ -1,6 +1,6 @@
 "use client"
 
-import DashboardLayout from "@/components/DashboardLayout"
+
 import AnimatedCard from "@/components/common/AnimatedCard"
 import EmptyState from "@/components/common/EmptyState"
 import LoadingState from "@/components/common/LoadingState"
@@ -8,24 +8,23 @@ import PageContainer from "@/components/common/PageContainer"
 import { useAuth } from "@/context/AuthContext"
 import { useTheme } from "@/context/ThemeContext"
 import { propertyApi } from "@/lib/api"
+import { motion } from "framer-motion"
 import {
     Bath,
     Bed,
     Building,
+    CheckCircle,
+    Clock,
     Edit,
     Eye,
     MapPin,
     Plus,
     Star,
-    Trash2,
-    CheckCircle,
-    XCircle,
-    Clock,
+    Trash2
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { motion } from "framer-motion"
 import { toast } from "react-hot-toast"
 
 export default function MyPropertiesPage() {
@@ -110,25 +109,22 @@ export default function MyPropertiesPage() {
 
     if (authLoading || loading) {
         return (
-            <DashboardLayout>
-                <LoadingState message="Loading your properties..." />
-            </DashboardLayout>
+            <LoadingState message="Loading your properties..." />
         )
     }
 
     return (
-        <DashboardLayout>
+        <>
             <PageContainer
                 title="My Properties"
                 description="Manage and track your rental listings"
                 action={
                     <Link
                         href="/dashboard/properties/add"
-                        className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-300 ${
-                            isDark
+                        className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-300 ${isDark
                                 ? "bg-primary-500 hover:bg-primary-600 text-white shadow-lg shadow-primary-500/25"
                                 : "bg-primary-600 hover:bg-primary-700 text-white shadow-md hover:shadow-lg"
-                        }`}
+                            }`}
                     >
                         <Plus className="w-4 h-4" />
                         Add Property
@@ -143,11 +139,10 @@ export default function MyPropertiesPage() {
                         action={
                             <Link
                                 href="/dashboard/properties/add"
-                                className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
-                                    isDark
+                                className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${isDark
                                         ? "bg-primary-500 hover:bg-primary-600 text-white"
                                         : "bg-primary-600 hover:bg-primary-700 text-white"
-                                }`}
+                                    }`}
                             >
                                 <Plus className="w-5 h-5" />
                                 Create Your First Listing
@@ -188,16 +183,14 @@ export default function MyPropertiesPage() {
                                 <div className="p-5 space-y-4">
                                     <div>
                                         <h3
-                                            className={`font-semibold text-lg mb-1 line-clamp-1 ${
-                                                isDark ? "text-white" : "text-slate-900"
-                                            }`}
+                                            className={`font-semibold text-lg mb-1 line-clamp-1 ${isDark ? "text-white" : "text-slate-900"
+                                                }`}
                                         >
                                             {property.title}
                                         </h3>
                                         <div
-                                            className={`flex items-center gap-1.5 text-sm ${
-                                                isDark ? "text-slate-400" : "text-slate-500"
-                                            }`}
+                                            className={`flex items-center gap-1.5 text-sm ${isDark ? "text-slate-400" : "text-slate-500"
+                                                }`}
                                         >
                                             <MapPin className="w-4 h-4 flex-shrink-0" />
                                             <span className="truncate">
@@ -209,26 +202,23 @@ export default function MyPropertiesPage() {
                                     {/* Features */}
                                     <div className="flex items-center gap-4 text-sm">
                                         <div
-                                            className={`flex items-center gap-1.5 ${
-                                                isDark ? "text-slate-300" : "text-slate-600"
-                                            }`}
+                                            className={`flex items-center gap-1.5 ${isDark ? "text-slate-300" : "text-slate-600"
+                                                }`}
                                         >
                                             <Bed className="w-4 h-4" />
                                             <span>{property.beds || 0} Beds</span>
                                         </div>
                                         <div
-                                            className={`flex items-center gap-1.5 ${
-                                                isDark ? "text-slate-300" : "text-slate-600"
-                                            }`}
+                                            className={`flex items-center gap-1.5 ${isDark ? "text-slate-300" : "text-slate-600"
+                                                }`}
                                         >
                                             <Bath className="w-4 h-4" />
                                             <span>{property.baths || 0} Baths</span>
                                         </div>
                                         {property.sqft && (
                                             <div
-                                                className={`flex items-center gap-1.5 ${
-                                                    isDark ? "text-slate-300" : "text-slate-600"
-                                                }`}
+                                                className={`flex items-center gap-1.5 ${isDark ? "text-slate-300" : "text-slate-600"
+                                                    }`}
                                             >
                                                 <Building className="w-4 h-4" />
                                                 <span>{property.sqft} sqft</span>
@@ -240,22 +230,19 @@ export default function MyPropertiesPage() {
                                     <div className="flex items-center justify-between pt-3 border-t border-white/10 dark:border-slate-700">
                                         <div className="flex items-center gap-1">
                                             <Star
-                                                className={`w-4 h-4 fill-yellow-400 text-yellow-400 ${
-                                                    isDark ? "" : ""
-                                                }`}
+                                                className={`w-4 h-4 fill-yellow-400 text-yellow-400 ${isDark ? "" : ""
+                                                    }`}
                                             />
                                             <span
-                                                className={`text-sm font-medium ${
-                                                    isDark ? "text-slate-300" : "text-slate-700"
-                                                }`}
+                                                className={`text-sm font-medium ${isDark ? "text-slate-300" : "text-slate-700"
+                                                    }`}
                                             >
                                                 {property.rating?.toFixed(1) || "0.0"}
                                             </span>
                                         </div>
                                         <span
-                                            className={`text-lg font-bold ${
-                                                isDark ? "text-primary-400" : "text-primary-600"
-                                            }`}
+                                            className={`text-lg font-bold ${isDark ? "text-primary-400" : "text-primary-600"
+                                                }`}
                                         >
                                             {property.price || `BDT ${property.priceAmount?.toLocaleString() || 0}/mo`}
                                         </span>
@@ -265,31 +252,28 @@ export default function MyPropertiesPage() {
                                     <div className="flex items-center gap-2 pt-2">
                                         <Link
                                             href={`/listings/${property.id}`}
-                                            className={`flex-1 text-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                                isDark
+                                            className={`flex-1 text-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isDark
                                                     ? "bg-white/10 hover:bg-white/20 text-white"
                                                     : "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                                            }`}
+                                                }`}
                                         >
                                             View
                                         </Link>
                                         <Link
                                             href={`/dashboard/properties/edit/${property.id}`}
-                                            className={`px-4 py-2 rounded-lg transition-colors ${
-                                                isDark
+                                            className={`px-4 py-2 rounded-lg transition-colors ${isDark
                                                     ? "bg-white/10 hover:bg-white/20 text-primary-400"
                                                     : "bg-slate-100 hover:bg-slate-200 text-primary-600"
-                                            }`}
+                                                }`}
                                         >
                                             <Edit className="w-4 h-4" />
                                         </Link>
                                         <button
                                             onClick={() => handleDelete(property.id)}
-                                            className={`px-4 py-2 rounded-lg transition-colors ${
-                                                isDark
+                                            className={`px-4 py-2 rounded-lg transition-colors ${isDark
                                                     ? "bg-white/10 hover:bg-red-500/20 text-red-400 hover:text-red-300"
                                                     : "bg-slate-100 hover:bg-red-50 text-red-600 hover:text-red-700"
-                                            }`}
+                                                }`}
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>
@@ -300,6 +284,6 @@ export default function MyPropertiesPage() {
                     </div>
                 )}
             </PageContainer>
-        </DashboardLayout>
+        </>
     )
 }

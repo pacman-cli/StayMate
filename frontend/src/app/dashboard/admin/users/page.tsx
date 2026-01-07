@@ -1,6 +1,5 @@
 "use client"
 
-import DashboardLayout from "@/components/DashboardLayout"
 import { DeletionWarningModal } from "@/components/admin/DeletionWarningModal"
 import { useAuth } from "@/context/AuthContext"
 import { useTheme } from "@/context/ThemeContext"
@@ -54,6 +53,10 @@ export default function UserManagementPage() {
         password: "",
         roles: [] as string[],
         enabled: true,
+        gender: "PREFER_NOT_TO_SAY",
+        seekingMode: "ROOM",
+        emailNotifications: true,
+        pushNotifications: true
     })
 
     const debouncedSearch = useDebounce(searchTerm, 500)
@@ -201,6 +204,10 @@ export default function UserManagementPage() {
             password: "",
             roles: user.roles || [],
             enabled: user.enabled,
+            gender: user.gender || "PREFER_NOT_TO_SAY",
+            seekingMode: user.seekingMode || "ROOM",
+            emailNotifications: user.emailNotifications ?? true,
+            pushNotifications: user.pushNotifications ?? true
         })
         setShowEditModal(true)
     }
@@ -213,19 +220,19 @@ export default function UserManagementPage() {
 
     if (loading && users.length === 0) {
         return (
-            <DashboardLayout>
-                <div className="flex items-center justify-center h-[calc(100vh-120px)]">
-                    <div className="flex flex-col items-center gap-4">
-                        <Loader2 className={`w-8 h-8 animate-spin ${isDark ? "text-primary-400" : "text-primary-600"}`} />
-                        <p className={`text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}>Loading users...</p>
-                    </div>
+
+            <div className="flex items-center justify-center h-[calc(100vh-120px)]">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className={`w-8 h-8 animate-spin ${isDark ? "text-primary-400" : "text-primary-600"}`} />
+                    <p className={`text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}>Loading users...</p>
                 </div>
-            </DashboardLayout>
+            </div>
+
         )
     }
 
     return (
-        <DashboardLayout>
+        <>
             <div className={`h-[calc(100vh-120px)] flex flex-col rounded-xl overflow-hidden border ${isDark ? "bg-dark-800/50 border-white/10" : "bg-white border-slate-200"}`}>
 
                 {/* Header Section */}
@@ -256,7 +263,7 @@ export default function UserManagementPage() {
 
                             <button
                                 onClick={() => {
-                                    setFormData({ firstName: "", lastName: "", email: "", password: "", roles: ["ROLE_USER"], enabled: true })
+                                    setFormData({ firstName: "", lastName: "", email: "", password: "", roles: ["ROLE_USER"], enabled: true, gender: "PREFER_NOT_TO_SAY", seekingMode: "ROOM", emailNotifications: true, pushNotifications: true })
                                     setShowCreateModal(true)
                                 }}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors text-white ${isDark ? "bg-primary-500 hover:bg-primary-600" : "bg-primary-600 hover:bg-primary-700"}`}
@@ -342,11 +349,11 @@ export default function UserManagementPage() {
                                                     </div>
                                                 ) : (
                                                     <div className={`hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${user.accountStatus === 'BANNED' ? 'text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400' :
-                                                            user.accountStatus === 'WARNING' ? 'text-amber-700 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400' :
-                                                                user.accountStatus === 'SUSPENDED' ? 'text-orange-700 bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400' :
-                                                                    user.enabled
-                                                                        ? (isDark ? "text-emerald-400 bg-emerald-500/10" : "text-emerald-700 bg-emerald-50")
-                                                                        : (isDark ? "text-red-400 bg-red-500/10" : "text-red-700 bg-red-50")
+                                                        user.accountStatus === 'WARNING' ? 'text-amber-700 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400' :
+                                                            user.accountStatus === 'SUSPENDED' ? 'text-orange-700 bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400' :
+                                                                user.enabled
+                                                                    ? (isDark ? "text-emerald-400 bg-emerald-500/10" : "text-emerald-700 bg-emerald-50")
+                                                                    : (isDark ? "text-red-400 bg-red-500/10" : "text-red-700 bg-red-50")
                                                         }`}>
                                                         {user.accountStatus === 'BANNED' ? <XCircle className="w-3 h-3" /> :
                                                             user.accountStatus === 'WARNING' ? <AlertTriangle className="w-3 h-3" /> :
@@ -546,6 +553,68 @@ export default function UserManagementPage() {
                                 </div>
                             </div>
 
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <label className={`text-xs font-semibold uppercase tracking-wider ${isDark ? "text-slate-400" : "text-slate-500"}`}>Gender</label>
+                                    <select
+                                        className={`w-full px-3 py-2 rounded-lg border outline-none transition-all ${isDark
+                                            ? "bg-dark-900 border-white/10 focus:border-primary-500 text-white"
+                                            : "bg-white border-slate-200 focus:border-primary-500 text-slate-900"
+                                            }`}
+                                        value={formData.gender}
+                                        onChange={e => setFormData({ ...formData, gender: e.target.value })}
+                                    >
+                                        <option value="MALE">Male</option>
+                                        <option value="FEMALE">Female</option>
+                                        <option value="NON_BINARY">Non-binary</option>
+                                        <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className={`text-xs font-semibold uppercase tracking-wider ${isDark ? "text-slate-400" : "text-slate-500"}`}>Seeking Mode</label>
+                                    <select
+                                        className={`w-full px-3 py-2 rounded-lg border outline-none transition-all ${isDark
+                                            ? "bg-dark-900 border-white/10 focus:border-primary-500 text-white"
+                                            : "bg-white border-slate-200 focus:border-primary-500 text-slate-900"
+                                            }`}
+                                        value={formData.seekingMode}
+                                        onChange={e => setFormData({ ...formData, seekingMode: e.target.value })}
+                                    >
+                                        <option value="ROOM">Room</option>
+                                        <option value="ROOMMATE">Roommate</option>
+                                        <option value="BOTH">Both</option>
+                                        <option value="NONE">None</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className={`flex items-center gap-3 p-3 rounded-lg border ${isDark ? "border-white/10 bg-white/5" : "border-slate-200 bg-slate-50"}`}>
+                                    <input
+                                        type="checkbox"
+                                        id="emailNotifications"
+                                        className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                        checked={formData.emailNotifications}
+                                        onChange={e => setFormData({ ...formData, emailNotifications: e.target.checked })}
+                                    />
+                                    <label htmlFor="emailNotifications" className={`text-sm font-medium cursor-pointer ${isDark ? "text-white" : "text-slate-900"}`}>
+                                        Email Alerts
+                                    </label>
+                                </div>
+                                <div className={`flex items-center gap-3 p-3 rounded-lg border ${isDark ? "border-white/10 bg-white/5" : "border-slate-200 bg-slate-50"}`}>
+                                    <input
+                                        type="checkbox"
+                                        id="pushNotifications"
+                                        className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                        checked={formData.pushNotifications}
+                                        onChange={e => setFormData({ ...formData, pushNotifications: e.target.checked })}
+                                    />
+                                    <label htmlFor="pushNotifications" className={`text-sm font-medium cursor-pointer ${isDark ? "text-white" : "text-slate-900"}`}>
+                                        Push Alerts
+                                    </label>
+                                </div>
+                            </div>
+
                             <div className={`flex items-center gap-3 p-3 rounded-lg border ${isDark ? "border-white/10 bg-white/5" : "border-slate-200 bg-slate-50"}`}>
                                 <input
                                     type="checkbox"
@@ -587,6 +656,6 @@ export default function UserManagementPage() {
                 onConfirm={handleScheduleDeletion}
                 userName={userToDelete ? `${userToDelete.firstName} ${userToDelete.lastName}` : ""}
             />
-        </DashboardLayout>
+        </>
     )
 }

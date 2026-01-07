@@ -8,7 +8,7 @@ import { adminApi } from "@/lib/api"
 import { AdminDashboardStatDto } from "@/types/auth"
 import { AlertCircle, Calendar, Home, Search, Users } from "lucide-react"
 import { useEffect, useState } from "react"
-import { toast } from "sonner"
+import { toast } from "react-hot-toast"
 
 export default function AdminDashboardPage() {
   const { user } = useAuth()
