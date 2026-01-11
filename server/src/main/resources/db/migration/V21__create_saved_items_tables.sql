@@ -1,6 +1,4 @@
--- Drop tables if they exist to handle partial failures from previous runs
-DROP TABLE IF EXISTS saved_properties;
-DROP TABLE IF EXISTS saved_roommates;
+-- Tables are created below. Drop statements removed to prevent 'Unknown table' warnings on fresh install.
 
 CREATE TABLE saved_properties (
     id BIGINT AUTO_INCREMENT NOT NULL,

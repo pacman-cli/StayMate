@@ -43,19 +43,28 @@ INSERT IGNORE INTO user_roles (user_id, role) VALUES
 -- 2. PROPERTIES (Various locations and statuses)
 -- =============================================
 
-INSERT IGNORE INTO properties (id, title, description, location, price, price_amount, status, beds, baths, sqft, owner_id, created_at) VALUES
--- Active Properties (Dhaka)
-(301, 'Modern Apartment near NSU', 'Spacious student-friendly apartment walking distance to North South University. Generator, Lift, and Guard available. Type: APARTMENT', 'Plot 5, Block B, Bashundhara R/A, Dhaka', '25,000', 25000, 'AVAILABLE', 3, 3, 1500, 101, NOW() - INTERVAL 10 DAY),
-(302, 'Cozy Studio in Gulshan', 'Fully furnished studio apartment perfect for bachelor or single professional. Type: STUDIO', 'Road 45, Gulshan 2, Dhaka', '35,000', 35000, 'AVAILABLE', 1, 1, 600, 101, NOW() - INTERVAL 5 DAY),
+INSERT IGNORE INTO properties (id, title, description, location, price, price_amount, status, beds, baths, sqft, owner_id, created_at)
+SELECT 301, 'Modern Apartment near NSU', 'Spacious student-friendly apartment walking distance to North South University. Generator, Lift, and Guard available. Type: APARTMENT', 'Plot 5, Block B, Bashundhara R/A, Dhaka', '25,000', 25000, 'AVAILABLE', 3, 3, 1500, (SELECT id FROM users WHERE email='landlord1@test.com'), NOW() - INTERVAL 10 DAY
+WHERE EXISTS (SELECT 1 FROM users WHERE email='landlord1@test.com');
+
+INSERT IGNORE INTO properties (id, title, description, location, price, price_amount, status, beds, baths, sqft, owner_id, created_at)
+SELECT 302, 'Cozy Studio in Gulshan', 'Fully furnished studio apartment perfect for bachelor or single professional. Type: STUDIO', 'Road 45, Gulshan 2, Dhaka', '35,000', 35000, 'AVAILABLE', 1, 1, 600, (SELECT id FROM users WHERE email='landlord1@test.com'), NOW() - INTERVAL 5 DAY
+WHERE EXISTS (SELECT 1 FROM users WHERE email='landlord1@test.com');
 
 -- Active Properties (Chittagong)
-(303, 'Sea View Flat', 'Beautiful view of the bay. Quiet neighborhood. Type: APARTMENT', 'Nasirabad Housing Society, Chittagong', '18,000', 18000, 'AVAILABLE', 2, 2, 1200, 102, NOW() - INTERVAL 20 DAY),
+INSERT IGNORE INTO properties (id, title, description, location, price, price_amount, status, beds, baths, sqft, owner_id, created_at)
+SELECT 303, 'Sea View Flat', 'Beautiful view of the bay. Quiet neighborhood. Type: APARTMENT', 'Nasirabad Housing Society, Chittagong', '18,000', 18000, 'AVAILABLE', 2, 2, 1200, (SELECT id FROM users WHERE email='landlord2@test.com'), NOW() - INTERVAL 20 DAY
+WHERE EXISTS (SELECT 1 FROM users WHERE email='landlord2@test.com');
 
 -- Pending Properties
-(304, 'Shared Room for Female Student', 'Female roommate needed. Near EWU. Type: SHARED_ROOM', 'Aftabnagar, Dhaka', '6,000', 6000, 'PENDING', 1, 1, 150, 102, NOW() - INTERVAL 1 DAY),
+INSERT IGNORE INTO properties (id, title, description, location, price, price_amount, status, beds, baths, sqft, owner_id, created_at)
+SELECT 304, 'Shared Room for Female Student', 'Female roommate needed. Near EWU. Type: SHARED_ROOM', 'Aftabnagar, Dhaka', '6,000', 6000, 'PENDING', 1, 1, 150, (SELECT id FROM users WHERE email='landlord2@test.com'), NOW() - INTERVAL 1 DAY
+WHERE EXISTS (SELECT 1 FROM users WHERE email='landlord2@test.com');
 
 -- Rented Properties
-(305, 'Family Apartment in Uttara', '3 Bedroom apartment, south facing. Type: APARTMENT', 'Sector 7, Uttara, Dhaka', '22,000', 22000, 'RENTED', 3, 3, 1400, 101, NOW() - INTERVAL 60 DAY);
+INSERT IGNORE INTO properties (id, title, description, location, price, price_amount, status, beds, baths, sqft, owner_id, created_at)
+SELECT 305, 'Family Apartment in Uttara', '3 Bedroom apartment, south facing. Type: APARTMENT', 'Sector 7, Uttara, Dhaka', '22,000', 22000, 'RENTED', 3, 3, 1400, (SELECT id FROM users WHERE email='landlord1@test.com'), NOW() - INTERVAL 60 DAY
+WHERE EXISTS (SELECT 1 FROM users WHERE email='landlord1@test.com');
 
 -- =============================================
 -- 3. BOOKINGS (Past, Active, Upcoming)
@@ -64,37 +73,74 @@ INSERT IGNORE INTO properties (id, title, description, location, price, price_am
 -- Linked manually per property owner:
 -- Property 305 owner=101, 301 owner=101, 302 owner=101, 303 owner=102
 
-INSERT IGNORE INTO bookings (id, tenant_id, landlord_id, start_date, end_date, status, created_at) VALUES
--- Past (COMPLETED) - was Property 305 (Owner 101)
-(401, 201, 101, NOW() - INTERVAL 6 MONTH, NOW() - INTERVAL 1 DAY, 'COMPLETED', NOW() - INTERVAL 6 MONTH),
+-- Past (COMPLETED) - using email lookups
+INSERT IGNORE INTO bookings (id, tenant_id, landlord_id, start_date, end_date, status, created_at)
+SELECT 401,
+       (SELECT id FROM users WHERE email='student1@test.com'),
+       (SELECT id FROM users WHERE email='landlord1@test.com'),
+       NOW() - INTERVAL 6 MONTH, NOW() - INTERVAL 1 DAY, 'COMPLETED', NOW() - INTERVAL 6 MONTH
+WHERE EXISTS (SELECT 1 FROM users WHERE email='student1@test.com') AND EXISTS (SELECT 1 FROM users WHERE email='landlord1@test.com');
 
--- Active (CONFIRMED) - was Property 301 (Owner 101)
-(402, 202, 101, NOW() - INTERVAL 10 DAY, NOW() + INTERVAL 20 DAY, 'CONFIRMED', NOW() - INTERVAL 15 DAY),
+-- Active (CONFIRMED)
+INSERT IGNORE INTO bookings (id, tenant_id, landlord_id, start_date, end_date, status, created_at)
+SELECT 402,
+       (SELECT id FROM users WHERE email='jobseeker@test.com'),
+       (SELECT id FROM users WHERE email='landlord1@test.com'),
+       NOW() - INTERVAL 10 DAY, NOW() + INTERVAL 20 DAY, 'CONFIRMED', NOW() - INTERVAL 15 DAY
+WHERE EXISTS (SELECT 1 FROM users WHERE email='jobseeker@test.com') AND EXISTS (SELECT 1 FROM users WHERE email='landlord1@test.com');
 
--- Upcoming (CONFIRMED) - was Property 302 (Owner 101)
-(403, 203, 101, NOW() + INTERVAL 5 DAY, NOW() + INTERVAL 35 DAY, 'CONFIRMED', NOW() - INTERVAL 2 DAY),
+-- Upcoming (CONFIRMED)
+INSERT IGNORE INTO bookings (id, tenant_id, landlord_id, start_date, end_date, status, created_at)
+SELECT 403,
+       (SELECT id FROM users WHERE email='newcomer@test.com'),
+       (SELECT id FROM users WHERE email='landlord1@test.com'),
+       NOW() + INTERVAL 5 DAY, NOW() + INTERVAL 35 DAY, 'CONFIRMED', NOW() - INTERVAL 2 DAY
+WHERE EXISTS (SELECT 1 FROM users WHERE email='newcomer@test.com') AND EXISTS (SELECT 1 FROM users WHERE email='landlord1@test.com');
 
--- Cancelled (CANCELLED) - was Property 303 (Owner 102)
-(404, 201, 102, NOW() + INTERVAL 10 DAY, NOW() + INTERVAL 40 DAY, 'CANCELLED', NOW() - INTERVAL 3 DAY);
+-- Cancelled (CANCELLED)
+INSERT IGNORE INTO bookings (id, tenant_id, landlord_id, start_date, end_date, status, created_at)
+SELECT 404,
+       (SELECT id FROM users WHERE email='student1@test.com'),
+       (SELECT id FROM users WHERE email='landlord2@test.com'),
+       NOW() + INTERVAL 10 DAY, NOW() + INTERVAL 40 DAY, 'CANCELLED', NOW() - INTERVAL 3 DAY
+WHERE EXISTS (SELECT 1 FROM users WHERE email='student1@test.com') AND EXISTS (SELECT 1 FROM users WHERE email='landlord2@test.com');
 
 -- =============================================
 -- 4. REVIEWS
 -- =============================================
 -- Note: Reviews table doesn't have booking_id. Has property_id and rating/comment.
 
-INSERT IGNORE INTO reviews (id, author_id, property_id, rating, comment, created_at) VALUES
--- Review for Property 305 by User 201
-(501, 201, 305, 5, 'Excellent apartment and very cooperative landlord. Highly recommended!', NOW() - INTERVAL 1 DAY),
--- Review for Landlord 101 directly (property_id null)
-(502, 201, null, 4, 'Mr. Rahim is a gentleman. Prompt with repairs.', NOW() - INTERVAL 1 DAY);
+INSERT IGNORE INTO reviews (id, author_id, receiver_id, property_id, rating, comment, created_at)
+SELECT 501,
+       (SELECT id FROM users WHERE email='student1@test.com'),
+       (SELECT id FROM users WHERE email='landlord1@test.com'),
+       (SELECT id FROM properties WHERE title LIKE 'Family Apartment in Uttara%' LIMIT 1),
+       5, 'Excellent apartment and very cooperative landlord. Highly recommended!', NOW() - INTERVAL 1 DAY
+WHERE EXISTS (SELECT 1 FROM users WHERE email='student1@test.com');
+
+INSERT IGNORE INTO reviews (id, author_id, receiver_id, property_id, rating, comment, created_at)
+SELECT 502,
+       (SELECT id FROM users WHERE email='student1@test.com'),
+       (SELECT id FROM users WHERE email='landlord1@test.com'),
+       NULL,
+       4, 'Mr. Rahim is a gentleman. Prompt with repairs.', NOW() - INTERVAL 1 DAY
+WHERE EXISTS (SELECT 1 FROM users WHERE email='student1@test.com');
 
 -- =============================================
 -- 5. REPORTS
 -- =============================================
 -- Note: Reports table has reported_user_id, NO reported_property_id. Added severity column.
 
-INSERT IGNORE INTO reports (id, reporter_id, reported_user_id, reason, description, severity, status, created_at) VALUES
--- Report against Scam Landlord
-(601, 201, 103, 'FRAUD', 'This user asked for advance payment without showing the property.', 'CRITICAL', 'PENDING', NOW() - INTERVAL 2 HOUR),
--- Report against Landlord 101 (Property issue, but reported against user)
-(602, 202, 101, 'OTHER', 'Lift was not working for 3 days at property.', 'MEDIUM', 'RESOLVED', NOW() - INTERVAL 5 DAY);
+INSERT IGNORE INTO reports (id, reporter_id, reported_user_id, reason, description, severity, status, created_at)
+SELECT 601,
+       (SELECT id FROM users WHERE email='student1@test.com'),
+       (SELECT id FROM users WHERE email='scam_landlord@test.com'),
+       'FRAUD', 'This user asked for advance payment without showing the property.', 'CRITICAL', 'PENDING', NOW() - INTERVAL 2 HOUR
+WHERE EXISTS (SELECT 1 FROM users WHERE email='student1@test.com') AND EXISTS (SELECT 1 FROM users WHERE email='scam_landlord@test.com');
+
+INSERT IGNORE INTO reports (id, reporter_id, reported_user_id, reason, description, severity, status, created_at)
+SELECT 602,
+       (SELECT id FROM users WHERE email='jobseeker@test.com'),
+       (SELECT id FROM users WHERE email='landlord1@test.com'),
+       'OTHER', 'Lift was not working for 3 days at property.', 'MEDIUM', 'RESOLVED', NOW() - INTERVAL 5 DAY
+WHERE EXISTS (SELECT 1 FROM users WHERE email='jobseeker@test.com') AND EXISTS (SELECT 1 FROM users WHERE email='landlord1@test.com');

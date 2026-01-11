@@ -20,6 +20,7 @@ export interface PropertyCardProps {
   onToggleSave?: (id: number) => void
   latitude?: number
   longitude?: number
+  address?: string
 }
 
 export default function PropertyCard({

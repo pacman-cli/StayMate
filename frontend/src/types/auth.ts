@@ -26,6 +26,10 @@ export interface User {
     deletionRequestedAt: string | null
     deletionScheduledAt: string | null
     deletionReason: string | null
+    emailNotifications?: boolean
+    pushNotifications?: boolean
+    gender?: string
+    seekingMode?: string
 }
 
 export interface AuthResponse {
@@ -51,6 +55,8 @@ export interface AuthUser {
     emailVerified: boolean
     phoneVerified: boolean
     roles: string[]
+    emailNotifications?: boolean
+    pushNotifications?: boolean
 }
 
 export interface LoginRequest {
@@ -202,31 +208,32 @@ export interface Booking {
 
 // Role-specific Dashboard DTOs
 export interface AdminDashboardDTO {
+    // Legacy / Complex Objects
+    verificationStats: VerificationStats
+    listingStats: Record<string, number>
+    userAcquisition: UserAcquisitionPoint[]
+    recentFraudEvents: FraudEvent[]
+
+    // Top Cards
     totalUsers: number
     totalLandlords: number
     totalListings: number
     verifiedListingsCount: number
     pendingVerificationsCount: number
     seatOccupancyRate: number
-    recentFraudAlerts: Report[]
-    // New Phase 6 Metrics
-    openMaintenanceRequests: number
-    todayAuditLogs: number
+
+    // Business Metrics
+    activeUsers: number
     totalBookings: number
     confirmedBookings: number
     cancelledBookings: number
+    openMaintenanceRequests: number
+    todayAuditLogs: number
 
+    // Optional / Computed on Frontend or Future
+    recentFraudAlerts?: Report[] // Can likely remove this if recentFraudEvents is used
     pendingVerificationUsers?: User[]
     occupancyAnalytics?: any[]
-    propertyGrowthStats?: any[]
-
-    pendingRoommatePostsCount: number
-    activeRoommatePostsCount: number
-    bannedUsersCount: number
-    warningUsersCount: number
-    totalEmergencyRoomsAvailable: number
-
-    propertyTypeStats?: { name: string; value: number }[]
     locationOccupancyStats?: { name: string; occupied: number; vacant: number }[]
 }
 
@@ -274,6 +281,9 @@ export interface PropertyResponse {
     location: string
     beds: number
     baths: number
+    sqft: number
+    rating: number
+    address?: string
 }
 
 export interface RoommatePostResponse {
@@ -607,6 +617,30 @@ export interface AdminDashboardStatDto {
     listingStats: Record<string, number>
     userAcquisition: UserAcquisitionPoint[]
     recentFraudEvents: FraudEvent[]
+}
+
+export interface RevenuePoint {
+    date: string
+    amount: number
+    transactionCount: number
+}
+
+export interface FinancialOverviewDTO {
+    netRevenue: number
+    avgBookingValue: number
+    totalRefunds: number
+    paymentMethodDistribution: Record<string, number>
+    revenueChangePercentage: number
+    avgValueChangePercentage: number
+}
+
+export interface AnalyticsDashboardData {
+    userGrowth: UserAcquisitionPoint[]
+    revenueTrends: RevenuePoint[]
+    dailyRevenue: RevenuePoint[]
+    totalRevenue: number
+    activeListings: number
+    occupancyRate: number
 }
 
 export interface VerificationStats {

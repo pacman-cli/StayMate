@@ -1,81 +1,98 @@
 package com.webapp.service;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.io.InputStream;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.minio.BucketExistsArgs;
+import io.minio.GetObjectArgs;
+import io.minio.MakeBucketArgs;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
 import jakarta.annotation.PostConstruct;
 
 @Service
 public class FileStorageService {
 
-    @Value("${app.file.upload-dir:uploads}")
-    private String uploadDir;
+    private final MinioClient minioClient;
 
-    private Path fileStorageLocation;
+    @Value("${minio.bucket-name}")
+    private String bucketName;
+
+    public FileStorageService(MinioClient minioClient) {
+        this.minioClient = minioClient;
+    }
 
     @PostConstruct
     public void init() {
-        this.fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
+        // Creates a bucket if missing; throws on failure
         try {
-            Files.createDirectories(this.fileStorageLocation);
-        } catch (Exception ex) {
-            throw new RuntimeException("Could not create the directory where the uploaded files will be stored.", ex);
+            boolean found = minioClient.bucketExists(
+                    BucketExistsArgs.builder()
+                            .bucket(bucketName)
+                            .build());
+            if (!found) {
+                minioClient.makeBucket(
+                        MakeBucketArgs.builder()
+                                .bucket(bucketName)
+                                .build());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Could not initialize MinIO bucket", e);
         }
     }
 
+    /**
+     * Stores file; returns unique name; handles exceptions
+     */
     public String storeFile(MultipartFile file) {
-        // Normalize file name
         String originalFileName = file.getOriginalFilename();
         if (originalFileName == null) {
             throw new RuntimeException("File name cannot be null");
         }
-        originalFileName = StringUtils.cleanPath(originalFileName);
+        String cleanFileName = StringUtils.cleanPath(originalFileName);
         String fileExtension = "";
 
-        // Stores file; throws exception on failure or invalid name
+        int i = cleanFileName.lastIndexOf('.');
+        if (i > 0) {
+            fileExtension = cleanFileName.substring(i); //Extract the file extension
+        }
+
+        String newFileName = UUID.randomUUID().toString() + fileExtension;
+
         try {
-            if (originalFileName.contains("..")) {
-                throw new RuntimeException("Sorry! Filename contains invalid path sequence " + originalFileName);
-            }
-
-            int i = originalFileName.lastIndexOf('.');
-            if (i > 0) {
-                fileExtension = originalFileName.substring(i);
-            }
-
-            String newFileName = UUID.randomUUID().toString() + fileExtension;
-            Path targetLocation = this.fileStorageLocation.resolve(newFileName);
-            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-
+            InputStream inputStream = file.getInputStream();
+            minioClient.putObject(
+                    // Stores a file in bucket with content type
+                    PutObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(newFileName)
+                            .stream(inputStream, file.getSize(), -1)
+                            .contentType(file.getContentType())
+                            .build());
             return newFileName;
-        } catch (IOException ex) {
-            throw new RuntimeException("Could not store file " + originalFileName + ". Please try again!", ex);
+        } catch (Exception ex) {
+            throw new RuntimeException("Could not store file " + cleanFileName + ". Please try again!", ex);
         }
     }
 
     public Resource loadFileAsResource(String fileName) {
-        // Loads a file as a resource; throws exception if not found
+        // Loads file as resource; throws on failure
         try {
-            Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
-            Resource resource = new UrlResource(filePath.toUri());
-            if (resource.exists()) {
-                return resource;
-            } else {
-                throw new RuntimeException("File not found " + fileName);
-            }
-        } catch (MalformedURLException ex) {
+            InputStream stream = minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(fileName)
+                            .build());
+
+            return new InputStreamResource(stream);
+        } catch (Exception ex) {
             throw new RuntimeException("File not found " + fileName, ex);
         }
     }

@@ -60,14 +60,14 @@ INSERT INTO bookings (tenant_id, landlord_id, start_date, end_date, status, note
 SELECT
     (SELECT id FROM users WHERE email='tenant.alex@staymate.com'),
     (SELECT id FROM users WHERE email='landlord.sarah@staymate.com'),
-    DATE_SUB(CURDATE(), INTERVAL 2 MONTH), DATE_SUB(CURDATE(), INTERVAL 1 MONTH),
+    CAST(DATE_SUB(NOW(), INTERVAL 2 MONTH) AS DATE), CAST(DATE_SUB(NOW(), INTERVAL 1 MONTH) AS DATE),
     'COMPLETED', 'Great stay!', DATE_SUB(NOW(), INTERVAL 65 DAY), DATE_SUB(NOW(), INTERVAL 65 DAY);
 
 INSERT INTO bookings (tenant_id, landlord_id, start_date, end_date, status, notes, created_at, updated_at)
 SELECT
     (SELECT id FROM users WHERE email='tenant.priya@staymate.com'),
     (SELECT id FROM users WHERE email='landlord.david@staymate.com'),
-    DATE_SUB(CURDATE(), INTERVAL 45 DAY), DATE_SUB(CURDATE(), INTERVAL 15 DAY),
+    CAST(DATE_SUB(NOW(), INTERVAL 45 DAY) AS DATE), CAST(DATE_SUB(NOW(), INTERVAL 15 DAY) AS DATE),
     'COMPLETED', 'Lovely place.', DATE_SUB(NOW(), INTERVAL 50 DAY), DATE_SUB(NOW(), INTERVAL 50 DAY);
 
 -- Active/Confirmed Bookings (Current Revenue)
@@ -75,7 +75,7 @@ INSERT INTO bookings (tenant_id, landlord_id, start_date, end_date, status, note
 SELECT
     (SELECT id FROM users WHERE email='tenant.sam@staymate.com'),
     (SELECT id FROM users WHERE email='landlord.elena@staymate.com'),
-    DATE_SUB(CURDATE(), INTERVAL 5 DAY), DATE_ADD(CURDATE(), INTERVAL 25 DAY),
+    CAST(DATE_SUB(NOW(), INTERVAL 5 DAY) AS DATE), CAST(DATE_ADD(NOW(), INTERVAL 25 DAY) AS DATE),
     'CONFIRMED', 'Moving in now.', DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 10 DAY);
 
 -- Pending Bookings (Upcoming Actions)
@@ -83,7 +83,7 @@ INSERT INTO bookings (tenant_id, landlord_id, start_date, end_date, status, note
 SELECT
     (SELECT id FROM users WHERE email='tenant.lisa@staymate.com'),
     (SELECT id FROM users WHERE email='landlord.james@staymate.com'),
-    DATE_ADD(CURDATE(), INTERVAL 10 DAY), DATE_ADD(CURDATE(), INTERVAL 40 DAY),
+    CAST(DATE_ADD(NOW(), INTERVAL 10 DAY) AS DATE), CAST(DATE_ADD(NOW(), INTERVAL 40 DAY) AS DATE),
     'PENDING', 'Is internet included?', NOW(), NOW();
 
 -- Cancelled (Churn)
@@ -91,7 +91,7 @@ INSERT INTO bookings (tenant_id, landlord_id, start_date, end_date, status, note
 SELECT
     (SELECT id FROM users WHERE email='tenant.alex@staymate.com'),
     (SELECT id FROM users WHERE email='landlord.james@staymate.com'),
-    DATE_ADD(CURDATE(), INTERVAL 2 DAY), DATE_ADD(CURDATE(), INTERVAL 5 DAY),
+    CAST(DATE_ADD(NOW(), INTERVAL 2 DAY) AS DATE), CAST(DATE_ADD(NOW(), INTERVAL 5 DAY) AS DATE),
     'CANCELLED', 'Changed destination.', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY);
 
 
