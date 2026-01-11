@@ -17,6 +17,7 @@ interface RoommateCardProps {
     smoking: boolean
     pets: boolean
     occupation: string
+    matchScore?: number
   }
 }
 
@@ -47,9 +48,21 @@ export default function RoommateCard({ post }: RoommateCardProps) {
               </div>
             </div>
           </div>
-          <div className={`px-3 py-1 rounded-full text-sm font-bold ${isDark ? "bg-primary-500/10 text-primary-400" : "bg-primary-50 text-primary-600"
-            }`}>
-            ৳{post.budget.toLocaleString()}
+          <div className="flex flex-col items-end gap-1">
+            <div className={`px-3 py-1 rounded-full text-sm font-bold ${isDark ? "bg-primary-500/10 text-primary-400" : "bg-primary-50 text-primary-600"
+              }`}>
+              ৳{post.budget.toLocaleString()}
+            </div>
+            {post.matchScore !== undefined && post.matchScore > 0 && (
+              <div className={`px-2 py-0.5 rounded-full text-xs font-bold ${post.matchScore > 70
+                ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400"
+                : post.matchScore > 40
+                  ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400"
+                  : "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400"
+                }`}>
+                {post.matchScore}% Match
+              </div>
+            )}
           </div>
         </div>
 
@@ -86,7 +99,6 @@ export default function RoommateCard({ post }: RoommateCardProps) {
           )}
         </div>
 
-        {/* Action */}
         {/* Action */}
         <Link
           href={`/roommates/${post.id}`}
