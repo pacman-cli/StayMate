@@ -1,12 +1,14 @@
 import {
     AdminDashboardDTO,
     AdminDashboardStatDto,
+    AnalyticsDashboardData,
     AuthResponse,
     Booking,
     ConversationListResponse,
     ConversationResponse,
     CreateConversationRequest,
     DashboardStats,
+    FinancialOverviewDTO,
     LandlordDashboardDTO,
     LandlordOverviewStats,
     LoginRequest,
@@ -22,14 +24,16 @@ import {
     PropertySeatSummary,
     RegisterRequest,
     Report,
+    RevenuePoint,
     ReviewResponse,
     RoleSelectionRequest,
     SendMessageRequest,
     TokenRefreshRequest,
     UnreadCountResponse,
     User,
+    UserAcquisitionPoint,
     UserDashboardDTO,
-    VerificationRequest
+    VerificationRequest,
 } from "@/types/auth"
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios"
 import Cookies from "js-cookie"
@@ -40,7 +44,7 @@ const API_BASE_URL = isServer
     : process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
 
 // Create axios instance
-const api = axios.create({
+export const api = axios.create({
     baseURL: API_BASE_URL,
     headers: {
         "Content-Type": "application/json",
@@ -55,6 +59,15 @@ export const getAccessToken = (): string | undefined => {
 
 export const getRefreshToken = (): string | undefined => {
     return Cookies.get("refreshToken")
+}
+
+// Simple JWT parser
+const parseJwt = (token: string) => {
+    try {
+        return JSON.parse(atob(token.split(".")[1]))
+    } catch (e) {
+        return null
+    }
 }
 
 // Mutex for token refresh
@@ -76,23 +89,23 @@ const processQueue = (error: any, token: string | null = null) => {
 }
 
 export const setTokens = (accessToken: string, refreshToken: string): void => {
-    // Check if we're in development (localhost)
-    const isLocalhost =
-        typeof window !== "undefined" &&
-        (window.location.hostname === "localhost" ||
-            window.location.hostname === "127.0.0.1")
+    // Determine if we should use secure cookies based on protocol
+    // This allows testing on local IPs (http://192.168.x.x) without getting blocked
+    const isSecure =
+        typeof window !== "undefined" && window.location.protocol === "https:"
 
-    // Access token expires in 15 minutes
+    // Access token usage: 15 mins.
+    // Cookie expiry: 20 mins (slightly longer than token to ensure we can read it for proactive refresh)
     Cookies.set("accessToken", accessToken, {
-        expires: 1 / 96,
-        secure: !isLocalhost, // Only use secure in production (HTTPS)
+        expires: 1 / 72, // ~20 minutes
+        secure: isSecure,
         sameSite: "lax",
         path: "/",
     })
-    // Refresh token expires in 7 days
+    // Refresh token: 7 days
     Cookies.set("refreshToken", refreshToken, {
         expires: 7,
-        secure: !isLocalhost, // Only use secure in production (HTTPS)
+        secure: isSecure,
         sameSite: "lax",
         path: "/",
     })
@@ -103,12 +116,55 @@ export const clearTokens = (): void => {
     Cookies.remove("refreshToken", { path: "/" })
 }
 
-// Request interceptor - add auth token
+// Request interceptor - add auth token & proactive refresh
 api.interceptors.request.use(
-    (config: InternalAxiosRequestConfig) => {
-        const token = getAccessToken()
-        if (token && config.headers) {
-            config.headers.Authorization = `Bearer ${token}`
+    async (config: InternalAxiosRequestConfig) => {
+        let token = getAccessToken()
+
+        // Skip proactive refresh for auth endpoints to avoid loops
+        if (config.url?.includes("/auth/") && !config.url?.includes("/me")) {
+            if (token && config.headers) {
+                config.headers.Authorization = `Bearer ${token}`
+            }
+            return config
+        }
+
+        if (token) {
+            const decoded = parseJwt(token)
+            const currentTime = Date.now() / 1000
+
+            // If token expires in less than 2 minutes, try to refresh
+            if (decoded && decoded.exp && decoded.exp - currentTime < 120) {
+                if (!isRefreshing) {
+                    isRefreshing = true
+                    try {
+                        const refreshToken = getRefreshToken()
+                        if (refreshToken) {
+                            const response = await axios.post<AuthResponse>(
+                                `${API_BASE_URL}/api/auth/refresh-token`,
+                                { refreshToken },
+                            )
+                            const { accessToken, refreshToken: newRefToken } = response.data
+                            setTokens(accessToken, newRefToken)
+                            token = accessToken // Use new token for this request
+                        }
+                    } catch (error) {
+                        console.warn("Proactive refresh failed", error)
+                        // Don't logout here, let the actual request fail with 401 if needed
+                        // or let the response interceptor handle it
+                    } finally {
+                        isRefreshing = false
+                    }
+                } else {
+                    // If already refreshing, wait a bit (rudimentary) or just proceed with old token
+                    // Ideally we would wait for the mutex, but for simplicity in request interceptor:
+                    // The response interceptor will handle the 401 if old token fails.
+                }
+            }
+
+            if (config.headers) {
+                config.headers.Authorization = `Bearer ${token}`
+            }
         }
         return config
     },
@@ -154,8 +210,7 @@ api.interceptors.response.use(
                         },
                     )
 
-                    const { accessToken, refreshToken: newRefreshToken } =
-                        response.data
+                    const { accessToken, refreshToken: newRefreshToken } = response.data
                     setTokens(accessToken, newRefreshToken)
 
                     processQueue(null, accessToken)
@@ -165,16 +220,31 @@ api.interceptors.response.use(
                         originalRequest.headers.Authorization = `Bearer ${accessToken}`
                     }
                     return api(originalRequest)
-                } catch (refreshError) {
+                } catch (refreshError: any) {
                     processQueue(refreshError, null)
-                    // Refresh failed, clear tokens and redirect to login
-                    clearTokens()
-                    if (typeof window !== "undefined") {
-                        // Avoid redirect loops if already on login page
-                        if (!window.location.pathname.startsWith("/login")) {
-                            window.location.href = "/login"
+
+                    // Only logout if it's a definitive auth failure (4xx)
+                    // If it's a network error or 5xx, keep tokens to allow retry
+                    if (
+                        refreshError.response &&
+                        (refreshError.response.status === 400 ||
+                            refreshError.response.status === 401 ||
+                            refreshError.response.status === 403)
+                    ) {
+                        clearTokens()
+                        if (typeof window !== "undefined") {
+                            // Avoid redirect loops if already on login page
+                            if (!window.location.pathname.startsWith("/login")) {
+                                window.location.href = "/login"
+                            }
                         }
+                    } else {
+                        console.warn(
+                            "Refresh failed due to non-auth error (network/server), keeping session.",
+                            refreshError,
+                        )
                     }
+
                     return Promise.reject(refreshError)
                 } finally {
                     isRefreshing = false
@@ -198,10 +268,7 @@ api.interceptors.response.use(
 // Auth API functions
 export const authApi = {
     register: async (data: RegisterRequest): Promise<AuthResponse> => {
-        const response = await api.post<AuthResponse>(
-            "/api/auth/register",
-            data,
-        )
+        const response = await api.post<AuthResponse>("/api/auth/register", data)
         return response.data
     },
 
@@ -227,6 +294,7 @@ export const authApi = {
         try {
             await api.post("/api/auth/logout")
         } finally {
+            //After logging out clearing the token is importent.
             clearTokens()
         }
     },
@@ -266,6 +334,10 @@ export const userApi = {
     updateProfile: async (updates: {
         firstName?: string
         lastName?: string
+        phoneNumber?: string
+        bio?: string
+        address?: string
+        city?: string
         profilePictureUrl?: string
     }): Promise<User> => {
         const response = await api.put<User>("/api/users/profile", updates)
@@ -283,6 +355,22 @@ export const userApi = {
         const response = await api.get<{ hasRole: boolean }>(
             `/api/users/has-role/${role}`,
         )
+        return response.data
+    },
+
+    changePassword: async (data: any): Promise<void> => {
+        const response = await api.post<{ message: string }>(
+            "/api/users/password",
+            data,
+        )
+        return
+    },
+
+    updateSettings: async (data: {
+        type: string
+        enabled: boolean
+    }): Promise<any> => {
+        const response = await api.post("/api/users/settings", data)
         return response.data
     },
 }
@@ -435,9 +523,7 @@ export const notificationApi = {
     },
 
     // Mark notifications as read
-    markAsRead: async (
-        request: NotificationMarkAsReadRequest,
-    ): Promise<void> => {
+    markAsRead: async (request: NotificationMarkAsReadRequest): Promise<void> => {
         await api.post("/api/notifications/mark-read", request)
     },
 
@@ -533,7 +619,9 @@ export const adminApi = {
     },
 
     updateUserStatus: async (id: number, status: string): Promise<void> => {
-        await api.put(`/api/admin/users/${id}/status`, null, { params: { status } })
+        await api.put(`/api/admin/users/${id}/status`, null, {
+            params: { status },
+        })
     },
 
     getStats: async (): Promise<{
@@ -580,8 +668,31 @@ export const adminApi = {
     },
 
     // Analytics
-    getRevenueAnalytics: async (): Promise<any> => {
-        const response = await api.get<any>("/api/admin/analytics/revenue")
+    getRevenueAnalytics: async (): Promise<RevenuePoint[]> => {
+        const response = await api.get<RevenuePoint[]>(
+            "/api/admin/analytics/revenue",
+        )
+        return response.data
+    },
+
+    getUserGrowthAnalytics: async (): Promise<UserAcquisitionPoint[]> => {
+        const response = await api.get<UserAcquisitionPoint[]>(
+            "/api/admin/analytics/user-growth",
+        )
+        return response.data
+    },
+
+    getFinancialOverview: async (): Promise<FinancialOverviewDTO> => {
+        const response = await api.get<FinancialOverviewDTO>(
+            "/api/admin/analytics/financial-overview",
+        )
+        return response.data
+    },
+
+    getAnalyticsDashboard: async (): Promise<AnalyticsDashboardData> => {
+        const response = await api.get<AnalyticsDashboardData>(
+            "/api/admin/analytics/dashboard",
+        )
         return response.data
     },
 
@@ -592,47 +703,70 @@ export const adminApi = {
     },
 
     resolveReport: async (id: number, notes: string): Promise<Report> => {
-        const response = await api.post<Report>(`/api/admin/reports/${id}/resolve`, { notes })
+        const response = await api.post<Report>(
+            `/api/admin/reports/${id}/resolve`,
+            { notes },
+        )
         return response.data
     },
 
     dismissReport: async (id: number, notes: string): Promise<Report> => {
-        const response = await api.post<Report>(`/api/admin/reports/${id}/dismiss`, { notes })
+        const response = await api.post<Report>(
+            `/api/admin/reports/${id}/dismiss`,
+            { notes },
+        )
         return response.data
     },
 
     // Verifications
     // Verifications
     getVerifications: async (): Promise<VerificationRequest[]> => {
-        const response = await api.get<VerificationRequest[]>("/api/admin/verifications")
+        const response = await api.get<VerificationRequest[]>(
+            "/api/verification/admin/pending",
+        )
         return response.data
     },
 
     approveVerification: async (id: number): Promise<VerificationRequest> => {
-        const response = await api.put<VerificationRequest>(`/api/admin/verifications/${id}/approve`)
+        const response = await api.post<VerificationRequest>(
+            `/api/verification/admin/${id}/approve`,
+        )
         return response.data
     },
 
-    rejectVerification: async (id: number, reason: string): Promise<VerificationRequest> => {
-        const response = await api.put<VerificationRequest>(`/api/admin/verifications/${id}/reject`, null, {
-            params: { reason }
-        })
+    rejectVerification: async (
+        id: number,
+        reason: string,
+    ): Promise<VerificationRequest> => {
+        const response = await api.post<VerificationRequest>(
+            `/api/verification/admin/${id}/reject`,
+            { reason },
+        )
         return response.data
     },
 
     // Settings
     getSettings: async (): Promise<Record<string, string>> => {
-        const response = await api.get<Record<string, string>>("/api/admin/settings")
+        const response = await api.get<Record<string, string>>(
+            "/api/admin/settings",
+        )
         return response.data
     },
 
-    updateSettings: async (settings: Record<string, string>): Promise<Record<string, string>> => {
-        const response = await api.put<Record<string, string>>("/api/admin/settings", settings)
+    updateSettings: async (
+        settings: Record<string, string>,
+    ): Promise<Record<string, string>> => {
+        const response = await api.put<Record<string, string>>(
+            "/api/admin/settings",
+            settings,
+        )
         return response.data
     },
 
     getDashboardStats: async (): Promise<AdminDashboardStatDto> => {
-        const response = await api.get<AdminDashboardStatDto>("/api/admin/dashboard")
+        const response = await api.get<AdminDashboardStatDto>(
+            "/api/admin/dashboard",
+        )
         return response.data
     },
 
@@ -643,12 +777,16 @@ export const adminApi = {
 
 export const landlordApi = {
     getOverview: async (): Promise<LandlordOverviewStats> => {
-        const response = await api.get<LandlordOverviewStats>("/api/landlord/dashboard/overview")
+        const response = await api.get<LandlordOverviewStats>(
+            "/api/landlord/dashboard/overview",
+        )
         return response.data
     },
 
     getPropertySummaries: async (): Promise<PropertySeatSummary[]> => {
-        const response = await api.get<PropertySeatSummary[]>("/api/landlord/properties/summary")
+        const response = await api.get<PropertySeatSummary[]>(
+            "/api/landlord/properties/summary",
+        )
         return response.data
     },
 
@@ -661,8 +799,13 @@ export const landlordApi = {
         return response.data
     },
 
-    updateBookingStatus: async (bookingId: number, status: string): Promise<void> => {
-        await api.patch(`/api/landlord/bookings/${bookingId}/status?status=${status}`)
+    updateBookingStatus: async (
+        bookingId: number,
+        status: string,
+    ): Promise<void> => {
+        await api.patch(
+            `/api/landlord/bookings/${bookingId}/status?status=${status}`,
+        )
     },
 
     getReviews: async (): Promise<ReviewResponse[]> => {
@@ -674,53 +817,75 @@ export const landlordApi = {
 // Application API
 export const applicationApi = {
     sendApplication: async (data: { receiverId: number; message: string }) => {
-        return api.post("/api/applications", data)
+        const response = await api.post("/api/applications", data)
+        return response.data
     },
     getSentApplications: async () => {
-        return api.get("/api/applications/sent")
+        const response = await api.get("/api/applications/sent")
+        return response.data
     },
     getReceivedApplications: async () => {
-        return api.get("/api/applications/received")
+        const response = await api.get("/api/applications/received")
+        return response.data
     },
     updateStatus: async (id: number, status: string) => {
-        return api.patch(`/api/applications/${id}/status`, null, { params: { status } })
+        const response = await api.patch(`/api/applications/${id}/status`, null, {
+            params: { status },
+        })
+        return response.data
     },
     deleteApplication: async (id: number) => {
-        return api.delete(`/api/applications/${id}`)
-    }
+        const response = await api.delete(`/api/applications/${id}`)
+        return response.data
+    },
 }
 
 // Booking API
 export const bookingApi = {
-    createBooking: async (data: { landlordId: number; propertyId: number; startDate: string; endDate: string; notes?: string }) => {
-        return api.post("/api/bookings", data)
+    createBooking: async (data: {
+        landlordId: number
+        propertyId: number
+        startDate: string
+        endDate: string
+        notes?: string
+    }) => {
+        const response = await api.post("/api/bookings", data)
+        return response.data
     },
     getMyBookings: async () => {
         const response = await api.get("/api/bookings/my-bookings")
         return response.data
     },
     getBookingRequests: async () => {
-        return api.get("/api/bookings/requests")
+        const response = await api.get("/api/bookings/requests")
+        return response.data
     },
     updateStatus: async (id: number, status: string) => {
-        return api.patch(`/api/bookings/${id}/status`, null, { params: { status } })
+        const response = await api.patch(`/api/bookings/${id}/status`, null, {
+            params: { status },
+        })
+        return response.data
     },
     deleteBooking: async (id: number) => {
-        return api.delete(`/api/bookings/${id}`)
-    }
+        const response = await api.delete(`/api/bookings/${id}`)
+        return response.data
+    },
 }
 
 // Match API
 export const matchApi = {
     createMatch: async (targetUserId: number) => {
-        return api.post("/api/matches", { targetUserId })
+        const response = await api.post("/api/matches", { targetUserId })
+        return response.data
     },
     getMatches: async () => {
-        return api.get("/api/matches")
+        const response = await api.get("/api/matches")
+        return response.data
     },
     unmatch: async (id: number) => {
-        return api.delete(`/api/matches/${id}`)
-    }
+        const response = await api.delete(`/api/matches/${id}`)
+        return response.data
+    },
 }
 
 // Dashboard API
@@ -734,15 +899,16 @@ export const dashboardApi = {
         return response.data
     },
     getLandlordStats: async (): Promise<LandlordDashboardDTO> => {
-        const response = await api.get<LandlordDashboardDTO>("/api/dashboard/landlord")
+        const response = await api.get<LandlordDashboardDTO>(
+            "/api/dashboard/landlord",
+        )
         return response.data
     },
     getUserStats: async (): Promise<UserDashboardDTO> => {
         const response = await api.get<UserDashboardDTO>("/api/dashboard/user")
         return response.data
-    }
+    },
 }
-
 
 // Property API
 export const propertyApi = {
@@ -773,9 +939,12 @@ export const propertyApi = {
         const formData = new FormData()
 
         // Append JSON data as a Blob with application/json type
-        formData.append("data", new Blob([JSON.stringify(data)], {
-            type: "application/json"
-        }))
+        formData.append(
+            "data",
+            new Blob([JSON.stringify(data)], {
+                type: "application/json",
+            }),
+        )
 
         // Append files
         if (files) {
@@ -792,34 +961,54 @@ export const propertyApi = {
         return response.data
     },
     updateStatus: async (id: number, status: string): Promise<any> => {
-        const response = await api.patch<any>(`/api/properties/${id}/status`, null, {
-            params: { status }
-        })
+        const response = await api.patch<any>(
+            `/api/properties/${id}/status`,
+            null,
+            {
+                params: { status },
+            },
+        )
         return response.data
     },
     deleteProperty: async (id: number): Promise<void> => {
         await api.delete(`/api/properties/${id}`)
-    }
+    },
 }
 
 // Contact API
 export const contactApi = {
-    sendMessage: async (data: { name: string; email: string; message: string }) => {
+    sendMessage: async (data: {
+        name: string
+        email: string
+        message: string
+    }) => {
         return api.post("/api/contact", data)
-    }
+    },
 }
 
 export const roommateApi = {
-    getAll: (params?: any) => api.get("/api/roommates", { params }).then((res) => res.data),
-    getRecommended: () => api.get("/api/roommates", { params: { size: 5, sort: "createdAt,desc" } }).then((res) => res.data),
+    getAll: (params?: any) =>
+        api.get("/api/roommates", { params }).then((res) => res.data),
+    getRecommended: () =>
+        api
+            .get("/api/roommates", { params: { size: 5, sort: "createdAt,desc" } })
+            .then((res) => res.data),
     getMyPosts: () => api.get("/api/roommates/my").then((res) => res.data),
-    getById: (id: number) => api.get(`/api/roommates/${id}`).then((res) => res.data),
-    create: (data: any) => api.post("/api/roommates", data).then((res) => res.data),
-    update: (id: number, data: any) => api.put(`/api/roommates/${id}`, data).then((res) => res.data),
+    getById: (id: number) =>
+        api.get(`/api/roommates/${id}`).then((res) => res.data),
+    create: (data: any) =>
+        api.post("/api/roommates", data).then((res) => res.data),
+    update: (id: number, data: any) =>
+        api.put(`/api/roommates/${id}`, data).then((res) => res.data),
     delete: (id: number) => api.delete(`/api/roommates/${id}`),
-    getAllAdmin: () => api.get<any[]>("/api/roommates/all").then((res) => res.data),
-    updateStatus: (id: number, status: string) => api.put<any>(`/api/roommates/${id}/status`, null, { params: { status } }).then((res) => res.data),
-    getMatches: () => api.get<any[]>("/api/roommates/matches").then((res) => res.data),
+    getAllAdmin: () =>
+        api.get<any[]>("/api/roommates/all").then((res) => res.data),
+    updateStatus: (id: number, status: string) =>
+        api
+            .put<any>(`/api/roommates/${id}/status`, null, { params: { status } })
+            .then((res) => res.data),
+    getMatches: () =>
+        api.get<any[]>("/api/roommates/matches").then((res) => res.data),
 }
 
 export const savedApi = {
@@ -834,7 +1023,9 @@ export const savedApi = {
         return api.delete(`/api/saved/properties/${id}`)
     },
     isPropertySaved: async (id: number): Promise<boolean> => {
-        const response = await api.get<{ isSaved: boolean }>(`/api/saved/properties/${id}/check`)
+        const response = await api.get<{ isSaved: boolean }>(
+            `/api/saved/properties/${id}/check`,
+        )
         return response.data.isSaved
     },
     getRoommates: async (): Promise<any[]> => {
@@ -849,14 +1040,21 @@ export const savedApi = {
     },
 
     isRoommateSaved: async (id: number): Promise<boolean> => {
-        const response = await api.get<{ isSaved: boolean }>(`/api/saved/roommates/${id}/check`)
+        const response = await api.get<{ isSaved: boolean }>(
+            `/api/saved/roommates/${id}/check`,
+        )
         return response.data.isSaved
-    }
+    },
 }
 
 export const reviewApi = {
-    create: async (data: { propertyId?: number; receiverId?: number; rating: number; comment: string }) => {
-        const response = await api.post('/api/reviews', data)
+    create: async (data: {
+        propertyId?: number
+        receiverId?: number
+        rating: number
+        comment: string
+    }) => {
+        const response = await api.post("/api/reviews", data)
         return response.data
     },
     getByUser: async (userId: number, page = 0) => {
@@ -864,32 +1062,52 @@ export const reviewApi = {
         return response.data
     },
     getByProperty: async (propertyId: number, page = 0) => {
-        const response = await api.get(`/api/reviews/property/${propertyId}?page=${page}`)
+        const response = await api.get(
+            `/api/reviews/property/${propertyId}?page=${page}`,
+        )
         return response.data
     },
     delete: async (id: number) => {
         await api.delete(`/api/reviews/${id}`)
-    }
+    },
 }
 
 // Audit API (Admin only)
 export const auditApi = {
     getLogs: async (page: number = 0, size: number = 50) => {
-        const response = await api.get("/api/admin/audit", { params: { page, size } })
+        const response = await api.get("/api/admin/audit", {
+            params: { page, size },
+        })
         return response.data
     },
-    getLogsForUser: async (userId: number, page: number = 0, size: number = 50) => {
-        const response = await api.get(`/api/admin/audit/user/${userId}`, { params: { page, size } })
+    getLogsForUser: async (
+        userId: number,
+        page: number = 0,
+        size: number = 50,
+    ) => {
+        const response = await api.get(`/api/admin/audit/user/${userId}`, {
+            params: { page, size },
+        })
         return response.data
     },
-    getLogsForEntity: async (entityType: string, entityId: number, page: number = 0, size: number = 50) => {
-        const response = await api.get(`/api/admin/audit/entity/${entityType}/${entityId}`, { params: { page, size } })
+    getLogsForEntity: async (
+        entityType: string,
+        entityId: number,
+        page: number = 0,
+        size: number = 50,
+    ) => {
+        const response = await api.get(
+            `/api/admin/audit/entity/${entityType}/${entityId}`,
+            { params: { page, size } },
+        )
         return response.data
     },
     cleanup: async (retentionDays: number = 90) => {
-        const response = await api.delete("/api/admin/audit/cleanup", { params: { retentionDays } })
+        const response = await api.delete("/api/admin/audit/cleanup", {
+            params: { retentionDays },
+        })
         return response.data
-    }
+    },
 }
 
 export default api
