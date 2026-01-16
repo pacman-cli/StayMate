@@ -103,7 +103,7 @@ public class AdminDashboardStrategy implements DashboardStrategy {
                                 .collect(java.util.stream.Collectors.toList());
 
                 List<com.webapp.domain.property.dto.PropertyResponse> pendingProperties = propertyRepository
-                                .findByStatus("Pending").stream()
+                                .findByStatus(com.webapp.domain.property.enums.PropertyStatus.PENDING).stream()
                                 .map(this::mapToPropertyResponse)
                                 .collect(java.util.stream.Collectors.toList());
 
@@ -151,7 +151,7 @@ public class AdminDashboardStrategy implements DashboardStrategy {
                                 .sqft(property.getSqft())
                                 .rating(property.getRating())
                                 .verified(property.isVerified())
-                                .status(property.getStatus())
+                                .status(property.getStatus().name())
                                 .views(property.getViews())
                                 .inquiries(property.getInquiries())
                                 .priceAmount(property.getPriceAmount())
@@ -180,8 +180,10 @@ public class AdminDashboardStrategy implements DashboardStrategy {
 
         private DashboardStats.ListingStats getListingStats() {
                 long totalListings = propertyRepository.count();
-                long activeListings = propertyRepository.countByStatus("Active");
-                long pendingListings = propertyRepository.countByStatus("Pending");
+                long activeListings = propertyRepository
+                                .countByStatus(com.webapp.domain.property.enums.PropertyStatus.ACTIVE);
+                long pendingListings = propertyRepository
+                                .countByStatus(com.webapp.domain.property.enums.PropertyStatus.PENDING);
 
                 List<Object[]> topLocationsRaw = propertyRepository
                                 .findTopLocations(org.springframework.data.domain.PageRequest.of(0, 5));

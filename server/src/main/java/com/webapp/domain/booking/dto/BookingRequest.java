@@ -2,6 +2,8 @@ package com.webapp.domain.booking.dto;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,9 +20,11 @@ public class BookingRequest {
     private Long landlordId;
 
     @NotNull(message = "Start date is required")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
 
     @NotNull(message = "End date is required")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
 
     @NotNull(message = "Property ID is required")

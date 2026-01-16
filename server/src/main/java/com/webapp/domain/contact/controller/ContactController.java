@@ -1,10 +1,13 @@
-package com.webapp.domain.contact;
+package com.webapp.domain.contact.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.webapp.domain.contact.ContactRequest;
+import com.webapp.domain.contact.ContactService;
 
 import lombok.RequiredArgsConstructor;
 
