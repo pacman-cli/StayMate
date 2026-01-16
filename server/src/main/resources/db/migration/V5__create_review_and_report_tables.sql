@@ -31,25 +31,26 @@ CREATE TABLE reports (
     FOREIGN KEY (reported_user_id) REFERENCES users(id)
 );
 
--- Seed some initial data for visual verification
+-- Seed some initial data for visual verification (COMMENTED OUT)
 -- Reviews
-INSERT INTO reviews (author_id, receiver_id, rating, comment, created_at, updated_at)
-SELECT
-    (SELECT id FROM users WHERE email='tenant@staymate.com' LIMIT 1),
-    (SELECT id FROM users WHERE email='landlord@staymate.com' LIMIT 1),
-    5,
-    'Great landlord, very responsive!',
-    NOW(),
-    NOW();
+-- INSERT INTO reviews (author_id, receiver_id, rating, comment, created_at, updated_at)
+-- SELECT
+--     (SELECT id FROM users WHERE email='tenant@staymate.com' LIMIT 1),
+--     (SELECT id FROM users WHERE email='landlord@staymate.com' LIMIT 1),
+--     5,
+--     'Great landlord, very responsive!',
+--     NOW(),
+--     NOW();
 
 -- Reports
-INSERT INTO reports (reporter_id, reported_user_id, reason, description, severity, status, created_at, updated_at)
-SELECT
-    (SELECT id FROM users WHERE email='landlord@staymate.com' LIMIT 1),
-    (SELECT id FROM users WHERE email='tenant@staymate.com' LIMIT 1),
-    'SPAM',
-    'Sending duplicate messages.',
-    'LOW',
-    'RESOLVED',
-    NOW(),
-    NOW();
+-- INSERT INTO reports (reporter_id, reported_user_id, reason, description, severity, status, created_at, updated_at)
+-- SELECT
+--     (SELECT id FROM users WHERE email='landlord@staymate.com' LIMIT 1),
+--     (SELECT id FROM users WHERE email='tenant@staymate.com' LIMIT 1),
+--     'SPAM',
+--     'Sending duplicate messages.',
+--     'LOW',
+--     'RESOLVED',
+--     NOW(),
+--     NOW();
+
