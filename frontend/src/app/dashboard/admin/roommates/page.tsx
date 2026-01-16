@@ -136,20 +136,28 @@ export default function AdminRoommatesPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700 mt-2">
-                  <button
-                    onClick={() => handleReject(post.id)}
-                    className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 rounded-lg transition flex items-center gap-2"
-                  >
-                    <X className="w-4 h-4" /> Reject
-                  </button>
-                  <button
-                    onClick={() => handleApprove(post.id)}
-                    className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition flex items-center gap-2 shadow-sm"
-                  >
-                    <Check className="w-4 h-4" /> Approve
-                  </button>
-                </div>
+                {(!post.status || post.status === 'PENDING') ? (
+                  <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700 mt-2">
+                    <button
+                      onClick={() => handleReject(post.id)}
+                      className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 rounded-lg transition flex items-center gap-2"
+                    >
+                      <X className="w-4 h-4" /> Reject
+                    </button>
+                    <button
+                      onClick={() => handleApprove(post.id)}
+                      className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition flex items-center gap-2 shadow-sm"
+                    >
+                      <Check className="w-4 h-4" /> Approve
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-700 mt-2">
+                    <span className="text-sm text-slate-500 italic">
+                      Action taken: {post.status}
+                    </span>
+                  </div>
+                )}
               </div>
             ))
           )}

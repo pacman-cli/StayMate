@@ -1,7 +1,7 @@
 "use client"
 
+import AuthGuard from "@/components/auth/AuthGuard"
 import DashboardLayout from "@/components/DashboardLayout"
-import ProtectedRoute from "@/components/auth/ProtectedRoute"
 import { useAuth } from "@/context/AuthContext"
 import { api } from "@/lib/api"
 import {
@@ -34,6 +34,7 @@ export default function VerificationPage() {
   const [loading, setLoading] = useState(true)
 
   // Phone Verification State
+  const [countryCode, setCountryCode] = useState("+880")
   const [phoneNumber, setPhoneNumber] = useState("")
   const [otp, setOtp] = useState("")
   const [showOtpInput, setShowOtpInput] = useState(false)
@@ -52,9 +53,10 @@ export default function VerificationPage() {
     try {
       const res = await api.get('/api/verification/status')
       setStatus(res.data)
-    } catch (error) {
+    } catch (error: any) {
       console.error(error)
-      toast.error("Failed to load verification status")
+      const message = error.response?.data?.message || "Failed to load verification status"
+      toast.error(message)
     } finally {
       setLoading(false)
     }
@@ -62,13 +64,18 @@ export default function VerificationPage() {
 
   const handleSendOtp = async () => {
     if (!phoneNumber) return toast.error("Enter phone number")
+
+    // Combine country code and phone number (removing leading 0 if present)
+    const cleanNumber = phoneNumber.startsWith("0") ? phoneNumber.substring(1) : phoneNumber
+    const fullNumber = countryCode + cleanNumber
+
     setSendingOtp(true)
     try {
-      const res = await api.post('/api/verification/phone', { phoneNumber })
-      toast.success("OTP Sent! (Use code: " + res.data.otp + ")")
+      await api.post('/api/verification/phone', { phoneNumber: fullNumber })
+      toast.success("OTP Sent!")
       setShowOtpInput(true)
-    } catch (error) {
-      toast.error("Failed to send OTP")
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to send OTP")
     } finally {
       setSendingOtp(false)
     }
@@ -76,14 +83,19 @@ export default function VerificationPage() {
 
   const handleVerifyOtp = async () => {
     if (!otp) return toast.error("Enter OTP")
+
+    // Reconstruct the full number used for sending
+    const cleanNumber = phoneNumber.startsWith("0") ? phoneNumber.substring(1) : phoneNumber
+    const fullNumber = countryCode + cleanNumber
+
     setVerifyingOtp(true)
     try {
-      await api.post('/api/verification/phone/verify', { otp, phone: phoneNumber })
+      await api.post('/api/verification/phone/verify', { otp, phone: fullNumber })
       toast.success("Phone Verified!")
       fetchStatus() // Refresh status
       setShowOtpInput(false)
-    } catch (error) {
-      toast.error("Invalid OTP")
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Invalid OTP")
     } finally {
       setVerifyingOtp(false)
     }
@@ -102,8 +114,8 @@ export default function VerificationPage() {
       })
       toast.success("Document uploaded successfully")
       fetchStatus()
-    } catch (error) {
-      toast.error("Upload failed")
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Upload failed")
     } finally {
       setUploading(false)
     }
@@ -112,7 +124,7 @@ export default function VerificationPage() {
   if (loading) return <div className="p-10 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-blue-600" /></div>
 
   return (
-    <ProtectedRoute>
+    <AuthGuard>
       <DashboardLayout title="Verification" description="Complete these steps to verify your account">
         <div className="max-w-3xl mx-auto space-y-8">
 
@@ -162,17 +174,31 @@ export default function VerificationPage() {
                 <div className="max-w-sm space-y-3">
                   {!showOtpInput ? (
                     <div className="flex gap-2">
+                      <select
+                        value={countryCode}
+                        onChange={(e) => setCountryCode(e.target.value)}
+                        className="px-3 py-2 border rounded-lg dark:bg-slate-900 dark:border-slate-600 bg-slate-50 text-sm font-medium"
+                      >
+                        <option value="+880">🇧🇩 +880</option>
+                        <option value="+1">🇺🇸 +1</option>
+                        <option value="+44">🇬🇧 +44</option>
+                        <option value="+91">🇮🇳 +91</option>
+                        <option value="+61">🇦🇺 +61</option>
+                        <option value="+81">🇯🇵 +81</option>
+                        <option value="+971">🇦🇪 +971</option>
+                        <option value="+966">🇸🇦 +966</option>
+                      </select>
                       <input
                         type="text"
                         className="flex-1 px-4 py-2 border rounded-lg dark:bg-slate-900 dark:border-slate-600"
-                        placeholder="Enter phone number"
+                        placeholder="1712345678"
                         value={phoneNumber}
                         onChange={e => setPhoneNumber(e.target.value)}
                       />
                       <button
                         onClick={handleSendOtp}
                         disabled={sendingOtp}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 whitespace-nowrap"
                       >
                         {sendingOtp ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send OTP"}
                       </button>
@@ -260,6 +286,6 @@ export default function VerificationPage() {
 
         </div>
       </DashboardLayout>
-    </ProtectedRoute>
+    </AuthGuard>
   )
 }

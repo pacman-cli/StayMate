@@ -1,5 +1,6 @@
 // Role types for the rental house and roommate finder app
 export type UserRole = "ROLE_USER" | "ROLE_HOUSE_OWNER" | "ROLE_ADMIN"
+export type RoleName = UserRole
 
 export type AuthProvider = "LOCAL" | "GOOGLE"
 
@@ -230,10 +231,15 @@ export interface AdminDashboardDTO {
     openMaintenanceRequests: number
     todayAuditLogs: number
 
+    // Emergency & Safety
+    totalEmergencyRoomsAvailable?: number
+    bannedUsersCount?: number
+
     // Optional / Computed on Frontend or Future
-    recentFraudAlerts?: Report[] // Can likely remove this if recentFraudEvents is used
+    recentFraudAlerts?: FraudEvent[]
     pendingVerificationUsers?: User[]
     occupancyAnalytics?: any[]
+    propertyTypeStats?: { name: string; value: number }[]
     locationOccupancyStats?: { name: string; occupied: number; vacant: number }[]
 }
 
@@ -286,13 +292,34 @@ export interface PropertyResponse {
     address?: string
 }
 
+export type CleanlinessLevel = "MESSY" | "MODERATE" | "NEAT_FREAK"
+export type SleepSchedule = "EARLY_BIRD" | "NIGHT_OWL" | "IRREGULAR"
+
 export interface RoommatePostResponse {
     id: number
-    authorName: string
+    userId: number
+    userName: string
+    userAvatar: string
     location: string
     budget: number
     moveInDate: string
-    lifestyle: string
+    bio: string
+    genderPreference: string
+    smoking: boolean
+    pets: boolean
+    occupation: string
+
+    // AI Fields
+    cleanliness?: CleanlinessLevel
+    sleepSchedule?: SleepSchedule
+    personalityTags?: string[]
+    interests?: string[]
+
+    latitude: number
+    longitude: number
+    status: "PENDING" | "APPROVED" | "REJECTED" | "CLOSED"
+    createdAt: string
+    matchScore?: number
 }
 
 export interface Expense {

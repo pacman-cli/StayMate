@@ -22,7 +22,7 @@ export default function LandingPage() {
     const { isDark } = useTheme()
 
     return (
-        <div className={`min-h-screen transition-colors duration-300 ${isDark ? "bg-dark-950" : "bg-slate-50"}`}>
+        <div className={`min-h-screen transition-colors duration-300 bg-transparent`}>
             <HexPatternBackground />
 
             <Navbar />

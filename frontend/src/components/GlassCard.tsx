@@ -1,15 +1,15 @@
-"use client";
+"use client"
 
-import { ReactNode } from "react";
-import { useTheme } from "@/context/ThemeContext";
+import { useTheme } from "@/context/ThemeContext"
+import { ReactNode } from "react"
 
 interface GlassCardProps {
-    children: ReactNode;
-    className?: string;
-    hover?: boolean;
-    glow?: boolean;
-    padding?: "none" | "sm" | "md" | "lg" | "xl";
-    blur?: "sm" | "md" | "lg" | "xl";
+    children: ReactNode
+    className?: string
+    hover?: boolean
+    glow?: boolean
+    padding?: "none" | "sm" | "md" | "lg" | "xl"
+    blur?: "sm" | "md" | "lg" | "xl"
 }
 
 export default function GlassCard({
@@ -20,7 +20,7 @@ export default function GlassCard({
     padding = "lg",
     blur = "lg",
 }: GlassCardProps) {
-    const { isDark } = useTheme();
+    const { isDark } = useTheme()
 
     const paddingClasses = {
         none: "",
@@ -28,14 +28,14 @@ export default function GlassCard({
         md: "p-4",
         lg: "p-6",
         xl: "p-8",
-    };
+    }
 
     const blurClasses = {
         sm: "backdrop-blur-sm",
         md: "backdrop-blur-md",
         lg: "backdrop-blur-lg",
         xl: "backdrop-blur-xl",
-    };
+    }
 
     return (
         <div
@@ -43,33 +43,29 @@ export default function GlassCard({
                 relative rounded-2xl overflow-hidden transition-all duration-300
                 ${paddingClasses[padding]}
                 ${blurClasses[blur]}
-                ${
-                    isDark
-                        ? "bg-white/5 border border-white/10"
-                        : "bg-white/70 border border-dark-200/50 shadow-lg"
+                ${isDark
+                    ? "bg-dark-800/80 border border-white/10 shadow-xl shadow-black/20"
+                    : "bg-warm-50 border border-slate-200/60 shadow-lg"
                 }
-                ${
-                    hover
-                        ? isDark
-                            ? "hover:bg-white/10 hover:border-white/20 hover:shadow-glass"
-                            : "hover:bg-white/90 hover:shadow-xl hover:border-dark-300/50"
-                        : ""
+                ${hover
+                    ? isDark
+                        ? "hover:bg-white/10 hover:border-white/20 hover:shadow-glass"
+                        : "hover:bg-white/90 hover:shadow-xl hover:border-dark-300/50"
+                    : ""
                 }
-                ${
-                    glow && isDark
-                        ? "shadow-glow-sm hover:shadow-glow"
-                        : ""
+                ${glow && isDark
+                    ? "shadow-glow-sm hover:shadow-glow"
+                    : ""
                 }
                 ${className}
             `}
         >
             {/* Gradient overlay for depth */}
             <div
-                className={`absolute inset-0 pointer-events-none ${
-                    isDark
-                        ? "bg-gradient-to-br from-white/5 via-transparent to-transparent"
-                        : "bg-gradient-to-br from-white/50 via-transparent to-transparent"
-                }`}
+                className={`absolute inset-0 pointer-events-none ${isDark
+                    ? "bg-gradient-to-br from-white/5 via-transparent to-transparent"
+                    : "bg-gradient-to-br from-white/50 via-transparent to-transparent"
+                    }`}
             />
 
             {/* Content */}
@@ -80,7 +76,7 @@ export default function GlassCard({
                 <div className="absolute inset-0 rounded-2xl pointer-events-none bg-gradient-to-br from-primary-500/5 to-transparent" />
             )}
         </div>
-    );
+    )
 }
 
 // Variant for smaller cards
@@ -89,9 +85,9 @@ export function GlassCardSmall({
     className = "",
     hover = true,
 }: {
-    children: ReactNode;
-    className?: string;
-    hover?: boolean;
+    children: ReactNode
+    className?: string
+    hover?: boolean
 }) {
     return (
         <GlassCard
@@ -102,7 +98,7 @@ export function GlassCardSmall({
         >
             {children}
         </GlassCard>
-    );
+    )
 }
 
 // Variant for feature cards with icon
@@ -112,38 +108,35 @@ export function GlassFeatureCard({
     description,
     className = "",
 }: {
-    icon: ReactNode;
-    title: string;
-    description: string;
-    className?: string;
+    icon: ReactNode
+    title: string
+    description: string
+    className?: string
 }) {
-    const { isDark } = useTheme();
+    const { isDark } = useTheme()
 
     return (
         <GlassCard hover glow className={className}>
             <div
-                className={`w-14 h-14 rounded-xl flex items-center justify-center mb-4 ${
-                    isDark
-                        ? "bg-primary-500/20 text-primary-400"
-                        : "bg-primary-100 text-primary-600"
-                }`}
+                className={`w-14 h-14 rounded-xl flex items-center justify-center mb-4 ${isDark
+                    ? "bg-primary-500/20 text-primary-400"
+                    : "bg-primary-100 text-primary-600"
+                    }`}
             >
                 {icon}
             </div>
             <h3
-                className={`text-lg font-semibold mb-2 ${
-                    isDark ? "text-white" : "text-dark-900"
-                }`}
+                className={`text-lg font-semibold mb-2 ${isDark ? "text-white" : "text-dark-900"
+                    }`}
             >
                 {title}
             </h3>
             <p
-                className={`text-sm leading-relaxed ${
-                    isDark ? "text-dark-400" : "text-dark-600"
-                }`}
+                className={`text-sm leading-relaxed ${isDark ? "text-dark-400" : "text-dark-600"
+                    }`}
             >
                 {description}
             </p>
         </GlassCard>
-    );
+    )
 }

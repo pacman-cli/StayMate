@@ -122,8 +122,8 @@ export default function MyPropertiesPage() {
                     <Link
                         href="/dashboard/properties/add"
                         className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-300 ${isDark
-                                ? "bg-primary-500 hover:bg-primary-600 text-white shadow-lg shadow-primary-500/25"
-                                : "bg-primary-600 hover:bg-primary-700 text-white shadow-md hover:shadow-lg"
+                            ? "bg-primary-500 hover:bg-primary-600 text-white shadow-lg shadow-primary-500/25"
+                            : "bg-primary-600 hover:bg-primary-700 text-white shadow-md hover:shadow-lg"
                             }`}
                     >
                         <Plus className="w-4 h-4" />
@@ -140,8 +140,8 @@ export default function MyPropertiesPage() {
                             <Link
                                 href="/dashboard/properties/add"
                                 className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${isDark
-                                        ? "bg-primary-500 hover:bg-primary-600 text-white"
-                                        : "bg-primary-600 hover:bg-primary-700 text-white"
+                                    ? "bg-primary-500 hover:bg-primary-600 text-white"
+                                    : "bg-primary-600 hover:bg-primary-700 text-white"
                                     }`}
                             >
                                 <Plus className="w-5 h-5" />
@@ -251,10 +251,10 @@ export default function MyPropertiesPage() {
                                     {/* Actions */}
                                     <div className="flex items-center gap-2 pt-2">
                                         <Link
-                                            href={`/listings/${property.id}`}
+                                            href={`/dashboard/properties/${property.id}`}
                                             className={`flex-1 text-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isDark
-                                                    ? "bg-white/10 hover:bg-white/20 text-white"
-                                                    : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                                                ? "bg-white/10 hover:bg-white/20 text-white"
+                                                : "bg-slate-100 hover:bg-slate-200 text-slate-700"
                                                 }`}
                                         >
                                             View
@@ -262,8 +262,8 @@ export default function MyPropertiesPage() {
                                         <Link
                                             href={`/dashboard/properties/edit/${property.id}`}
                                             className={`px-4 py-2 rounded-lg transition-colors ${isDark
-                                                    ? "bg-white/10 hover:bg-white/20 text-primary-400"
-                                                    : "bg-slate-100 hover:bg-slate-200 text-primary-600"
+                                                ? "bg-white/10 hover:bg-white/20 text-primary-400"
+                                                : "bg-slate-100 hover:bg-slate-200 text-primary-600"
                                                 }`}
                                         >
                                             <Edit className="w-4 h-4" />
@@ -271,8 +271,8 @@ export default function MyPropertiesPage() {
                                         <button
                                             onClick={() => handleDelete(property.id)}
                                             className={`px-4 py-2 rounded-lg transition-colors ${isDark
-                                                    ? "bg-white/10 hover:bg-red-500/20 text-red-400 hover:text-red-300"
-                                                    : "bg-slate-100 hover:bg-red-50 text-red-600 hover:text-red-700"
+                                                ? "bg-white/10 hover:bg-red-500/20 text-red-400 hover:text-red-300"
+                                                : "bg-slate-100 hover:bg-red-50 text-red-600 hover:text-red-700"
                                                 }`}
                                         >
                                             <Trash2 className="w-4 h-4" />

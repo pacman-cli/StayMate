@@ -133,6 +133,16 @@ export default function Sidebar() {
                             href: "/dashboard/admin/verifications",
                             icon: <Shield className="w-5 h-5" />,
                         },
+                        {
+                            name: "Roommate Posts",
+                            href: "/dashboard/admin/roommates",
+                            icon: <Users className="w-5 h-5" />,
+                        },
+                        {
+                            name: "Support Tickets",
+                            href: "/dashboard/admin/support",
+                            icon: <MessageSquare className="w-5 h-5" />,
+                        },
                     ],
                 },
                 {
@@ -169,7 +179,6 @@ export default function Sidebar() {
                             name: "Booking Requests",
                             href: "/dashboard/bookings",
                             icon: <CalendarDays className="w-5 h-5" />,
-                            badge: 2,
                         },
                         {
                             name: "Inquiries",
@@ -291,7 +300,7 @@ export default function Sidebar() {
             className={`fixed left-0 top-0 h-screen flex flex-col transition-all duration-300 z-40 ${collapsed ? "w-20" : "w-64"
                 } ${isDark
                     ? "bg-dark-900 border-r border-white/10"
-                    : "bg-white border-r border-slate-200"
+                    : "bg-warm-50 border-r border-slate-200"
                 }`}
         >
             {/* Logo Section */}
@@ -398,20 +407,23 @@ export default function Sidebar() {
                     }`}
             >
                 {/* Help */}
-                <Link
-                    href="/help"
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${isDark
-                        ? "text-slate-400 hover:text-white hover:bg-dark-800"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-                        } ${collapsed ? "justify-center" : ""}`}
-                >
-                    <HelpCircle className="w-5 h-5" />
-                    {!collapsed && (
-                        <span className="text-sm font-medium">
-                            Help & Support
-                        </span>
-                    )}
-                </Link>
+                {/* Help - Hidden for Admins */}
+                {!isAdmin && (
+                    <Link
+                        href="/dashboard/support"
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${isDark
+                            ? "text-slate-400 hover:text-white hover:bg-dark-800"
+                            : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                            } ${collapsed ? "justify-center" : ""}`}
+                    >
+                        <HelpCircle className="w-5 h-5" />
+                        {!collapsed && (
+                            <span className="text-sm font-medium">
+                                Help & Support
+                            </span>
+                        )}
+                    </Link>
+                )}
 
                 {/* Logout */}
                 <button

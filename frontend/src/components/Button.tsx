@@ -53,10 +53,10 @@ export default function Button({
         `,
         secondary: `
             ${isDark
-                ? "bg-white/10 text-white border border-white/20 hover:bg-white/20"
-                : "bg-dark-100 text-dark-900 border border-dark-200 hover:bg-dark-200"
+                ? "bg-dark-800 text-white border border-white/10 hover:bg-dark-700"
+                : "bg-white text-slate-700 border border-slate-200 hover:bg-warm-25 hover:border-slate-300"
             }
-            hover:scale-[1.02] active:scale-[0.98]
+            shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98]
         `,
         ghost: `
             ${isDark
@@ -148,13 +148,13 @@ export function IconButton({
         secondary: `
             ${isDark
                 ? "bg-white/10 text-white hover:bg-white/20"
-                : "bg-dark-100 text-dark-700 hover:bg-dark-200"
+                : "bg-white text-dark-700 hover:bg-warm-25 border border-slate-200"
             }
         `,
         ghost: `
             ${isDark
                 ? "text-dark-400 hover:text-white hover:bg-white/10"
-                : "text-dark-500 hover:text-dark-900 hover:bg-dark-100"
+                : "text-dark-500 hover:text-dark-900 hover:bg-warm-25"
             }
         `,
         danger: `

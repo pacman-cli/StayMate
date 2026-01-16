@@ -74,7 +74,7 @@ export default function AdminAnalyticsPage() {
                   <Tooltip
                     contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.9)', border: 'none', borderRadius: '8px', color: '#fff' }}
                     cursor={{ stroke: '#10b981', strokeWidth: 1 }}
-                    formatter={(value: number) => [`BDT ${value.toLocaleString()}`, 'Revenue']}
+                    formatter={(value) => [`BDT ${typeof value === 'number' ? value.toLocaleString() : '0'}`, 'Revenue']}
                   />
                   <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorRevenue)" />
                 </AreaChart>

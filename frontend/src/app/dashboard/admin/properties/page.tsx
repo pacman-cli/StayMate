@@ -10,7 +10,7 @@ export default function AdminPropertiesPage() {
   const { user } = useAuth()
   const [properties, setProperties] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState("ALL") // ALL, PENDING, ACTIVE
+  const [filter, setFilter] = useState("ALL") // ALL, PENDING, APPROVED
 
   useEffect(() => {
     loadProperties()
@@ -53,9 +53,8 @@ export default function AdminPropertiesPage() {
     if (filter === "ALL") return true
 
     // Normalize status for comparison logic
-    // Backend statuses: "Active", "Pending", "Rejected"
-    // Filter keys: "ACTIVE", "PENDING"
-    if (filter === "ACTIVE") return p.status === "Active"
+    // Backend statuses: "Approved", "Active" (legacy), "Pending", "Rejected"
+    if (filter === "APPROVED") return p.status === "Approved" || p.status === "Active"
     if (filter === "PENDING") return p.status === "Pending"
 
     return true
@@ -69,7 +68,7 @@ export default function AdminPropertiesPage() {
           <p className="text-slate-500 text-sm">Review, approve, or reject property listings.</p>
         </div>
         <div className="flex gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
-          {["ALL", "PENDING", "ACTIVE"].map((f) => (
+          {["ALL", "PENDING", "APPROVED"].map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -115,7 +114,7 @@ export default function AdminPropertiesPage() {
                           {property.location}
                         </div>
                       </div>
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${property.status === 'Active' ? 'bg-emerald-100 text-emerald-700' :
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${property.status === 'Approved' || property.status === 'Active' ? 'bg-emerald-100 text-emerald-700' :
                         property.status === 'Pending' ? 'bg-amber-100 text-amber-700' :
                           'bg-red-100 text-red-700'
                         }`}>

@@ -9,7 +9,8 @@ interface KPIStatsGridProps {
 }
 
 export function KPIStatsGrid({ data }: KPIStatsGridProps) {
-  // Mock data for sparklines
+  // Sparklines are decorative visualizations (trend indicators)
+  // Real KPI values come from the data prop (AdminDashboardDTO)
   const sparklineData = [
     { value: 40 }, { value: 30 }, { value: 45 }, { value: 80 }, { value: 55 }, { value: 90 }, { value: 100 }
   ]

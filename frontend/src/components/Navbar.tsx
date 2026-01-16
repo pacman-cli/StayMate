@@ -23,8 +23,8 @@ export default function Navbar() {
     return (
         <nav
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isDark
-                ? "bg-[#0A101C] border-b border-white/5" // Dark Mode: Solid background, no blur
-                : "bg-[#F5EEE4]/80 border-b border-[#EAE5D5] backdrop-blur-md" // Light Mode: Preserve glass effect
+                ? "bg-dark-900/90 border-b border-white/5 backdrop-blur-md" // Dark Mode: Premium Glass
+                : "bg-warm-25/95 border-b border-[#EAE5D5] backdrop-blur-md" // Light Mode: Preserve glass effect, higher opacity
                 }`}
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

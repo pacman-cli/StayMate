@@ -1,7 +1,7 @@
 "use client"
 
 import DashboardLayout from "@/components/DashboardLayout"
-import ProtectedRoute from "@/components/auth/ProtectedRoute"
+import AuthGuard from "@/components/auth/AuthGuard"
 
 export default function Layout({
   children,
@@ -9,10 +9,10 @@ export default function Layout({
   children: React.ReactNode
 }) {
   return (
-    <ProtectedRoute>
+    <AuthGuard>
       <DashboardLayout>
         {children}
       </DashboardLayout>
-    </ProtectedRoute>
+    </AuthGuard>
   )
 }

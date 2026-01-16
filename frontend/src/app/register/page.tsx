@@ -1,68 +1,68 @@
-"use client";
+"use client"
 
-import { useState, FormEvent, useEffect } from "react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
-import { useTheme } from "@/context/ThemeContext";
-import ThemeSwitcher from "@/components/ThemeSwitcher";
-import Logo from "@/components/Logo";
+import Logo from "@/components/Logo"
+import ThemeSwitcher from "@/components/ThemeSwitcher"
+import { useAuth } from "@/context/AuthContext"
+import { useTheme } from "@/context/ThemeContext"
 import {
-    Mail,
-    Lock,
-    User,
+    AlertCircle,
+    ArrowLeft,
+    ArrowRight,
+    Building,
+    CheckCircle,
     Eye,
     EyeOff,
-    AlertCircle,
-    Loader2,
-    CheckCircle,
-    Phone,
-    MapPin,
-    Building,
-    Users,
-    ArrowRight,
-    ArrowLeft,
-    Sparkles,
     Key,
-} from "lucide-react";
+    Loader2,
+    Lock,
+    Mail,
+    MapPin,
+    Phone,
+    Sparkles,
+    User,
+    Users,
+} from "lucide-react"
+import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
+import { FormEvent, useEffect, useState } from "react"
 
 export default function RegisterPage() {
-    const router = useRouter();
-    const searchParams = useSearchParams();
+    const router = useRouter()
+    const searchParams = useSearchParams()
     const {
         register,
         loginWithGoogle,
         isAuthenticated,
         isLoading: authLoading,
-    } = useAuth();
-    const { isDark } = useTheme();
+    } = useAuth()
+    const { isDark } = useTheme()
 
     // Get role from URL params if present
     const initialRole =
-        searchParams.get("role") === "HOUSE_OWNER" ? "HOUSE_OWNER" : "USER";
+        searchParams.get("role") === "HOUSE_OWNER" ? "HOUSE_OWNER" : "USER"
 
     // Basic fields
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [firstName, setFirstName] = useState("")
+    const [lastName, setLastName] = useState("")
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("")
+    const [showPassword, setShowPassword] = useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
     // Additional fields
-    const [phoneNumber, setPhoneNumber] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("")
     const [role, setRole] = useState<"USER" | "HOUSE_OWNER">(
         initialRole as "USER" | "HOUSE_OWNER",
-    );
-    const [bio, setBio] = useState("");
-    const [address, setAddress] = useState("");
-    const [city, setCity] = useState("");
+    )
+    const [bio, setBio] = useState("")
+    const [address, setAddress] = useState("")
+    const [city, setCity] = useState("")
 
     // Form state
-    const [error, setError] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const [step, setStep] = useState(1);
+    const [error, setError] = useState("")
+    const [isLoading, setIsLoading] = useState(false)
+    const [step, setStep] = useState(1)
 
     // Password validation
     const [passwordValidation, setPasswordValidation] = useState({
@@ -70,14 +70,14 @@ export default function RegisterPage() {
         hasUppercase: false,
         hasLowercase: false,
         hasNumber: false,
-    });
+    })
 
     // Redirect if authenticated
     useEffect(() => {
         if (isAuthenticated && !authLoading) {
-            router.push("/dashboard");
+            router.push("/dashboard")
         }
-    }, [isAuthenticated, authLoading, router]);
+    }, [isAuthenticated, authLoading, router])
 
     // Password validation
     useEffect(() => {
@@ -86,31 +86,31 @@ export default function RegisterPage() {
             hasUppercase: /[A-Z]/.test(password),
             hasLowercase: /[a-z]/.test(password),
             hasNumber: /[0-9]/.test(password),
-        });
-    }, [password]);
+        })
+    }, [password])
 
-    const isPasswordValid = Object.values(passwordValidation).every(Boolean);
+    const isPasswordValid = Object.values(passwordValidation).every(Boolean)
 
     const handleSubmit = async (e: FormEvent) => {
-        e.preventDefault();
-        setError("");
+        e.preventDefault()
+        setError("")
 
         if (!email || !password || !confirmPassword) {
-            setError("Please fill in all required fields");
-            return;
+            setError("Please fill in all required fields")
+            return
         }
 
         if (!isPasswordValid) {
-            setError("Please ensure your password meets all requirements");
-            return;
+            setError("Please ensure your password meets all requirements")
+            return
         }
 
         if (password !== confirmPassword) {
-            setError("Passwords do not match");
-            return;
+            setError("Passwords do not match")
+            return
         }
 
-        setIsLoading(true);
+        setIsLoading(true)
 
         try {
             await register({
@@ -123,78 +123,76 @@ export default function RegisterPage() {
                 bio: bio || undefined,
                 address: address || undefined,
                 city: city || undefined,
-            });
-            router.push("/dashboard");
+            })
+            router.push("/dashboard")
         } catch (err: any) {
             const message =
                 err.response?.data?.message ||
-                "Registration failed. Please try again.";
-            setError(message);
+                "Registration failed. Please try again."
+            setError(message)
         } finally {
-            setIsLoading(false);
+            setIsLoading(false)
         }
-    };
+    }
 
     const handleGoogleLogin = () => {
-        loginWithGoogle();
-    };
+        loginWithGoogle()
+    }
 
     const nextStep = () => {
         if (step === 1) {
             if (!email) {
-                setError("Email is required");
-                return;
+                setError("Email is required")
+                return
             }
             if (!password || !isPasswordValid) {
-                setError("Please enter a valid password");
-                return;
+                setError("Please enter a valid password")
+                return
             }
             if (password !== confirmPassword) {
-                setError("Passwords do not match");
-                return;
+                setError("Passwords do not match")
+                return
             }
-            setError("");
+            setError("")
         }
-        setStep(step + 1);
-    };
+        setStep(step + 1)
+    }
 
     const prevStep = () => {
-        setStep(step - 1);
-        setError("");
-    };
+        setStep(step - 1)
+        setError("")
+    }
 
     if (authLoading) {
         return (
             <div
-                className={`min-h-screen flex items-center justify-center ${
-                    isDark ? "bg-dark-950" : "bg-gray-50"
-                }`}
+                className={`min-h-screen flex items-center justify-center ${isDark ? "bg-dark-950" : "bg-warm-25"
+                    }`}
             >
                 <div className="relative">
                     <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
                     <div className="absolute inset-0 w-12 h-12 border-4 border-primary-500/20 rounded-full" />
                 </div>
             </div>
-        );
+        )
     }
 
     const PasswordRequirement = ({
         met,
         text,
     }: {
-        met: boolean;
-        text: string;
+        met: boolean
+        text: string
     }) => (
         <div
-            className={`flex items-center gap-2 text-xs transition-colors ${
-                met
-                    ? isDark
-                        ? "text-emerald-400"
-                        : "text-emerald-600"
-                    : isDark
-                      ? "text-dark-500"
-                      : "text-dark-400"
-            }`}
+            className={`flex items-center gap-2 text-xs transition-colors ${met
+                ? isDark
+                    ? "text-emerald-400"
+                    : "text-emerald-600"
+                : isDark
+                    ? "text-dark-500"
+                    : "text-dark-400"
+                }`}
         >
             {met ? (
                 <CheckCircle className="w-3.5 h-3.5" />
@@ -203,57 +201,48 @@ export default function RegisterPage() {
             )}
             <span>{text}</span>
         </div>
-    );
+    )
 
-    const inputClassName = `w-full pl-12 pr-4 py-3.5 rounded-xl border transition-all duration-300 ${
-        isDark
-            ? "bg-white/5 border-white/10 text-white placeholder-dark-500 focus:bg-white/10 focus:border-primary-500/50"
-            : "bg-white border-dark-200 text-dark-900 placeholder-dark-400 focus:border-primary-500"
-    } focus:outline-none focus:ring-2 focus:ring-primary-500/20`;
+    const inputClassName = `w-full pl-12 pr-4 py-3.5 rounded-xl border transition-all duration-300 ${isDark
+        ? "bg-white/5 border-white/10 text-white placeholder-dark-500 focus:bg-white/10 focus:border-primary-500/50"
+        : "bg-white border-warm-200 text-dark-900 placeholder-dark-400 focus:border-primary-500 shadow-sm"
+        } focus:outline-none focus:ring-2 focus:ring-primary-500/20`
 
-    const labelClassName = `block text-sm font-medium mb-2 ${
-        isDark ? "text-dark-300" : "text-dark-700"
-    }`;
+    const labelClassName = `block text-sm font-medium mb-2 ${isDark ? "text-dark-300" : "text-dark-700"
+        }`
 
-    const iconClassName = `w-5 h-5 ${isDark ? "text-dark-500" : "text-dark-400"}`;
+    const iconClassName = `w-5 h-5 ${isDark ? "text-dark-500" : "text-dark-400"}`
 
     return (
         <div
-            className={`min-h-screen flex transition-colors duration-500 ${
-                isDark
-                    ? "bg-dark-950"
-                    : "bg-gradient-to-br from-gray-50 via-white to-gray-100"
-            }`}
+            className={`min-h-screen flex transition-colors duration-500 ${isDark
+                ? "bg-dark-950"
+                : "bg-warm-25"
+                }`}
         >
             {/* Background Effects */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
                 <div
-                    className={`absolute top-0 -left-40 w-96 h-96 rounded-full blur-3xl ${
-                        isDark ? "bg-primary-500/10" : "bg-primary-400/20"
-                    }`}
+                    className={`absolute top-0 -left-40 w-96 h-96 rounded-full blur-3xl ${isDark ? "bg-primary-500/10" : "bg-primary-400/10"
+                        }`}
                 />
                 <div
-                    className={`absolute bottom-0 -right-40 w-96 h-96 rounded-full blur-3xl ${
-                        isDark ? "bg-purple-500/10" : "bg-purple-400/15"
-                    }`}
+                    className={`absolute bottom-0 -right-40 w-96 h-96 rounded-full blur-3xl ${isDark ? "bg-purple-500/10" : "bg-purple-400/5"
+                        }`}
                 />
                 <div
-                    className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl ${
-                        isDark ? "bg-primary-500/5" : "bg-primary-400/10"
-                    }`}
+                    className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl ${isDark ? "bg-primary-500/5" : "bg-primary-400/5"
+                        }`}
                 />
 
                 {/* Grid Pattern */}
                 <div
-                    className={`absolute inset-0 ${
-                        isDark ? "opacity-[0.02]" : "opacity-[0.03]"
-                    }`}
+                    className={`absolute inset-0 ${isDark ? "opacity-[0.02]" : "opacity-[0.03]"
+                        }`}
                     style={{
-                        backgroundImage: `linear-gradient(${
-                            isDark ? "#fff" : "#000"
-                        } 1px, transparent 1px), linear-gradient(90deg, ${
-                            isDark ? "#fff" : "#000"
-                        } 1px, transparent 1px)`,
+                        backgroundImage: `linear-gradient(${isDark ? "#fff" : "#000"
+                            } 1px, transparent 1px), linear-gradient(90deg, ${isDark ? "#fff" : "#000"
+                            } 1px, transparent 1px)`,
                         backgroundSize: "60px 60px",
                     }}
                 />
@@ -261,11 +250,10 @@ export default function RegisterPage() {
 
             {/* Left Side - Branding */}
             <div
-                className={`hidden lg:flex lg:w-1/2 relative overflow-hidden ${
-                    isDark
-                        ? "bg-gradient-to-br from-primary-900/40 via-dark-900 to-purple-900/40"
-                        : "bg-gradient-to-br from-primary-600 via-primary-700 to-purple-700"
-                }`}
+                className={`hidden lg:flex lg:w-1/2 relative overflow-hidden ${isDark
+                    ? "bg-gradient-to-br from-primary-900/40 via-dark-900 to-purple-900/40"
+                    : "bg-gradient-to-br from-primary-600 via-primary-700 to-purple-700"
+                    }`}
             >
                 {/* Background Elements */}
                 <div className="absolute inset-0">
@@ -301,11 +289,10 @@ export default function RegisterPage() {
                         {/* Feature Cards */}
                         <div className="grid grid-cols-2 gap-4">
                             <div
-                                className={`p-4 rounded-2xl text-left ${
-                                    isDark
-                                        ? "bg-white/5 border border-white/10"
-                                        : "bg-white/10"
-                                } backdrop-blur-sm`}
+                                className={`p-4 rounded-2xl text-left ${isDark
+                                    ? "bg-white/5 border border-white/10"
+                                    : "bg-white/10"
+                                    } backdrop-blur-sm`}
                             >
                                 <Users className="w-8 h-8 text-white mb-3" />
                                 <h3 className="text-white font-semibold mb-1">
@@ -316,11 +303,10 @@ export default function RegisterPage() {
                                 </p>
                             </div>
                             <div
-                                className={`p-4 rounded-2xl text-left ${
-                                    isDark
-                                        ? "bg-white/5 border border-white/10"
-                                        : "bg-white/10"
-                                } backdrop-blur-sm`}
+                                className={`p-4 rounded-2xl text-left ${isDark
+                                    ? "bg-white/5 border border-white/10"
+                                    : "bg-white/10"
+                                    } backdrop-blur-sm`}
                             >
                                 <Key className="w-8 h-8 text-white mb-3" />
                                 <h3 className="text-white font-semibold mb-1">
@@ -353,11 +339,10 @@ export default function RegisterPage() {
 
                     {/* Register Card */}
                     <div
-                        className={`relative rounded-3xl overflow-hidden ${
-                            isDark
-                                ? "bg-white/5 border border-white/10"
-                                : "bg-white border border-dark-100 shadow-2xl"
-                        } backdrop-blur-xl p-8`}
+                        className={`relative rounded-3xl overflow-hidden ${isDark
+                            ? "bg-white/5 border border-white/10"
+                            : "bg-warm-50 border border-warm-100 shadow-xl"
+                            } backdrop-blur-xl p-8`}
                     >
                         {isDark && (
                             <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 via-transparent to-purple-500/5 pointer-events-none" />
@@ -367,30 +352,27 @@ export default function RegisterPage() {
                             {/* Header */}
                             <div className="text-center mb-8">
                                 <div
-                                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-4 ${
-                                        isDark
-                                            ? "bg-primary-500/10 text-primary-400 border border-primary-500/20"
-                                            : "bg-primary-100 text-primary-700"
-                                    }`}
+                                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-4 ${isDark
+                                        ? "bg-primary-500/10 text-primary-400 border border-primary-500/20"
+                                        : "bg-primary-100 text-primary-700"
+                                        }`}
                                 >
                                     <Sparkles className="w-3 h-3" />
                                     Step {step} of 3
                                 </div>
                                 <h2
-                                    className={`text-2xl md:text-3xl font-bold mb-2 ${
-                                        isDark ? "text-white" : "text-dark-900"
-                                    }`}
+                                    className={`text-2xl md:text-3xl font-bold mb-2 ${isDark ? "text-white" : "text-dark-900"
+                                        }`}
                                 >
                                     {step === 1 && "Create Account"}
                                     {step === 2 && "Choose Your Role"}
                                     {step === 3 && "Complete Profile"}
                                 </h2>
                                 <p
-                                    className={`${
-                                        isDark
-                                            ? "text-dark-400"
-                                            : "text-dark-600"
-                                    }`}
+                                    className={`${isDark
+                                        ? "text-dark-400"
+                                        : "text-dark-600"
+                                        }`}
                                 >
                                     {step === 1 && "Enter your credentials"}
                                     {step === 2 && "How will you use RentMate?"}
@@ -402,17 +384,15 @@ export default function RegisterPage() {
                                     {[1, 2, 3].map((s) => (
                                         <div
                                             key={s}
-                                            className={`h-1.5 rounded-full transition-all duration-300 ${
-                                                s === step
-                                                    ? "w-8 bg-primary-500"
-                                                    : s < step
-                                                      ? "w-8 bg-emerald-500"
-                                                      : `w-4 ${
-                                                            isDark
-                                                                ? "bg-white/10"
-                                                                : "bg-dark-200"
-                                                        }`
-                                            }`}
+                                            className={`h-1.5 rounded-full transition-all duration-300 ${s === step
+                                                ? "w-8 bg-primary-500"
+                                                : s < step
+                                                    ? "w-8 bg-emerald-500"
+                                                    : `w-4 ${isDark
+                                                        ? "bg-white/10"
+                                                        : "bg-dark-200"
+                                                    }`
+                                                }`}
                                         />
                                     ))}
                                 </div>
@@ -421,25 +401,22 @@ export default function RegisterPage() {
                             {/* Error Message */}
                             {error && (
                                 <div
-                                    className={`mb-6 p-4 rounded-xl flex items-start gap-3 animate-fade-in ${
-                                        isDark
-                                            ? "bg-red-500/10 border border-red-500/20"
-                                            : "bg-red-50 border border-red-200"
-                                    }`}
+                                    className={`mb-6 p-4 rounded-xl flex items-start gap-3 animate-fade-in ${isDark
+                                        ? "bg-red-500/10 border border-red-500/20"
+                                        : "bg-red-50 border border-red-200"
+                                        }`}
                                 >
                                     <AlertCircle
-                                        className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
-                                            isDark
-                                                ? "text-red-400"
-                                                : "text-red-500"
-                                        }`}
+                                        className={`w-5 h-5 flex-shrink-0 mt-0.5 ${isDark
+                                            ? "text-red-400"
+                                            : "text-red-500"
+                                            }`}
                                     />
                                     <p
-                                        className={`text-sm ${
-                                            isDark
-                                                ? "text-red-300"
-                                                : "text-red-600"
-                                        }`}
+                                        className={`text-sm ${isDark
+                                            ? "text-red-300"
+                                            : "text-red-600"
+                                            }`}
                                     >
                                         {error}
                                     </p>
@@ -454,11 +431,10 @@ export default function RegisterPage() {
                                         type="button"
                                         onClick={handleGoogleLogin}
                                         disabled={isLoading}
-                                        className={`w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl border font-medium transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${
-                                            isDark
-                                                ? "bg-white/5 border-white/10 text-white hover:bg-white/10"
-                                                : "bg-white border-dark-200 text-dark-700 hover:bg-dark-50 shadow-sm"
-                                        }`}
+                                        className={`w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl border font-medium transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${isDark
+                                            ? "bg-white/5 border-white/10 text-white hover:bg-white/10"
+                                            : "bg-white border-warm-200 text-dark-900 hover:bg-warm-50 shadow-sm"
+                                            }`}
                                     >
                                         <svg
                                             className="w-5 h-5"
@@ -488,20 +464,18 @@ export default function RegisterPage() {
                                     <div className="relative">
                                         <div className="absolute inset-0 flex items-center">
                                             <div
-                                                className={`w-full border-t ${
-                                                    isDark
-                                                        ? "border-white/10"
-                                                        : "border-dark-200"
-                                                }`}
+                                                className={`w-full border-t ${isDark
+                                                    ? "border-white/10"
+                                                    : "border-warm-200"
+                                                    }`}
                                             />
                                         </div>
                                         <div className="relative flex justify-center text-sm">
                                             <span
-                                                className={`px-4 ${
-                                                    isDark
-                                                        ? "bg-dark-900/50 text-dark-500"
-                                                        : "bg-white text-dark-500"
-                                                }`}
+                                                className={`px-4 ${isDark
+                                                    ? "bg-dark-900/50 text-dark-500"
+                                                    : "bg-warm-50 text-dark-500"
+                                                    }`}
                                             >
                                                 or register with email
                                             </span>
@@ -584,19 +558,17 @@ export default function RegisterPage() {
                                             >
                                                 {showPassword ? (
                                                     <EyeOff
-                                                        className={`w-5 h-5 transition-colors ${
-                                                            isDark
-                                                                ? "text-dark-500 hover:text-dark-300"
-                                                                : "text-dark-400 hover:text-dark-600"
-                                                        }`}
+                                                        className={`w-5 h-5 transition-colors ${isDark
+                                                            ? "text-dark-500 hover:text-dark-300"
+                                                            : "text-dark-400 hover:text-dark-600"
+                                                            }`}
                                                     />
                                                 ) : (
                                                     <Eye
-                                                        className={`w-5 h-5 transition-colors ${
-                                                            isDark
-                                                                ? "text-dark-500 hover:text-dark-300"
-                                                                : "text-dark-400 hover:text-dark-600"
-                                                        }`}
+                                                        className={`w-5 h-5 transition-colors ${isDark
+                                                            ? "text-dark-500 hover:text-dark-300"
+                                                            : "text-dark-400 hover:text-dark-600"
+                                                            }`}
                                                     />
                                                 )}
                                             </button>
@@ -605,11 +577,10 @@ export default function RegisterPage() {
                                         {/* Password Requirements */}
                                         {password && (
                                             <div
-                                                className={`mt-3 p-3 rounded-xl grid grid-cols-2 gap-2 ${
-                                                    isDark
-                                                        ? "bg-white/5"
-                                                        : "bg-dark-50"
-                                                }`}
+                                                className={`mt-3 p-3 rounded-xl grid grid-cols-2 gap-2 ${isDark
+                                                    ? "bg-white/5"
+                                                    : "bg-warm-100"
+                                                    }`}
                                             >
                                                 <PasswordRequirement
                                                     met={
@@ -685,19 +656,17 @@ export default function RegisterPage() {
                                             >
                                                 {showConfirmPassword ? (
                                                     <EyeOff
-                                                        className={`w-5 h-5 transition-colors ${
-                                                            isDark
-                                                                ? "text-dark-500 hover:text-dark-300"
-                                                                : "text-dark-400 hover:text-dark-600"
-                                                        }`}
+                                                        className={`w-5 h-5 transition-colors ${isDark
+                                                            ? "text-dark-500 hover:text-dark-300"
+                                                            : "text-dark-400 hover:text-dark-600"
+                                                            }`}
                                                     />
                                                 ) : (
                                                     <Eye
-                                                        className={`w-5 h-5 transition-colors ${
-                                                            isDark
-                                                                ? "text-dark-500 hover:text-dark-300"
-                                                                : "text-dark-400 hover:text-dark-600"
-                                                        }`}
+                                                        className={`w-5 h-5 transition-colors ${isDark
+                                                            ? "text-dark-500 hover:text-dark-300"
+                                                            : "text-dark-400 hover:text-dark-600"
+                                                            }`}
                                                     />
                                                 )}
                                             </button>
@@ -718,44 +687,40 @@ export default function RegisterPage() {
                                     <button
                                         type="button"
                                         onClick={() => setRole("USER")}
-                                        className={`w-full p-5 rounded-2xl border-2 text-left transition-all duration-300 ${
-                                            role === "USER"
-                                                ? isDark
-                                                    ? "border-primary-500 bg-primary-500/10"
-                                                    : "border-primary-500 bg-primary-50"
-                                                : isDark
-                                                  ? "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
-                                                  : "border-dark-200 bg-white hover:border-dark-300 hover:bg-dark-50"
-                                        }`}
+                                        className={`w-full p-5 rounded-2xl border-2 text-left transition-all duration-300 ${role === "USER"
+                                            ? isDark
+                                                ? "border-primary-500 bg-primary-500/10"
+                                                : "border-primary-500 bg-primary-50"
+                                            : isDark
+                                                ? "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
+                                                : "border-warm-200 bg-white hover:border-warm-300 hover:bg-warm-50 shadow-sm"
+                                            }`}
                                     >
                                         <div className="flex items-start gap-4">
                                             <div
-                                                className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                                                    role === "USER"
-                                                        ? "bg-primary-500 text-white"
-                                                        : isDark
-                                                          ? "bg-white/10 text-dark-400"
-                                                          : "bg-dark-100 text-dark-500"
-                                                }`}
+                                                className={`w-12 h-12 rounded-xl flex items-center justify-center ${role === "USER"
+                                                    ? "bg-primary-500 text-white"
+                                                    : isDark
+                                                        ? "bg-white/10 text-dark-400"
+                                                        : "bg-warm-100 text-dark-500"
+                                                    }`}
                                             >
                                                 <Users className="w-6 h-6" />
                                             </div>
                                             <div className="flex-1">
                                                 <h3
-                                                    className={`font-semibold mb-1 ${
-                                                        isDark
-                                                            ? "text-white"
-                                                            : "text-dark-900"
-                                                    }`}
+                                                    className={`font-semibold mb-1 ${isDark
+                                                        ? "text-white"
+                                                        : "text-dark-900"
+                                                        }`}
                                                 >
                                                     I'm looking for a rental
                                                 </h3>
                                                 <p
-                                                    className={`text-sm ${
-                                                        isDark
-                                                            ? "text-dark-400"
-                                                            : "text-dark-600"
-                                                    }`}
+                                                    className={`text-sm ${isDark
+                                                        ? "text-dark-400"
+                                                        : "text-dark-600"
+                                                        }`}
                                                 >
                                                     Find homes, apartments, and
                                                     connect with roommates
@@ -770,44 +735,40 @@ export default function RegisterPage() {
                                     <button
                                         type="button"
                                         onClick={() => setRole("HOUSE_OWNER")}
-                                        className={`w-full p-5 rounded-2xl border-2 text-left transition-all duration-300 ${
-                                            role === "HOUSE_OWNER"
-                                                ? isDark
-                                                    ? "border-emerald-500 bg-emerald-500/10"
-                                                    : "border-emerald-500 bg-emerald-50"
-                                                : isDark
-                                                  ? "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
-                                                  : "border-dark-200 bg-white hover:border-dark-300 hover:bg-dark-50"
-                                        }`}
+                                        className={`w-full p-5 rounded-2xl border-2 text-left transition-all duration-300 ${role === "HOUSE_OWNER"
+                                            ? isDark
+                                                ? "border-emerald-500 bg-emerald-500/10"
+                                                : "border-emerald-500 bg-emerald-50"
+                                            : isDark
+                                                ? "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
+                                                : "border-warm-200 bg-white hover:border-warm-300 hover:bg-warm-50 shadow-sm"
+                                            }`}
                                     >
                                         <div className="flex items-start gap-4">
                                             <div
-                                                className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                                                    role === "HOUSE_OWNER"
-                                                        ? "bg-emerald-500 text-white"
-                                                        : isDark
-                                                          ? "bg-white/10 text-dark-400"
-                                                          : "bg-dark-100 text-dark-500"
-                                                }`}
+                                                className={`w-12 h-12 rounded-xl flex items-center justify-center ${role === "HOUSE_OWNER"
+                                                    ? "bg-emerald-500 text-white"
+                                                    : isDark
+                                                        ? "bg-white/10 text-dark-400"
+                                                        : "bg-warm-100 text-dark-500"
+                                                    }`}
                                             >
                                                 <Building className="w-6 h-6" />
                                             </div>
                                             <div className="flex-1">
                                                 <h3
-                                                    className={`font-semibold mb-1 ${
-                                                        isDark
-                                                            ? "text-white"
-                                                            : "text-dark-900"
-                                                    }`}
+                                                    className={`font-semibold mb-1 ${isDark
+                                                        ? "text-white"
+                                                        : "text-dark-900"
+                                                        }`}
                                                 >
                                                     I'm a property owner
                                                 </h3>
                                                 <p
-                                                    className={`text-sm ${
-                                                        isDark
-                                                            ? "text-dark-400"
-                                                            : "text-dark-600"
-                                                    }`}
+                                                    className={`text-sm ${isDark
+                                                        ? "text-dark-400"
+                                                        : "text-dark-600"
+                                                        }`}
                                                 >
                                                     List and manage your rental
                                                     properties
@@ -950,11 +911,10 @@ export default function RegisterPage() {
                                     <button
                                         type="submit"
                                         disabled={isLoading}
-                                        className={`group relative w-full py-3.5 px-4 rounded-xl font-semibold text-white overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${
-                                            isDark
-                                                ? "shadow-glow-sm"
-                                                : "shadow-lg"
-                                        }`}
+                                        className={`group relative w-full py-3.5 px-4 rounded-xl font-semibold text-white overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${isDark
+                                            ? "shadow-glow-sm"
+                                            : "shadow-lg"
+                                            }`}
                                     >
                                         <div className="absolute inset-0 bg-gradient-to-r from-primary-500 to-primary-600" />
                                         <span className="relative flex items-center justify-center gap-2">
@@ -981,11 +941,10 @@ export default function RegisterPage() {
                                         <button
                                             type="button"
                                             onClick={prevStep}
-                                            className={`flex-1 py-3.5 px-4 rounded-xl font-medium border transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${
-                                                isDark
-                                                    ? "border-white/10 text-white hover:bg-white/10"
-                                                    : "border-dark-200 text-dark-700 hover:bg-dark-50"
-                                            }`}
+                                            className={`flex-1 py-3.5 px-4 rounded-xl font-medium border transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${isDark
+                                                ? "border-white/10 text-white hover:bg-white/10"
+                                                : "border-dark-200 text-dark-700 hover:bg-dark-50"
+                                                }`}
                                         >
                                             <span className="flex items-center justify-center gap-2">
                                                 <ArrowLeft className="w-4 h-4" />
@@ -996,11 +955,10 @@ export default function RegisterPage() {
                                     <button
                                         type="button"
                                         onClick={nextStep}
-                                        className={`flex-1 py-3.5 px-4 rounded-xl font-semibold text-white bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${
-                                            isDark
-                                                ? "shadow-glow-sm"
-                                                : "shadow-lg"
-                                        }`}
+                                        className={`flex-1 py-3.5 px-4 rounded-xl font-semibold text-white bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${isDark
+                                            ? "shadow-glow-sm"
+                                            : "shadow-lg"
+                                            }`}
                                     >
                                         <span className="flex items-center justify-center gap-2">
                                             Continue
@@ -1014,11 +972,10 @@ export default function RegisterPage() {
                                 <button
                                     type="button"
                                     onClick={prevStep}
-                                    className={`w-full mt-4 py-3 px-4 rounded-xl font-medium border transition-all duration-300 ${
-                                        isDark
-                                            ? "border-white/10 text-dark-400 hover:bg-white/5"
-                                            : "border-dark-200 text-dark-600 hover:bg-dark-50"
-                                    }`}
+                                    className={`w-full mt-4 py-3 px-4 rounded-xl font-medium border transition-all duration-300 ${isDark
+                                        ? "border-white/10 text-dark-400 hover:bg-white/5"
+                                        : "border-dark-200 text-dark-600 hover:bg-dark-50"
+                                        }`}
                                 >
                                     <span className="flex items-center justify-center gap-2">
                                         <ArrowLeft className="w-4 h-4" />
@@ -1029,18 +986,16 @@ export default function RegisterPage() {
 
                             {/* Login Link */}
                             <p
-                                className={`mt-8 text-center ${
-                                    isDark ? "text-dark-400" : "text-dark-600"
-                                }`}
+                                className={`mt-8 text-center ${isDark ? "text-dark-400" : "text-dark-600"
+                                    }`}
                             >
                                 Already have an account?{" "}
                                 <Link
                                     href="/login"
-                                    className={`font-semibold transition-colors ${
-                                        isDark
-                                            ? "text-primary-400 hover:text-primary-300"
-                                            : "text-primary-600 hover:text-primary-700"
-                                    }`}
+                                    className={`font-semibold transition-colors ${isDark
+                                        ? "text-primary-400 hover:text-primary-300"
+                                        : "text-primary-600 hover:text-primary-700"
+                                        }`}
                                 >
                                     Sign in
                                 </Link>
@@ -1052,11 +1007,10 @@ export default function RegisterPage() {
                     <p className="mt-8 text-center">
                         <Link
                             href="/"
-                            className={`inline-flex items-center gap-2 text-sm transition-colors ${
-                                isDark
-                                    ? "text-dark-500 hover:text-dark-300"
-                                    : "text-dark-500 hover:text-dark-700"
-                            }`}
+                            className={`inline-flex items-center gap-2 text-sm transition-colors ${isDark
+                                ? "text-dark-500 hover:text-dark-300"
+                                : "text-dark-500 hover:text-dark-700"
+                                }`}
                         >
                             <ArrowRight className="w-4 h-4 rotate-180" />
                             Back to home
@@ -1065,5 +1019,5 @@ export default function RegisterPage() {
                 </div>
             </div>
         </div>
-    );
+    )
 }

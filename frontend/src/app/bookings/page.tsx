@@ -15,6 +15,7 @@ interface Booking {
     propertyImage: string
     propertyAddress: string // or location
     landlordName: string
+    landlordId: number
     startDate: string
     endDate: string
     status: 'PENDING' | 'CONFIRMED' | 'REJECTED' | 'CANCELLED'
@@ -23,10 +24,16 @@ interface Booking {
     createdAt: string
 }
 
+import { ReviewModal } from "@/components/reviews/ReviewModal"
+import { reviewApi } from "@/lib/api"
+import toast from "react-hot-toast"
+
 export default function MyBookingsPage() {
     const { user } = useAuth()
     const [bookings, setBookings] = useState<Booking[]>([])
     const [loading, setLoading] = useState(true)
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
+    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
 
     const fetchBookings = async () => {
         try {
@@ -43,6 +50,30 @@ export default function MyBookingsPage() {
     useEffect(() => {
         fetchBookings()
     }, [])
+
+    const handleOpenReview = (booking: Booking) => {
+        setSelectedBooking(booking)
+        setIsReviewModalOpen(true)
+    }
+
+    const handleSubmitReview = async (rating: number, comment: string) => {
+        if (!selectedBooking) return
+
+        try {
+            await reviewApi.create({
+                propertyId: selectedBooking.propertyId,
+                receiverId: selectedBooking.landlordId,
+                rating,
+                comment,
+            })
+            toast.success("Review submitted successfully!")
+            setIsReviewModalOpen(false)
+            setSelectedBooking(null)
+        } catch (error) {
+            console.error("Failed to submit review", error)
+            toast.error("Failed to submit review. Please try again.")
+        }
+    }
 
     const getStatusColor = (status: Booking['status']) => {
         switch (status) {
@@ -144,7 +175,10 @@ export default function MyBookingsPage() {
 
                                             {/* Add Review Button for Confirmed/Past bookings */}
                                             {booking.status === 'CONFIRMED' && (
-                                                <button className="text-sm font-medium text-blue-600 hover:underline">
+                                                <button
+                                                    onClick={() => handleOpenReview(booking)}
+                                                    className="text-sm font-medium text-blue-600 hover:underline"
+                                                >
                                                     Write Review
                                                 </button>
                                             )}
@@ -156,6 +190,17 @@ export default function MyBookingsPage() {
                     ))
                 )}
             </div>
+
+            <ReviewModal
+                isOpen={isReviewModalOpen}
+                onClose={() => {
+                    setIsReviewModalOpen(false)
+                    setSelectedBooking(null)
+                }}
+                onSubmit={handleSubmitReview}
+                title={`Review your stay at ${selectedBooking?.propertyTitle}`}
+                subtitle={`How was your experience with ${selectedBooking?.landlordName}?`}
+            />
         </DashboardLayout>
     )
 }

@@ -213,8 +213,8 @@ export default function DashboardLayout({
     return (
         <div
             className={`min-h-screen transition-colors duration-500 overflow-x-hidden ${isDark
-                ? "bg-dark-950"
-                : "bg-gradient-to-br from-slate-50 via-white to-slate-50"
+                ? "bg-[#0B1120]"
+                : "bg-warm-25"
                 }`}
         >
             {/* Subtle Grid Lines Background */}
@@ -241,7 +241,7 @@ export default function DashboardLayout({
                 <header
                     className={`sticky top-0 z-30 h-16 flex items-center justify-between px-6 border-b ${isDark
                         ? "bg-dark-900 border-white/5"
-                        : "bg-white/80 backdrop-blur-xl border-slate-200"
+                        : "bg-warm-25/95 backdrop-blur-xl border-slate-200" // Warm background for header
                         }`}
                 >
                     {/* Left: Page Title / Search */}

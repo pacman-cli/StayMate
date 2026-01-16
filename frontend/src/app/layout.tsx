@@ -53,6 +53,8 @@ export const metadata: Metadata = {
     },
 }
 
+import { Toaster } from "react-hot-toast"
+
 export default function RootLayout({
     children,
 }: {
@@ -78,7 +80,16 @@ export default function RootLayout({
             </head>
             <body className="min-h-screen antialiased">
                 <ThemeProvider>
-                    <AuthProvider>{children}</AuthProvider>
+                    <AuthProvider>
+                        {children}
+                        <Toaster position="top-center" toastOptions={{
+                            className: 'dark:bg-slate-800 dark:text-white',
+                            style: {
+                                background: '#333',
+                                color: '#fff',
+                            },
+                        }} />
+                    </AuthProvider>
                 </ThemeProvider>
             </body>
         </html>

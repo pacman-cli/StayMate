@@ -23,7 +23,7 @@ export default function HexPatternBackground() {
   if (!mounted) return null
 
   return (
-    <div className={`fixed inset-0 overflow-hidden pointer-events-none transition-colors duration-700 -z-10 ${isDark ? "bg-[#0A101C]" : "bg-[#F5EEE4]"
+    <div className={`fixed inset-0 overflow-hidden pointer-events-none transition-colors duration-700 -z-10 ${isDark ? "bg-[#0B1120]" : "bg-warm-25"
       }`}>
       <motion.div style={{ opacity: containerOpacity }} className="absolute inset-0">
         {/* Ambient Gradient Orbs */}

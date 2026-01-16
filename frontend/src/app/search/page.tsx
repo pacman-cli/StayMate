@@ -85,10 +85,36 @@ export default function SearchRentalsPage() {
         try {
             if (isCurrentlySaved) {
                 await savedApi.removeProperty(id)
-                toast.success("Removed from saved items")
+                toast.success(
+                    <div className="flex items-center gap-2">
+                        <span className="text-lg">💔</span>
+                        <div>
+                            <p className="font-semibold">Removed from Saved</p>
+                            <p className="text-xs opacity-70">Property removed from your favorites</p>
+                        </div>
+                    </div>,
+                    { position: "bottom-right", duration: 3000 }
+                )
             } else {
                 await savedApi.saveProperty(id)
-                toast.success("Saved to your list")
+                toast.success(
+                    <div className="flex items-center gap-2">
+                        <span className="text-lg">❤️</span>
+                        <div>
+                            <p className="font-semibold">Added to Saved</p>
+                            <p className="text-xs opacity-70">Property saved to your favorites</p>
+                        </div>
+                    </div>,
+                    {
+                        position: "bottom-right",
+                        duration: 3000,
+                        style: {
+                            background: isDark ? '#1e293b' : '#fff',
+                            color: isDark ? '#fff' : '#0f172a',
+                            border: '1px solid ' + (isDark ? '#334155' : '#e2e8f0'),
+                        }
+                    }
+                )
             }
         } catch (error) {
             console.error("Failed to toggle save", error)
@@ -160,9 +186,15 @@ export default function SearchRentalsPage() {
                                 <h3 className={`text-lg font-semibold mb-2 ${isDark ? "text-white" : "text-slate-900"}`}>
                                     No properties found
                                 </h3>
-                                <p className={`text-sm max-w-xs mx-auto ${isDark ? "text-slate-500" : "text-slate-500"}`}>
+                                <p className={`text-sm max-w-xs mx-auto mb-4 ${isDark ? "text-slate-500" : "text-slate-500"}`}>
                                     Try adjusting your filters or search for a different location.
                                 </p>
+                                <button
+                                    onClick={() => window.location.reload()}
+                                    className="text-sm text-primary-500 hover:text-primary-600 font-medium"
+                                >
+                                    Refresh Results
+                                </button>
                             </div>
                         )}
                     </div>

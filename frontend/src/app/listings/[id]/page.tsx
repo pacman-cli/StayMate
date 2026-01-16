@@ -3,7 +3,7 @@
 import DashboardLayout from "@/components/DashboardLayout"
 import { useAuth } from "@/context/AuthContext"
 import { useTheme } from "@/context/ThemeContext"
-import { bookingApi, propertyApi } from "@/lib/api"
+import { bookingApi, messageApi, propertyApi, savedApi } from "@/lib/api"
 import {
   Calendar,
   CheckCircle2,
@@ -32,6 +32,10 @@ export default function ListingDetailPage() {
   // Date inputs for booking
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
+
+  // Save functionality
+  const [isSaved, setIsSaved] = useState(false)
+  const [savingProperty, setSavingProperty] = useState(false)
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -66,6 +70,81 @@ export default function ListingDetailPage() {
       fetchProperty()
     }
   }, [params.id, isAuthenticated])
+
+  // Handle save/unsave property
+  const handleToggleSave = async () => {
+    if (savingProperty) return
+
+    // Validate property exists
+    if (!property?.id) {
+      toast.error("Cannot save - property not found")
+      return
+    }
+
+    setSavingProperty(true)
+
+    try {
+      if (isSaved) {
+        await savedApi.removeProperty(property.id)
+        setIsSaved(false)
+        toast.success(
+          <div className="flex items-center gap-2">
+            <span className="text-lg">💔</span>
+            <div>
+              <p className="font-semibold">Removed from Saved</p>
+              <p className="text-xs opacity-70">Property removed from your favorites</p>
+            </div>
+          </div>,
+          { position: "bottom-right", duration: 3000 }
+        )
+      } else {
+        await savedApi.saveProperty(property.id)
+        setIsSaved(true)
+        toast.success(
+          <div className="flex items-center gap-2">
+            <span className="text-lg">❤️</span>
+            <div>
+              <p className="font-semibold">Added to Saved</p>
+              <p className="text-xs opacity-70">Property saved to your favorites</p>
+            </div>
+          </div>,
+          {
+            position: "bottom-right",
+            duration: 3000,
+            style: {
+              background: isDark ? '#1e293b' : '#fff',
+              color: isDark ? '#fff' : '#0f172a',
+              border: '1px solid ' + (isDark ? '#334155' : '#e2e8f0'),
+            }
+          }
+        )
+      }
+    } catch (error: any) {
+      console.error("Failed to toggle save", error)
+      const errorMessage = error?.response?.data?.message || error?.message || "Failed to update saved status"
+      toast.error(errorMessage)
+      // Revert the optimistic update if we set it
+    } finally {
+      setSavingProperty(false)
+    }
+  }
+
+  // Handle message host
+  const handleMessageHost = async () => {
+    try {
+      // Create or get existing conversation
+      const conversation = await messageApi.createConversation({
+        recipientId: property.ownerId,
+        initialMessage: `Hi, I'm interested in your property: ${property.title}`,
+        propertyId: property.id
+      })
+      toast.success("Message sent! Redirecting to chat...")
+      router.push(`/messages?conversation=${conversation.id}`)
+    } catch (error: any) {
+      console.error("Failed to message host", error)
+      toast.error(error?.response?.data?.message || "Failed to send message")
+    }
+  }
 
   const handleRequestBooking = async () => {
     if (!startDate || !endDate) {
@@ -163,9 +242,15 @@ export default function ListingDetailPage() {
                       }`}>
                       <Share2 className="w-5 h-5" />
                     </button>
-                    <button className={`p-2 rounded-full border transition-all ${isDark ? "border-white/10 hover:bg-white/10" : "border-slate-200 hover:bg-slate-100"
-                      }`}>
-                      <Heart className="w-5 h-5" />
+                    <button
+                      onClick={handleToggleSave}
+                      disabled={savingProperty}
+                      className={`p-2 rounded-full border transition-all transform active:scale-90 ${isSaved
+                        ? "bg-red-50 border-red-200 text-red-500"
+                        : isDark ? "border-white/10 hover:bg-white/10" : "border-slate-200 hover:bg-slate-100"
+                        } ${savingProperty ? "opacity-50" : ""}`}
+                    >
+                      <Heart className={`w-5 h-5 transition-all ${isSaved ? "fill-red-500 text-red-500 scale-110" : ""}`} />
                     </button>
                   </div>
                 </div>
@@ -208,10 +293,12 @@ export default function ListingDetailPage() {
                       <p className="text-sm text-slate-500">Joined in December 2024</p>
                     </div>
                   </div>
-                  <button className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${isDark
-                    ? "border-white/10 hover:bg-white/10"
-                    : "border-slate-200 hover:bg-slate-50"
-                    }`}>
+                  <button
+                    onClick={handleMessageHost}
+                    className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${isDark
+                      ? "border-white/10 hover:bg-white/10"
+                      : "border-slate-200 hover:bg-slate-50"
+                      }`}>
                     Message Host
                   </button>
                 </div>

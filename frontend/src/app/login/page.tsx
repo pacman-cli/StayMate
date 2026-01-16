@@ -1,125 +1,117 @@
-"use client";
+"use client"
 
-import { useState, FormEvent, useEffect } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
-import { useTheme } from "@/context/ThemeContext";
-import ThemeSwitcher from "@/components/ThemeSwitcher";
-import Logo from "@/components/Logo";
+import Logo from "@/components/Logo"
+import ThemeSwitcher from "@/components/ThemeSwitcher"
+import { useAuth } from "@/context/AuthContext"
+import { useTheme } from "@/context/ThemeContext"
 import {
-    Mail,
-    Lock,
+    AlertCircle,
+    ArrowRight,
     Eye,
     EyeOff,
-    AlertCircle,
     Loader2,
-    ArrowRight,
+    Lock,
+    Mail,
     Sparkles,
-} from "lucide-react";
+} from "lucide-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { FormEvent, useEffect, useState } from "react"
 
 export default function LoginPage() {
-    const router = useRouter();
+    const router = useRouter()
     const {
         login,
         loginWithGoogle,
         isAuthenticated,
         isLoading: authLoading,
-    } = useAuth();
-    const { isDark } = useTheme();
+    } = useAuth()
+    const { isDark } = useTheme()
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [showPassword, setShowPassword] = useState(false)
+    const [error, setError] = useState("")
+    const [isLoading, setIsLoading] = useState(false)
 
     // Redirect if already authenticated
     useEffect(() => {
         if (isAuthenticated && !authLoading) {
-            router.push("/dashboard");
+            router.push("/dashboard")
         }
-    }, [isAuthenticated, authLoading, router]);
+    }, [isAuthenticated, authLoading, router])
 
     const handleSubmit = async (e: FormEvent) => {
-        e.preventDefault();
-        setError("");
+        e.preventDefault()
+        setError("")
 
         if (!email || !password) {
-            setError("Please fill in all fields");
-            return;
+            setError("Please fill in all fields")
+            return
         }
 
-        setIsLoading(true);
+        setIsLoading(true)
 
         try {
-            await login(email, password);
-            router.push("/dashboard");
+            await login(email, password)
+            router.push("/dashboard")
         } catch (err: any) {
             const message =
-                err.response?.data?.message || "Invalid email or password";
-            setError(message);
+                err.response?.data?.message || "Invalid email or password"
+            setError(message)
         } finally {
-            setIsLoading(false);
+            setIsLoading(false)
         }
-    };
+    }
 
     const handleGoogleLogin = () => {
-        loginWithGoogle();
-    };
+        loginWithGoogle()
+    }
 
     if (authLoading) {
         return (
             <div
-                className={`min-h-screen flex items-center justify-center ${
-                    isDark ? "bg-dark-950" : "bg-gray-50"
-                }`}
+                className={`min-h-screen flex items-center justify-center ${isDark ? "bg-dark-950" : "bg-warm-25"
+                    }`}
             >
                 <div className="relative">
                     <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
                     <div className="absolute inset-0 w-12 h-12 border-4 border-primary-500/20 rounded-full" />
                 </div>
             </div>
-        );
+        )
     }
 
     return (
         <div
-            className={`min-h-screen flex transition-colors duration-500 ${
-                isDark
-                    ? "bg-dark-950"
-                    : "bg-gradient-to-br from-gray-50 via-white to-gray-100"
-            }`}
+            className={`min-h-screen flex transition-colors duration-500 ${isDark
+                ? "bg-dark-950"
+                : "bg-warm-25"
+                }`}
         >
             {/* Background Effects */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
                 <div
-                    className={`absolute top-0 -left-40 w-96 h-96 rounded-full blur-3xl ${
-                        isDark ? "bg-primary-500/10" : "bg-primary-400/20"
-                    }`}
+                    className={`absolute top-0 -left-40 w-96 h-96 rounded-full blur-3xl ${isDark ? "bg-primary-500/10" : "bg-primary-400/10"
+                        }`}
                 />
                 <div
-                    className={`absolute bottom-0 -right-40 w-96 h-96 rounded-full blur-3xl ${
-                        isDark ? "bg-purple-500/10" : "bg-purple-400/15"
-                    }`}
+                    className={`absolute bottom-0 -right-40 w-96 h-96 rounded-full blur-3xl ${isDark ? "bg-purple-500/10" : "bg-purple-400/5"
+                        }`}
                 />
                 <div
-                    className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl ${
-                        isDark ? "bg-primary-500/5" : "bg-primary-400/10"
-                    }`}
+                    className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl ${isDark ? "bg-primary-500/5" : "bg-primary-400/5"
+                        }`}
                 />
 
                 {/* Grid Pattern */}
                 <div
-                    className={`absolute inset-0 ${
-                        isDark ? "opacity-[0.02]" : "opacity-[0.03]"
-                    }`}
+                    className={`absolute inset-0 ${isDark ? "opacity-[0.02]" : "opacity-[0.03]"
+                        }`}
                     style={{
-                        backgroundImage: `linear-gradient(${
-                            isDark ? "#fff" : "#000"
-                        } 1px, transparent 1px), linear-gradient(90deg, ${
-                            isDark ? "#fff" : "#000"
-                        } 1px, transparent 1px)`,
+                        backgroundImage: `linear-gradient(${isDark ? "#fff" : "#000"
+                            } 1px, transparent 1px), linear-gradient(90deg, ${isDark ? "#fff" : "#000"
+                            } 1px, transparent 1px)`,
                         backgroundSize: "60px 60px",
                     }}
                 />
@@ -127,11 +119,10 @@ export default function LoginPage() {
 
             {/* Left Side - Branding (Hidden on mobile) */}
             <div
-                className={`hidden lg:flex lg:w-1/2 relative overflow-hidden ${
-                    isDark
-                        ? "bg-gradient-to-br from-primary-900/40 via-dark-900 to-purple-900/40"
-                        : "bg-gradient-to-br from-primary-600 via-primary-700 to-purple-700"
-                }`}
+                className={`hidden lg:flex lg:w-1/2 relative overflow-hidden ${isDark
+                    ? "bg-gradient-to-br from-primary-900/40 via-dark-900 to-purple-900/40"
+                    : "bg-gradient-to-br from-primary-600 via-primary-700 to-purple-700"
+                    }`}
             >
                 {/* Animated Background Elements */}
                 <div className="absolute inset-0">
@@ -174,11 +165,10 @@ export default function LoginPage() {
                             ].map((feature, index) => (
                                 <div
                                     key={index}
-                                    className={`px-4 py-2 rounded-full text-sm font-medium ${
-                                        isDark
-                                            ? "bg-white/10 text-white border border-white/20"
-                                            : "bg-white/20 text-white"
-                                    } backdrop-blur-sm`}
+                                    className={`px-4 py-2 rounded-full text-sm font-medium ${isDark
+                                        ? "bg-white/10 text-white border border-white/20"
+                                        : "bg-white/20 text-white"
+                                        } backdrop-blur-sm`}
                                 >
                                     {feature}
                                 </div>
@@ -207,11 +197,10 @@ export default function LoginPage() {
 
                     {/* Login Card */}
                     <div
-                        className={`relative rounded-3xl overflow-hidden ${
-                            isDark
-                                ? "bg-white/5 border border-white/10"
-                                : "bg-white border border-dark-100 shadow-2xl"
-                        } backdrop-blur-xl p-8`}
+                        className={`relative rounded-3xl overflow-hidden ${isDark
+                            ? "bg-white/5 border border-white/10"
+                            : "bg-warm-50 border border-warm-100 shadow-xl"
+                            } backdrop-blur-xl p-8`}
                     >
                         {/* Card Glow Effect */}
                         {isDark && (
@@ -222,28 +211,25 @@ export default function LoginPage() {
                             {/* Header */}
                             <div className="text-center mb-8">
                                 <div
-                                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-4 ${
-                                        isDark
-                                            ? "bg-primary-500/10 text-primary-400 border border-primary-500/20"
-                                            : "bg-primary-100 text-primary-700"
-                                    }`}
+                                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-4 ${isDark
+                                        ? "bg-primary-500/10 text-primary-400 border border-primary-500/20"
+                                        : "bg-primary-100 text-primary-700"
+                                        }`}
                                 >
                                     <Sparkles className="w-3 h-3" />
                                     Welcome back
                                 </div>
                                 <h2
-                                    className={`text-2xl md:text-3xl font-bold mb-2 ${
-                                        isDark ? "text-white" : "text-dark-900"
-                                    }`}
+                                    className={`text-2xl md:text-3xl font-bold mb-2 ${isDark ? "text-white" : "text-dark-900"
+                                        }`}
                                 >
                                     Sign In
                                 </h2>
                                 <p
-                                    className={`${
-                                        isDark
-                                            ? "text-dark-400"
-                                            : "text-dark-600"
-                                    }`}
+                                    className={`${isDark
+                                        ? "text-dark-400"
+                                        : "text-dark-600"
+                                        }`}
                                 >
                                     Enter your credentials to access your
                                     account
@@ -253,25 +239,22 @@ export default function LoginPage() {
                             {/* Error Message */}
                             {error && (
                                 <div
-                                    className={`mb-6 p-4 rounded-xl flex items-start gap-3 animate-fade-in ${
-                                        isDark
-                                            ? "bg-red-500/10 border border-red-500/20"
-                                            : "bg-red-50 border border-red-200"
-                                    }`}
+                                    className={`mb-6 p-4 rounded-xl flex items-start gap-3 animate-fade-in ${isDark
+                                        ? "bg-red-500/10 border border-red-500/20"
+                                        : "bg-red-50 border border-red-200"
+                                        }`}
                                 >
                                     <AlertCircle
-                                        className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
-                                            isDark
-                                                ? "text-red-400"
-                                                : "text-red-500"
-                                        }`}
+                                        className={`w-5 h-5 flex-shrink-0 mt-0.5 ${isDark
+                                            ? "text-red-400"
+                                            : "text-red-500"
+                                            }`}
                                     />
                                     <p
-                                        className={`text-sm ${
-                                            isDark
-                                                ? "text-red-300"
-                                                : "text-red-600"
-                                        }`}
+                                        className={`text-sm ${isDark
+                                            ? "text-red-300"
+                                            : "text-red-600"
+                                            }`}
                                     >
                                         {error}
                                     </p>
@@ -284,22 +267,20 @@ export default function LoginPage() {
                                 <div>
                                     <label
                                         htmlFor="email"
-                                        className={`block text-sm font-medium mb-2 ${
-                                            isDark
-                                                ? "text-dark-300"
-                                                : "text-dark-700"
-                                        }`}
+                                        className={`block text-sm font-medium mb-2 ${isDark
+                                            ? "text-dark-300"
+                                            : "text-dark-700"
+                                            }`}
                                     >
                                         Email Address
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                             <Mail
-                                                className={`w-5 h-5 ${
-                                                    isDark
-                                                        ? "text-dark-500"
-                                                        : "text-dark-400"
-                                                }`}
+                                                className={`w-5 h-5 ${isDark
+                                                    ? "text-dark-500"
+                                                    : "text-dark-400"
+                                                    }`}
                                             />
                                         </div>
                                         <input
@@ -309,11 +290,10 @@ export default function LoginPage() {
                                             onChange={(e) =>
                                                 setEmail(e.target.value)
                                             }
-                                            className={`w-full pl-12 pr-4 py-3.5 rounded-xl border transition-all duration-300 ${
-                                                isDark
-                                                    ? "bg-white/5 border-white/10 text-white placeholder-dark-500 focus:bg-white/10 focus:border-primary-500/50"
-                                                    : "bg-white border-dark-200 text-dark-900 placeholder-dark-400 focus:border-primary-500"
-                                            } focus:outline-none focus:ring-2 focus:ring-primary-500/20`}
+                                            className={`w-full pl-12 pr-4 py-3.5 rounded-xl border transition-all duration-300 ${isDark
+                                                ? "bg-white/5 border-white/10 text-white placeholder-dark-500 focus:bg-white/10 focus:border-primary-500/50"
+                                                : "bg-white border-warm-200 text-dark-900 placeholder-dark-400 focus:border-primary-500 shadow-sm"
+                                                } focus:outline-none focus:ring-2 focus:ring-primary-500/20`}
                                             placeholder="you@example.com"
                                             autoComplete="email"
                                             disabled={isLoading}
@@ -325,22 +305,20 @@ export default function LoginPage() {
                                 <div>
                                     <label
                                         htmlFor="password"
-                                        className={`block text-sm font-medium mb-2 ${
-                                            isDark
-                                                ? "text-dark-300"
-                                                : "text-dark-700"
-                                        }`}
+                                        className={`block text-sm font-medium mb-2 ${isDark
+                                            ? "text-dark-300"
+                                            : "text-dark-700"
+                                            }`}
                                     >
                                         Password
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                             <Lock
-                                                className={`w-5 h-5 ${
-                                                    isDark
-                                                        ? "text-dark-500"
-                                                        : "text-dark-400"
-                                                }`}
+                                                className={`w-5 h-5 ${isDark
+                                                    ? "text-dark-500"
+                                                    : "text-dark-400"
+                                                    }`}
                                             />
                                         </div>
                                         <input
@@ -354,11 +332,10 @@ export default function LoginPage() {
                                             onChange={(e) =>
                                                 setPassword(e.target.value)
                                             }
-                                            className={`w-full pl-12 pr-12 py-3.5 rounded-xl border transition-all duration-300 ${
-                                                isDark
-                                                    ? "bg-white/5 border-white/10 text-white placeholder-dark-500 focus:bg-white/10 focus:border-primary-500/50"
-                                                    : "bg-white border-dark-200 text-dark-900 placeholder-dark-400 focus:border-primary-500"
-                                            } focus:outline-none focus:ring-2 focus:ring-primary-500/20`}
+                                            className={`w-full pl-12 pr-12 py-3.5 rounded-xl border transition-all duration-300 ${isDark
+                                                ? "bg-white/5 border-white/10 text-white placeholder-dark-500 focus:bg-white/10 focus:border-primary-500/50"
+                                                : "bg-white border-warm-200 text-dark-900 placeholder-dark-400 focus:border-primary-500 shadow-sm"
+                                                } focus:outline-none focus:ring-2 focus:ring-primary-500/20`}
                                             placeholder="••••••••"
                                             autoComplete="current-password"
                                             disabled={isLoading}
@@ -372,19 +349,17 @@ export default function LoginPage() {
                                         >
                                             {showPassword ? (
                                                 <EyeOff
-                                                    className={`w-5 h-5 transition-colors ${
-                                                        isDark
-                                                            ? "text-dark-500 hover:text-dark-300"
-                                                            : "text-dark-400 hover:text-dark-600"
-                                                    }`}
+                                                    className={`w-5 h-5 transition-colors ${isDark
+                                                        ? "text-dark-500 hover:text-dark-300"
+                                                        : "text-dark-400 hover:text-dark-600"
+                                                        }`}
                                                 />
                                             ) : (
                                                 <Eye
-                                                    className={`w-5 h-5 transition-colors ${
-                                                        isDark
-                                                            ? "text-dark-500 hover:text-dark-300"
-                                                            : "text-dark-400 hover:text-dark-600"
-                                                    }`}
+                                                    className={`w-5 h-5 transition-colors ${isDark
+                                                        ? "text-dark-500 hover:text-dark-300"
+                                                        : "text-dark-400 hover:text-dark-600"
+                                                        }`}
                                                 />
                                             )}
                                         </button>
@@ -395,9 +370,8 @@ export default function LoginPage() {
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className={`group relative w-full py-3.5 px-4 rounded-xl font-semibold text-white overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ${
-                                        isDark ? "shadow-glow-sm" : "shadow-lg"
-                                    }`}
+                                    className={`group relative w-full py-3.5 px-4 rounded-xl font-semibold text-white overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ${isDark ? "shadow-glow-sm" : "shadow-lg"
+                                        }`}
                                 >
                                     <div className="absolute inset-0 bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-300 group-hover:from-primary-600 group-hover:to-primary-700" />
                                     <span className="relative flex items-center justify-center gap-2">
@@ -420,20 +394,18 @@ export default function LoginPage() {
                             <div className="relative my-8">
                                 <div className="absolute inset-0 flex items-center">
                                     <div
-                                        className={`w-full border-t ${
-                                            isDark
-                                                ? "border-white/10"
-                                                : "border-dark-200"
-                                        }`}
+                                        className={`w-full border-t ${isDark
+                                            ? "border-white/10"
+                                            : "border-warm-200"
+                                            }`}
                                     />
                                 </div>
                                 <div className="relative flex justify-center text-sm">
                                     <span
-                                        className={`px-4 ${
-                                            isDark
-                                                ? "bg-dark-900/50 text-dark-500"
-                                                : "bg-white text-dark-500"
-                                        }`}
+                                        className={`px-4 ${isDark
+                                            ? "bg-dark-900/50 text-dark-500"
+                                            : "bg-warm-50 text-dark-500"
+                                            }`}
                                     >
                                         or continue with
                                     </span>
@@ -445,11 +417,10 @@ export default function LoginPage() {
                                 type="button"
                                 onClick={handleGoogleLogin}
                                 disabled={isLoading}
-                                className={`w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl border font-medium transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${
-                                    isDark
-                                        ? "bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20"
-                                        : "bg-white border-dark-200 text-dark-700 hover:bg-dark-50 hover:border-dark-300 shadow-sm"
-                                }`}
+                                className={`w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl border font-medium transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${isDark
+                                    ? "bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20"
+                                    : "bg-white border-warm-200 text-dark-900 hover:bg-warm-50 hover:border-warm-300 shadow-sm"
+                                    }`}
                             >
                                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                                     <path
@@ -474,18 +445,16 @@ export default function LoginPage() {
 
                             {/* Register Link */}
                             <p
-                                className={`mt-8 text-center ${
-                                    isDark ? "text-dark-400" : "text-dark-600"
-                                }`}
+                                className={`mt-8 text-center ${isDark ? "text-dark-400" : "text-dark-600"
+                                    }`}
                             >
                                 Don't have an account?{" "}
                                 <Link
                                     href="/register"
-                                    className={`font-semibold transition-colors ${
-                                        isDark
-                                            ? "text-primary-400 hover:text-primary-300"
-                                            : "text-primary-600 hover:text-primary-700"
-                                    }`}
+                                    className={`font-semibold transition-colors ${isDark
+                                        ? "text-primary-400 hover:text-primary-300"
+                                        : "text-primary-600 hover:text-primary-700"
+                                        }`}
                                 >
                                     Create account
                                 </Link>
@@ -497,11 +466,10 @@ export default function LoginPage() {
                     <p className="mt-8 text-center">
                         <Link
                             href="/"
-                            className={`inline-flex items-center gap-2 text-sm transition-colors ${
-                                isDark
-                                    ? "text-dark-500 hover:text-dark-300"
-                                    : "text-dark-500 hover:text-dark-700"
-                            }`}
+                            className={`inline-flex items-center gap-2 text-sm transition-colors ${isDark
+                                ? "text-dark-500 hover:text-dark-300"
+                                : "text-dark-500 hover:text-dark-700"
+                                }`}
                         >
                             <ArrowRight className="w-4 h-4 rotate-180" />
                             Back to home
@@ -510,5 +478,5 @@ export default function LoginPage() {
                 </div>
             </div>
         </div>
-    );
+    )
 }
