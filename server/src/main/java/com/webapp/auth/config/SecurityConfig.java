@@ -91,6 +91,7 @@ public class SecurityConfig {
                                                                 "/ws/**",
                                                                 "/h2-console/**",
                                                                 "/error",
+                                                                "/api/uploads/**",
                                                                 // Hidden admin endpoints (protected by secret key, not
                                                                 // JWT)
                                                                 "/api/v1/internal/sudo/**")

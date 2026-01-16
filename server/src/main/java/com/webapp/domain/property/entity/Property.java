@@ -79,9 +79,12 @@ public class Property {
     @Builder.Default
     private int inquiries = 0;
 
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private String status = "Active"; // Active, Pending, Rented
+    private com.webapp.domain.property.enums.PropertyStatus status = com.webapp.domain.property.enums.PropertyStatus.PENDING; // Default
+    // to
+    // Pending
 
     @Column(name = "emergency_available")
     @Builder.Default

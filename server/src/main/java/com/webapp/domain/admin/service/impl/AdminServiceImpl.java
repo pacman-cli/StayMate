@@ -17,6 +17,7 @@ import com.webapp.domain.admin.entity.FraudEvent;
 import com.webapp.domain.admin.repository.FraudEventRepository;
 import com.webapp.domain.admin.service.AdminService;
 import com.webapp.domain.booking.enums.BookingStatus;
+import com.webapp.domain.property.enums.PropertyStatus;
 import com.webapp.domain.property.enums.SeatStatus;
 import com.webapp.domain.property.repository.PropertyRepository;
 import com.webapp.domain.user.enums.RoleName;
@@ -44,7 +45,7 @@ public class AdminServiceImpl implements AdminService {
   public AdminDashboardStatDto getDashboardStats() {
     // 1. Verification Stats
     long pendingIdentity = verificationRequestRepository.countByStatus(VerificationStatus.PENDING);
-    long pendingProperties = propertyRepository.countByStatus("Pending");
+    long pendingProperties = propertyRepository.countByStatus(PropertyStatus.PENDING);
 
     // Calculate Occupancy Rate
     long totalSeats = seatRepository.count();
@@ -53,10 +54,13 @@ public class AdminServiceImpl implements AdminService {
 
     // Additional Metrics
     long totalUsers = userRepository.count();
-    long totalLandlords = userRepository.countByRole(RoleName.ROLE_HOUSE_OWNER); // Use ROLE_HOUSE_OWNER for Landlord
+    long totalHouseOwners = userRepository.countByRole(RoleName.ROLE_HOUSE_OWNER);
+    long totalRegularUsers = userRepository.countByRole(RoleName.ROLE_USER);
+    long totalAdmins = userRepository.countByRole(RoleName.ROLE_ADMIN);
     long totalListings = propertyRepository.count();
-    long verifiedListings = propertyRepository.countByStatus("Active"); // Assuming Active means Verified/Approved here
-                                                                        // for now
+    long verifiedListings = propertyRepository.countByStatus(PropertyStatus.ACTIVE); // Assuming Active means
+                                                                                     // Verified/Approved here
+    // for now
 
     // Booking Metrics
     long totalBookings = bookingRepository.count();
@@ -82,7 +86,7 @@ public class AdminServiceImpl implements AdminService {
     List<Object[]> statusCounts = propertyRepository.countByStatusGrouped();
     Map<String, Long> listingStats = new HashMap<>();
     for (Object[] row : statusCounts) {
-      String status = (String) row[0];
+      String status = (row[0] != null) ? row[0].toString() : "Unknown";
       Long count = (Long) row[1];
       listingStats.put(status, count);
     }
@@ -113,7 +117,9 @@ public class AdminServiceImpl implements AdminService {
         .recentFraudEvents(fraudEvents)
         // New Fields
         .totalUsers(totalUsers)
-        .totalLandlords(totalLandlords)
+        .totalHouseOwners(totalHouseOwners)
+        .totalRegularUsers(totalRegularUsers)
+        .totalAdmins(totalAdmins)
         .totalListings(totalListings)
         .verifiedListingsCount(verifiedListings)
         .pendingVerificationsCount(pendingIdentity)
@@ -124,6 +130,10 @@ public class AdminServiceImpl implements AdminService {
         .cancelledBookings(cancelledBookings)
         .openMaintenanceRequests(openMaintenance)
         .todayAuditLogs(todayAuditLogs)
+        // Emergency & Safety
+        .totalEmergencyRoomsAvailable(propertyRepository.countByEmergencyAvailableTrue())
+        .bannedUsersCount(userRepository.countByAccountStatus(com.webapp.domain.user.enums.AccountStatus.BANNED))
+        .recentFraudAlerts(fraudEvents) // Reuse the fraud events list already calculated
         .build();
   }
 

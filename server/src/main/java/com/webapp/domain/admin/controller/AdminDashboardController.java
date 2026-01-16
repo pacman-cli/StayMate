@@ -24,6 +24,14 @@ public class AdminDashboardController {
   @GetMapping("/dashboard")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<AdminDashboardStatDto> getDashboardStats() {
+    // Ensuring backward compatibility if frontend calls /dashboard
+    return ResponseEntity.ok(adminService.getDashboardStats());
+  }
+
+  @GetMapping("/stats")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<AdminDashboardStatDto> getStats() {
+    // Alias for /stats as requested by frontend
     return ResponseEntity.ok(adminService.getDashboardStats());
   }
 

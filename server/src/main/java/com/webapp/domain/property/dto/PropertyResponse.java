@@ -27,6 +27,9 @@ public class PropertyResponse {
     private String ownerName;
     private Long ownerId;
     private String imageUrl;
+    private java.util.List<String> images;
     private Double latitude;
     private Double longitude;
+    private String propertyType;
+    private boolean isSaved;
 }

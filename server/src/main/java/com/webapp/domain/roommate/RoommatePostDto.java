@@ -2,6 +2,8 @@ package com.webapp.domain.roommate;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -26,6 +28,7 @@ public class RoommatePostDto {
   private Double budget;
 
   @NotNull(message = "Move-in date is required")
+  @JsonFormat(pattern = "yyyy-MM-dd")
   private LocalDate moveInDate;
 
   private String bio;
@@ -35,10 +38,17 @@ public class RoommatePostDto {
   private Boolean pets;
   private String occupation;
 
+  private CleanlinessLevel cleanliness;
+  private SleepSchedule sleepSchedule;
+  private java.util.List<String> personalityTags;
+  private java.util.List<String> interests;
+
   private Double latitude;
   private Double longitude;
 
   private String createdAt;
   private RoommatePostStatus status;
   private Integer matchScore;
+  private String matchExplanation;
+  private boolean isSaved;
 }

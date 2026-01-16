@@ -1,4 +1,4 @@
-package com.webapp.domain.roommate;
+package com.webapp.domain.roommate.controller;
 
 import java.util.List;
 
@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.webapp.auth.security.UserPrincipal;
+import com.webapp.domain.roommate.RoommatePostDto;
+import com.webapp.domain.roommate.RoommatePostStatus;
+import com.webapp.domain.roommate.RoommateService;
 
 import lombok.RequiredArgsConstructor;
 

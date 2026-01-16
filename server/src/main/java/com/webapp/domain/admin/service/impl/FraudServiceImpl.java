@@ -60,7 +60,7 @@ public class FraudServiceImpl implements FraudService {
   public void scanForEmergencyMismatches() {
     log.info("Scanning for emergency availability mismatches...");
     List<com.webapp.domain.property.entity.Property> mismatches = propertyRepository
-        .findByEmergencyAvailableTrueAndStatus("Rented");
+        .findByEmergencyAvailableTrueAndStatus(com.webapp.domain.property.enums.PropertyStatus.RENTED);
 
     for (com.webapp.domain.property.entity.Property p : mismatches) {
       createFraudEventIfNeeded(p.getOwner().getId(), FraudType.FAKE_LOCATION, FraudSeverity.LOW,

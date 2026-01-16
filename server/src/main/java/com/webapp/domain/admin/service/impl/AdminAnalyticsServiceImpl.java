@@ -143,7 +143,12 @@ public class AdminAnalyticsServiceImpl implements AdminAnalyticsService {
     Long activeListings = propertyRepository.count();
 
     // Mock occupancy for now or calculate if property occupancy logic exists
-    Double occupancyRate = 0.75;
+    long activeListingsCount = propertyRepository.countByStatus(com.webapp.domain.property.enums.PropertyStatus.ACTIVE);
+    long occupiedProperties = bookingRepository.countOccupiedProperties();
+
+    Double occupancyRate = activeListingsCount > 0
+        ? (double) occupiedProperties / activeListingsCount
+        : 0.0;
 
     return AnalyticsDashboardData.builder()
         .userGrowth(userGrowth)

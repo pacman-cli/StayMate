@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.*;
 
 @Data
 @Builder
@@ -21,43 +22,43 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PropertyRequest {
 
-  @NotBlank(message = "Title is required")
-  private String title;
+    @NotBlank(message = "Title is required")
+    private String title;
 
-  @NotBlank(message = "Description is required")
-  private String description;
+    @NotBlank(message = "Description is required")
+    private String description;
 
-  @NotNull(message = "Price is required")
-  @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
-  private BigDecimal price;
+    @NotNull(message = "Price is required")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
+    private BigDecimal price;
 
-  @NotBlank(message = "Address is required")
-  private String address;
+    @NotBlank(message = "Address is required")
+    private String address;
 
-  @NotBlank(message = "City is required")
-  private String city;
+    @NotBlank(message = "City is required")
+    private String city;
 
-  private String state;
+    private String state;
 
-  @NotBlank(message = "Zip code is required")
-  private String zipCode;
+    @NotBlank(message = "Zip code is required")
+    private String zipCode;
 
-  private Double latitude;
-  private Double longitude;
+    private Double latitude;
+    private Double longitude;
 
-  @jakarta.validation.constraints.Min(value = 0, message = "Beds must be 0 or more")
-  private Integer beds;
+    @Min(value = 0, message = "Beds must be 0 or more")
+    private Integer beds;
 
-  @jakarta.validation.constraints.Min(value = 0, message = "Baths must be 0 or more")
-  private Integer baths;
+    @Min(value = 0, message = "Baths must be 0 or more")
+    private Integer baths;
 
-  @Positive(message = "Area must be positive")
-  private Double area;
+    @Positive(message = "Area must be positive")
+    private Double area;
 
-  @NotNull(message = "Property type is required")
-  private PropertyType propertyType;
+    @NotNull(message = "Property type is required")
+    private PropertyType propertyType;
 
-  private Set<String> amenities;
+    private Set<String> amenities;
 
-  private List<String> images;
+    private List<String> images;
 }

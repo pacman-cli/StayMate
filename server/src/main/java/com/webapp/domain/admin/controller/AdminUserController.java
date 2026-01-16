@@ -2,6 +2,8 @@ package com.webapp.domain.admin.controller;
 
 import java.util.Map;
 
+import com.webapp.auth.security.*;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,25 +23,25 @@ import lombok.RequiredArgsConstructor;
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminUserController {
 
-  private final UserDeletionService userDeletionService;
+    private final UserDeletionService userDeletionService;
 
-  @PostMapping("/{userId}/delete-request")
-  public ResponseEntity<?> initiateDeletion(
-      @PathVariable Long userId,
-      @AuthenticationPrincipal com.webapp.auth.security.UserPrincipal adminPrincipal,
-      @RequestBody Map<String, String> request) {
+    @PostMapping("/{userId}/delete-request")
+    public ResponseEntity<?> initiateDeletion(
+            @PathVariable Long userId,
+            @AuthenticationPrincipal UserPrincipal adminPrincipal,
+            @RequestBody Map<String, String> request) {
 
-    String reason = request.get("reason");
-    userDeletionService.initiateDeletion(userId, adminPrincipal.getId(), reason);
-    return ResponseEntity.ok().body(Map.of("message", "User scheduled for deletion in 72 hours"));
-  }
+        String reason = request.get("reason");
+        userDeletionService.initiateDeletion(userId, adminPrincipal.getId(), reason);
+        return ResponseEntity.ok().body(Map.of("message", "User scheduled for deletion in 72 hours"));
+    }
 
-  @PostMapping("/{userId}/cancel-delete")
-  public ResponseEntity<?> cancelDeletion(
-      @PathVariable Long userId,
-      @AuthenticationPrincipal com.webapp.auth.security.UserPrincipal adminPrincipal) {
+    @PostMapping("/{userId}/cancel-delete")
+    public ResponseEntity<?> cancelDeletion(
+            @PathVariable Long userId,
+            @AuthenticationPrincipal UserPrincipal adminPrincipal) {
 
-    userDeletionService.cancelDeletion(userId, adminPrincipal.getId());
-    return ResponseEntity.ok().body(Map.of("message", "User deletion cancelled. Account restored to ACTIVE."));
-  }
+        userDeletionService.cancelDeletion(userId, adminPrincipal.getId());
+        return ResponseEntity.ok().body(Map.of("message", "User deletion cancelled. Account restored to ACTIVE."));
+    }
 }

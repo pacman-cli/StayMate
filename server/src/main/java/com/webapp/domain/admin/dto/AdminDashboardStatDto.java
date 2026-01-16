@@ -17,7 +17,9 @@ public class AdminDashboardStatDto {
 
   // New Metrics (Matching Frontend)
   private long totalUsers;
-  private long totalLandlords;
+  private long totalHouseOwners; // Renamed from totalLandlords
+  private long totalRegularUsers;
+  private long totalAdmins;
   private long totalListings;
   private long verifiedListingsCount;
   private long pendingVerificationsCount;
@@ -30,4 +32,9 @@ public class AdminDashboardStatDto {
   private long cancelledBookings;
   private long openMaintenanceRequests;
   private long todayAuditLogs;
+
+  // Emergency & Safety Metrics
+  private long totalEmergencyRoomsAvailable;
+  private long bannedUsersCount;
+  private List<FraudEventDto> recentFraudAlerts;
 }

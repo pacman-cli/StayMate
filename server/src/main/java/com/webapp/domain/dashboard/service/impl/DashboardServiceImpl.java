@@ -154,7 +154,8 @@ public class DashboardServiceImpl implements DashboardService {
                 long suspendedUsers = userRepository
                                 .countByAccountStatus(com.webapp.domain.user.enums.AccountStatus.SUSPENDED);
 
-                long emergencyRoomsAvailable = propertyRepository.countByStatus("Active"); // Simplified
+                long emergencyRoomsAvailable = propertyRepository
+                                .countByStatus(com.webapp.domain.property.enums.PropertyStatus.ACTIVE); // Simplified
 
                 // Real Property Type Stats
                 List<java.util.Map<String, Object>> typeStats = propertyRepository.countPropertiesByType().stream()
@@ -222,46 +223,83 @@ public class DashboardServiceImpl implements DashboardService {
 
         @Override
         public LandlordDashboardDTO getLandlordDashboard(User user) {
-                long activeProperties = propertyRepository.countByOwnerIdAndStatus(user.getId(), "Active");
-                long totalProperties = propertyRepository.countByOwnerId(user.getId());
+                // Use CompletableFuture to run independent queries in parallel
+                java.util.concurrent.CompletableFuture<Long> activePropertiesFuture = java.util.concurrent.CompletableFuture
+                                .supplyAsync(() -> propertyRepository.countByOwnerIdAndStatus(user.getId(),
+                                                com.webapp.domain.property.enums.PropertyStatus.ACTIVE));
 
-                long pendingRequests = bookingRepository.countByLandlordIdAndStatus(user.getId(),
-                                com.webapp.domain.booking.enums.BookingStatus.PENDING);
+                java.util.concurrent.CompletableFuture<Long> totalPropertiesFuture = java.util.concurrent.CompletableFuture
+                                .supplyAsync(() -> propertyRepository.countByOwnerId(user.getId()));
 
-                java.math.BigDecimal revenue = propertyRepository.sumRevenueByOwnerId(user.getId());
-                Long views = propertyRepository.sumViewsByOwnerId(user.getId());
-                Long inquiries = propertyRepository.sumInquiriesByOwnerId(user.getId());
+                java.util.concurrent.CompletableFuture<Long> pendingRequestsFuture = java.util.concurrent.CompletableFuture
+                                .supplyAsync(() -> bookingRepository.countByLandlordIdAndStatus(user.getId(),
+                                                com.webapp.domain.booking.enums.BookingStatus.PENDING));
 
-                // Occupancy: Confirmed Bookings / Total Properties
-                long activeBookings = bookingRepository.countByLandlordIdAndStatus(user.getId(),
-                                com.webapp.domain.booking.enums.BookingStatus.CONFIRMED);
-                double occupancy = totalProperties > 0 ? ((double) activeBookings / totalProperties) * 100.0 : 0.0;
+                java.util.concurrent.CompletableFuture<java.math.BigDecimal> revenueFuture = java.util.concurrent.CompletableFuture
+                                .supplyAsync(() -> propertyRepository.sumRevenueByOwnerId(user.getId()));
+
+                java.util.concurrent.CompletableFuture<Long> viewsFuture = java.util.concurrent.CompletableFuture
+                                .supplyAsync(() -> propertyRepository.sumViewsByOwnerId(user.getId()));
+
+                java.util.concurrent.CompletableFuture<Long> inquiriesFuture = java.util.concurrent.CompletableFuture
+                                .supplyAsync(() -> propertyRepository.sumInquiriesByOwnerId(user.getId()));
+
+                java.util.concurrent.CompletableFuture<Long> activeBookingsFuture = java.util.concurrent.CompletableFuture
+                                .supplyAsync(() -> bookingRepository.countByLandlordIdAndStatus(user.getId(),
+                                                com.webapp.domain.booking.enums.BookingStatus.CONFIRMED));
 
                 // Incoming Tenant Requests (Real)
-                List<com.webapp.domain.booking.dto.BookingResponse> incomingRequests = bookingRepository
-                                .findIncomingRequests(user.getId(),
-                                                org.springframework.data.domain.PageRequest.of(0, 5))
-                                .stream()
-                                .map(this::mapToBookingResponse)
-                                .collect(Collectors.toList());
+                java.util.concurrent.CompletableFuture<List<com.webapp.domain.booking.dto.BookingResponse>> incomingRequestsFuture = java.util.concurrent.CompletableFuture
+                                .supplyAsync(() -> bookingRepository
+                                                .findIncomingRequests(user.getId(),
+                                                                org.springframework.data.domain.PageRequest.of(0, 5))
+                                                .stream()
+                                                .map(booking -> mapToBookingResponse(booking))
+                                                .collect(Collectors.toList()));
 
                 // My Properties Overview (Real)
-                List<com.webapp.domain.property.dto.PropertyResponse> myProperties = propertyRepository
-                                .findTop5ByOwnerIdOrderByCreatedAtDesc(user.getId())
-                                .stream()
-                                .map(this::mapToPropertyResponse)
-                                .collect(Collectors.toList());
+                // Pass 'user' to mapToPropertyResponse to avoid lazy loading
+                java.util.concurrent.CompletableFuture<List<com.webapp.domain.property.dto.PropertyResponse>> myPropertiesFuture = java.util.concurrent.CompletableFuture
+                                .supplyAsync(() -> propertyRepository
+                                                .findTop5ByOwnerIdOrderByCreatedAtDesc(user.getId())
+                                                .stream()
+                                                .map(property -> mapToPropertyResponse(property, user))
+                                                .collect(Collectors.toList()));
 
-                return LandlordDashboardDTO.builder()
-                                .activePropertiesCount(activeProperties)
-                                .totalRequestsPending(pendingRequests)
-                                .totalRevenue(revenue != null ? revenue : java.math.BigDecimal.ZERO)
-                                .totalViews(views != null ? views : 0L)
-                                .totalInquiries(inquiries != null ? inquiries : 0L)
-                                .occupancyRate(occupancy)
-                                .incomingTenantRequests(incomingRequests)
-                                .myPropertiesOverview(myProperties)
-                                .build();
+                // Wait for all
+                java.util.concurrent.CompletableFuture.allOf(activePropertiesFuture, totalPropertiesFuture,
+                                pendingRequestsFuture, revenueFuture, viewsFuture, inquiriesFuture,
+                                activeBookingsFuture, incomingRequestsFuture, myPropertiesFuture).join();
+
+                try {
+                        long activeProperties = activePropertiesFuture.get();
+                        long totalProperties = totalPropertiesFuture.get();
+                        long pendingRequests = pendingRequestsFuture.get();
+                        java.math.BigDecimal revenue = revenueFuture.get();
+                        Long views = viewsFuture.get();
+                        Long inquiries = inquiriesFuture.get();
+                        long activeBookings = activeBookingsFuture.get();
+                        List<com.webapp.domain.booking.dto.BookingResponse> incomingRequests = incomingRequestsFuture
+                                        .get();
+                        List<com.webapp.domain.property.dto.PropertyResponse> myProperties = myPropertiesFuture.get();
+
+                        // Occupancy: Confirmed Bookings / Total Properties
+                        double occupancy = totalProperties > 0 ? ((double) activeBookings / totalProperties) * 100.0
+                                        : 0.0;
+
+                        return LandlordDashboardDTO.builder()
+                                        .activePropertiesCount(activeProperties)
+                                        .totalRequestsPending(pendingRequests)
+                                        .totalRevenue(revenue != null ? revenue : java.math.BigDecimal.ZERO)
+                                        .totalViews(views != null ? views : 0L)
+                                        .totalInquiries(inquiries != null ? inquiries : 0L)
+                                        .occupancyRate(occupancy)
+                                        .incomingTenantRequests(incomingRequests)
+                                        .myPropertiesOverview(myProperties)
+                                        .build();
+                } catch (Exception e) {
+                        throw new RuntimeException("Error calculating dashboard stats", e);
+                }
         }
 
         @Override
@@ -270,7 +308,10 @@ public class DashboardServiceImpl implements DashboardService {
                 long unread = notificationRepository.countUnreadByUserId(user.getId());
 
                 List<com.webapp.domain.property.dto.PropertyResponse> recommended = propertyRepository
-                                .searchProperties(user.getCity(), null, null, null, null, null)
+                                .searchProperties(user.getCity(), null, null, null, null, null,
+                                                java.util.List.of(
+                                                                com.webapp.domain.property.enums.PropertyStatus.APPROVED,
+                                                                com.webapp.domain.property.enums.PropertyStatus.ACTIVE))
                                 .stream().limit(3)
                                 .map(p -> com.webapp.domain.property.dto.PropertyResponse.builder()
                                                 .id(p.getId())
@@ -305,22 +346,22 @@ public class DashboardServiceImpl implements DashboardService {
                 boolean idVerified = verificationRequestRepository.existsByUserIdAndStatusAndDocumentTypeIn(
                                 user.getId(),
                                 com.webapp.domain.verification.entity.VerificationRequest.VerificationStatus.APPROVED,
-                                List.of("ID_CARD", "PASSPORT"));
+                                List.of("ID_CARD", "PASSPORT", "GOVERNMENT_ID", "DRIVER_LICENSE"));
 
                 // Check for Reference verification (could be another document type or logic)
                 boolean referenceVerified = false; // Placeholder or check other doc types
 
                 int progress = 0;
                 if (emailVerified)
-                        progress += 20;
+                        progress += 25;
                 if (phoneVerified)
-                        progress += 20;
+                        progress += 25;
                 if (profileCompleted)
-                        progress += 20;
+                        progress += 25;
                 if (idVerified)
-                        progress += 20;
-                if (referenceVerified)
-                        progress += 20;
+                        progress += 25;
+                // Reference verification is currently unused/placeholder
+                // if (referenceVerified) progress += 20;
 
                 UserDashboardDTO.VerificationProgress verProgress = UserDashboardDTO.VerificationProgress.builder()
                                 .totalProgress(progress)
@@ -370,7 +411,8 @@ public class DashboardServiceImpl implements DashboardService {
 
                 // Emergency Rooms: Find real emergency rooms
                 List<com.webapp.domain.property.dto.PropertyResponse> emergency = propertyRepository
-                                .findByEmergencyAvailableTrueAndStatus("Active")
+                                .findByEmergencyAvailableTrueAndStatus(
+                                                com.webapp.domain.property.enums.PropertyStatus.ACTIVE)
                                 .stream()
                                 .limit(5)
                                 .map(this::mapToPropertyResponse)
@@ -418,6 +460,11 @@ public class DashboardServiceImpl implements DashboardService {
 
         private com.webapp.domain.property.dto.PropertyResponse mapToPropertyResponse(
                         com.webapp.domain.property.entity.Property property) {
+                return mapToPropertyResponse(property, property.getOwner());
+        }
+
+        private com.webapp.domain.property.dto.PropertyResponse mapToPropertyResponse(
+                        com.webapp.domain.property.entity.Property property, User owner) {
                 return com.webapp.domain.property.dto.PropertyResponse.builder()
                                 .id(property.getId())
                                 .title(property.getTitle())
@@ -429,15 +476,17 @@ public class DashboardServiceImpl implements DashboardService {
                                 .sqft(property.getSqft())
                                 .rating(property.getRating())
                                 .verified(property.isVerified())
-                                .status(property.getStatus())
+                                .status(property.getStatus().name())
                                 .views(property.getViews())
                                 .inquiries(property.getInquiries())
                                 .priceAmount(property.getPriceAmount())
-                                .ownerName(property.getOwner() != null ? property.getOwner().getFullName() : "Unknown")
-                                .ownerId(property.getOwner() != null ? property.getOwner().getId() : null)
+                                .ownerName(owner != null ? owner.getFullName() : "Unknown")
+                                .ownerId(owner != null ? owner.getId() : null)
                                 .imageUrl(property.getImageUrl())
                                 .latitude(property.getLatitude())
                                 .longitude(property.getLongitude())
+                                .propertyType(property.getPropertyType().name())
+                                .isSaved(property.isSaved())
                                 .build();
         }
 }

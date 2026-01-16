@@ -12,6 +12,7 @@ public class ApplicationMapper {
         if (app == null) {
             return null;
         }
+        // Maps status, message, and timestamps to response
         return ApplicationResponse.builder()
                 .id(app.getId())
                 .senderId(app.getSender().getId())

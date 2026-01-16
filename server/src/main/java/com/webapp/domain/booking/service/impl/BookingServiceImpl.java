@@ -21,6 +21,7 @@ import com.webapp.domain.notification.service.NotificationService;
 import com.webapp.domain.property.repository.PropertyRepository;
 import com.webapp.domain.user.entity.User;
 import com.webapp.domain.user.service.UserService;
+import com.webapp.domain.verification.service.VerificationService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,10 +35,14 @@ public class BookingServiceImpl implements BookingService {
     private final BookingMapper bookingMapper;
     private final AuditService auditService;
     private final NotificationService notificationService;
+    private final VerificationService verificationService;
 
     @Override
     @Transactional
     public BookingResponse createBooking(Long userId, BookingRequest request) {
+        // Enforce 100% Verification
+        verificationService.validateUserVerification(userId);
+
         User tenant = userService.getUserById(userId);
 
         // Find Property
@@ -76,6 +81,15 @@ public class BookingServiceImpl implements BookingService {
         // Audit log
         auditService.log(userId, AuditAction.BOOKING_CREATE, "Booking", savedBooking.getId());
 
+        // Notify landlord about new booking request
+        notificationService.createNotificationForUser(
+                landlord.getId(),
+                NotificationType.BOOKING_REQUEST,
+                "New Booking Request",
+                tenant.getFirstName() + " " + tenant.getLastName() + " wants to book your property: "
+                        + property.getTitle(),
+                "/dashboard/bookings");
+
         return bookingMapper.toResponse(savedBooking);
     }
 
@@ -101,6 +115,11 @@ public class BookingServiceImpl implements BookingService {
         } else if (status == BookingStatus.CONFIRMED || status == BookingStatus.REJECTED) {
             if (!booking.getLandlord().getId().equals(userId)) {
                 throw new SecurityException("Only landlord can confirm/reject booking");
+            }
+            if (status == BookingStatus.CONFIRMED) {
+                com.webapp.domain.property.entity.Property property = booking.getProperty();
+                property.setStatus(com.webapp.domain.property.enums.PropertyStatus.RENTED);
+                propertyRepository.save(property);
             }
         }
 
