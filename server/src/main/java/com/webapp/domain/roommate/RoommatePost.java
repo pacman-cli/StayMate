@@ -60,6 +60,21 @@ public class RoommatePost {
   private Boolean pets; // true = ok with pets / has pets
   private String occupation; // STUDENT, PROFESSIONAL, ANY
 
+  // AI Matching Fields
+  @Column(name = "cleanliness")
+  @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+  private CleanlinessLevel cleanliness;
+
+  @Column(name = "sleep_schedule")
+  @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+  private SleepSchedule sleepSchedule;
+
+  @Column(name = "personality_tags")
+  private java.util.List<String> personalityTags;
+
+  @Column(name = "interests")
+  private java.util.List<String> interests;
+
   @Column(name = "status")
   @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
   @Builder.Default
