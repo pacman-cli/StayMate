@@ -47,6 +47,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         email);
 
                 if (userDetails != null) {
+                    log.debug("Loaded UserDetails: {}", userDetails.getClass().getName());
+                    if (userDetails instanceof com.webapp.auth.security.UserPrincipal) {
+                        log.debug("UserPrincipal ID: {}",
+                                ((com.webapp.auth.security.UserPrincipal) userDetails).getId());
+                    } else {
+                        log.warn("UserDetails is NOT UserPrincipal! It is: {}", userDetails.getClass().getName());
+                    }
+
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
@@ -94,8 +102,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // Skip JWT filter for public auth endpoints and OAuth2 endpoints
-        return (path.startsWith("/api/auth/") ||
+        // Only skip specific public endpoints, do NOT skip entire /api/auth/ prefix
+        // blindly
+        return path.equals("/api/auth/login") ||
+                path.equals("/api/auth/register") ||
+                path.equals("/api/auth/refresh-token") ||
+                path.equals("/api/auth/check-email") ||
                 path.startsWith("/oauth2/") ||
-                path.startsWith("/login/oauth2/"));
+                path.startsWith("/login/oauth2/");
     }
 }

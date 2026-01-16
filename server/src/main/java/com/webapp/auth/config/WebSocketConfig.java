@@ -16,25 +16,25 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final WebSocketAuthInterceptor webSocketAuthInterceptor;
+  private final WebSocketAuthInterceptor webSocketAuthInterceptor;
 
-    @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*")
-                .withSockJS();
-    }
+  @Override
+  public void registerStompEndpoints(StompEndpointRegistry registry) {
+    registry.addEndpoint("/ws")
+        .setAllowedOriginPatterns("*")
+        .withSockJS();
+  }
 
-    @Override
-    public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // Enable simple broker for both public topics and private queues
-        registry.enableSimpleBroker("/topic", "/queue", "/user");
-        registry.setApplicationDestinationPrefixes("/app");
-        registry.setUserDestinationPrefix("/user");
-    }
+  @Override
+  public void configureMessageBroker(MessageBrokerRegistry registry) {
+    // Enable simple broker for both public topics and private queues
+    registry.enableSimpleBroker("/topic", "/queue", "/user");
+    registry.setApplicationDestinationPrefixes("/app");
+    registry.setUserDestinationPrefix("/user");
+  }
 
-    @Override
-    public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(webSocketAuthInterceptor);
-    }
+  @Override
+  public void configureClientInboundChannel(ChannelRegistration registration) {
+    registration.interceptors(webSocketAuthInterceptor);
+  }
 }
