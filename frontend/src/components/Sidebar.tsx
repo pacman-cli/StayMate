@@ -297,10 +297,7 @@ export default function Sidebar() {
 
     return (
         <aside
-            className={`fixed left-0 top-0 h-screen flex flex-col transition-all duration-300 z-40 ${collapsed ? "w-20" : "w-64"
-                } ${isDark
-                    ? "bg-dark-900 border-r border-white/10"
-                    : "bg-warm-50 border-r border-slate-200"
+            className={`glass-panel fixed left-0 top-0 h-screen flex flex-col z-40 ${collapsed ? "w-20" : "w-64"
                 }`}
         >
             {/* Logo Section */}
@@ -316,8 +313,8 @@ export default function Sidebar() {
                 <button
                     onClick={() => setCollapsed(!collapsed)}
                     className={`p-1.5 rounded-lg transition-colors ${isDark
-                        ? "hover:bg-dark-800 text-slate-400"
-                        : "hover:bg-slate-100 text-slate-500"
+                        ? "hover:bg-white/10 text-slate-400"
+                        : "hover:bg-slate-900/5 text-slate-500"
                         }`}
                 >
                     {collapsed ? (

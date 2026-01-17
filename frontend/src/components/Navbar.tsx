@@ -23,8 +23,8 @@ export default function Navbar() {
     return (
         <nav
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isDark
-                ? "bg-dark-900/90 border-b border-white/5 backdrop-blur-md" // Dark Mode: Premium Glass
-                : "bg-warm-25/95 border-b border-[#EAE5D5] backdrop-blur-md" // Light Mode: Preserve glass effect, higher opacity
+                ? "glass-panel" // Dark Mode: Premium Glass
+                : "glass-panel bg-white/80" // Light Mode: Slightly more opaque for navbar
                 }`}
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -217,10 +217,10 @@ export default function Navbar() {
             {
                 mobileMenuOpen && (
                     <div
-                        className={`md:hidden border-t animate-fade-in-down ${isDark
-                            ? "bg-dark-900/95 border-white/10"
-                            : "bg-[#F5EEE4]/95 border-dark-200/10"
-                            } backdrop-blur-xl`}
+                        className={`md:hidden border-t animate-fade-in-down glass-panel ${isDark
+                            ? "bg-dark-900/95"
+                            : "bg-[#F5EEE4]/95"
+                            }`}
                     >
                         <div className="px-4 py-4 space-y-2">
                             {isAuthenticated ? (

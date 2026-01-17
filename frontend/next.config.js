@@ -3,7 +3,9 @@ const nextConfig = {
     reactStrictMode: true,
     output: "standalone",
     async rewrites() {
-        const backendUrl = process.env.BACKEND_URL || "http://localhost:8080";
+        console.log("DEBUG: process.env.BACKEND_URL =", process.env.BACKEND_URL)
+        const backendUrl = process.env.BACKEND_URL || "http://localhost:8080"
+        console.log("DEBUG: Using backendUrl =", backendUrl)
         return [
             {
                 source: "/oauth2/:path*",
@@ -17,8 +19,32 @@ const nextConfig = {
                 source: "/api/:path*",
                 destination: `${backendUrl}/api/:path*`,
             },
-        ];
+        ]
     },
-};
+    images: {
+        remotePatterns: [
+            {
+                protocol: "http",
+                hostname: "localhost",
+            },
+            {
+                protocol: "http",
+                hostname: "minio",
+            },
+            {
+                protocol: "https",
+                hostname: "ui-avatars.com",
+            },
+            {
+                protocol: "https",
+                hostname: "images.unsplash.com",
+            },
+            {
+                protocol: "https",
+                hostname: "*.googleusercontent.com",
+            },
+        ],
+    },
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig

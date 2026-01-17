@@ -42,6 +42,10 @@ module.exports = {
                     orange: "#f97316",
                     emerald: "#10b981",
                 },
+                warm: {
+                    25: "#f9eddeff",
+                    50: "#f8ecdcff",
+                },
             },
             fontFamily: {
                 sans: ["Inter", "system-ui", "sans-serif"],
@@ -113,12 +117,13 @@ module.exports = {
                 xs: "2px",
             },
             boxShadow: {
-                "glow-sm": "0 0 15px -3px rgba(99, 102, 241, 0.3)",
-                glow: "0 0 25px -5px rgba(99, 102, 241, 0.4)",
-                "glow-lg": "0 0 35px -5px rgba(99, 102, 241, 0.5)",
-                "inner-glow": "inset 0 0 20px rgba(99, 102, 241, 0.1)",
-                glass: "0 8px 32px 0 rgba(0, 0, 0, 0.36)",
-                "glass-sm": "0 4px 16px 0 rgba(0, 0, 0, 0.2)",
+                "glow-sm": "0 0 15px -3px rgba(99, 102, 241, 0.2)",
+                glow: "0 0 25px -5px rgba(99, 102, 241, 0.3)",
+                "glow-lg": "0 0 35px -5px rgba(99, 102, 241, 0.4)",
+                "inner-glow": "inset 0 0 20px rgba(99, 102, 241, 0.05)",
+                glass: "0 8px 32px 0 rgba(0, 0, 0, 0.15)", // Softer shadow
+                "glass-sm": "0 4px 16px 0 rgba(0, 0, 0, 0.1)",
+                "glass-md": "0 6px 24px 0 rgba(0, 0, 0, 0.12)",
             },
             borderRadius: {
                 "4xl": "2rem",
@@ -127,4 +132,4 @@ module.exports = {
         },
     },
     plugins: [],
-};
+}

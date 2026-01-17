@@ -63,9 +63,14 @@ export default function HeroSection() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className={`text-5xl sm:text-6xl md:text-7xl font-extrabold mb-6 leading-[1.1] tracking-tight ${isDark ? "text-white" : "text-slate-900"
                 }`}
+              style={{
+                textShadow: isDark
+                  ? "0 2px 20px rgba(0,0,0,0.5), 0 0 40px rgba(0,0,0,0.3)"
+                  : "0 1px 10px rgba(255,255,255,0.8), 0 0 20px rgba(255,255,255,0.5)"
+              }}
             >
               Find Your <br />
-              <span className="bg-gradient-to-r from-primary-400 via-primary-500 to-purple-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-primary-400 via-primary-500 to-purple-500 bg-clip-text text-transparent drop-shadow-sm">
                 Perfect Place.
               </span>
             </motion.h1>
@@ -74,8 +79,13 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className={`text-xl font-light leading-relaxed mb-10 max-w-xl ${isDark ? "text-slate-300" : "text-slate-600"
+              className={`text-xl font-light leading-relaxed mb-10 max-w-xl ${isDark ? "text-slate-200" : "text-slate-700"
                 }`}
+              style={{
+                textShadow: isDark
+                  ? "0 1px 8px rgba(0,0,0,0.4)"
+                  : "0 1px 4px rgba(255,255,255,0.6)"
+              }}
             >
               Connect with verified landlords and compatible roommates.
               A safer, smarter way to rent in the modern world.
@@ -158,7 +168,7 @@ export default function HeroSection() {
             >
               {/* Fake Image Area */}
               <div className="h-48 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-800 relative overflow-hidden mb-4 group">
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80')] bg-cover bg-center transition-transform duration-700 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-[url('/images/property-placeholder.svg')] bg-cover bg-center transition-transform duration-700 group-hover:scale-110" />
                 <div className="absolute top-3 right-3 bg-white/20 backdrop-blur-md p-1.5 rounded-full">
                   <Heart className="w-4 h-4 text-white fill-white" />
                 </div>
