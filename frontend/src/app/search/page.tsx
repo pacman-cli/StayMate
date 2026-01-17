@@ -52,7 +52,7 @@ export default function SearchRentalsPage() {
 
                 const mappedProperties = data.map((p: any) => ({
                     ...p,
-                    imageUrl: p.imageUrl || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80",
+                    imageUrl: p.imageUrl || "/images/property-placeholder.svg",
                     isSaved: false
                 }))
                 setProperties(mappedProperties)

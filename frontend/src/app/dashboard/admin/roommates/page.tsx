@@ -1,5 +1,6 @@
 "use client"
 
+import Avatar from "@/components/common/Avatar"
 import { useAuth } from "@/context/AuthContext"
 import { roommateApi } from "@/lib/api"
 import { Calendar, Check, Cigarette, DollarSign, MapPin, X } from "lucide-react"
@@ -98,7 +99,7 @@ export default function AdminRoommatesPage() {
               <div key={post.id} className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 flex flex-col gap-4">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
-                    <img src={post.userAvatar || `https://ui-avatars.com/api/?name=${post.userName}`} alt={post.userName} className="w-10 h-10 rounded-full" />
+                    <Avatar name={post.userName || "User"} src={post.userAvatar} size="md" />
                     <div>
                       <h3 className="font-semibold text-slate-900 dark:text-white">{post.userName}</h3>
                       <div className="flex items-center gap-2 text-slate-500 text-xs">

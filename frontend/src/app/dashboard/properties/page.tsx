@@ -160,11 +160,9 @@ export default function MyPropertiesPage() {
                                 {/* Image */}
                                 <div className="relative aspect-video overflow-hidden">
                                     <motion.img
-                                        src={
-                                            property.imageUrl ||
-                                            "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80"
-                                        }
+                                        src={property.imageUrl || "/images/property-placeholder.svg"}
                                         alt={property.title}
+                                        onError={(e) => { e.currentTarget.src = "/images/property-placeholder.svg" }}
                                         className="w-full h-full object-cover"
                                         whileHover={{ scale: 1.05 }}
                                         transition={{ duration: 0.3 }}

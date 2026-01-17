@@ -1,81 +1,76 @@
-"use client";
+"use client"
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
-import { useTheme } from "@/context/ThemeContext";
-import DashboardLayout from "@/components/DashboardLayout";
-import { messageApi, userSearchApi } from "@/lib/api";
-import { socketService } from "@/lib/socket";
+import DashboardLayout from "@/components/DashboardLayout"
+import { useAuth } from "@/context/AuthContext"
+import { useTheme } from "@/context/ThemeContext"
+import { messageApi, userSearchApi } from "@/lib/api"
+import { PresenceUpdate, socketService } from "@/lib/socket"
 import {
     ConversationResponse,
     MessageResponse,
     SendMessageRequest,
     User,
-} from "@/types/auth";
+} from "@/types/auth"
 import {
-    Search,
-    Send,
-    MoreVertical,
-    Phone,
-    Video,
     ArrowLeft,
     Check,
     CheckCheck,
-    Smile,
-    Paperclip,
-    Image as ImageIcon,
-    Trash2,
-    Circle,
-    MessageSquare,
-    Plus,
-    X,
-    Loader2,
-    Users,
     Home,
-    Clock,
-    ChevronDown,
+    Image as ImageIcon,
+    Loader2,
+    MessageSquare,
+    MoreVertical,
+    Paperclip,
+    Phone,
+    Plus,
+    Search,
+    Send,
+    Smile,
     UserPlus,
-} from "lucide-react";
-import Link from "next/link";
+    Users,
+    Video,
+    X
+} from "lucide-react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 export default function MessagesPage() {
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const { user, isAuthenticated, isLoading: authLoading } = useAuth();
-    const { isDark } = useTheme();
+    const router = useRouter()
+    const searchParams = useSearchParams()
+    const { user, isAuthenticated, isLoading: authLoading } = useAuth()
+    const { isDark } = useTheme()
 
     const [conversations, setConversations] = useState<ConversationResponse[]>(
         [],
-    );
+    )
     const [selectedConversation, setSelectedConversation] =
-        useState<ConversationResponse | null>(null);
-    const [messages, setMessages] = useState<MessageResponse[]>([]);
-    const [newMessage, setNewMessage] = useState("");
-    const [searchQuery, setSearchQuery] = useState("");
-    const [isLoading, setIsLoading] = useState(true);
-    const [isSending, setIsSending] = useState(false);
-    const [showMobileChat, setShowMobileChat] = useState(false);
-    const [totalUnread, setTotalUnread] = useState(0);
+        useState<ConversationResponse | null>(null)
+    const [messages, setMessages] = useState<MessageResponse[]>([])
+    const [newMessage, setNewMessage] = useState("")
+    const [searchQuery, setSearchQuery] = useState("")
+    const [isLoading, setIsLoading] = useState(true)
+    const [isSending, setIsSending] = useState(false)
+    const [showMobileChat, setShowMobileChat] = useState(false)
+    const [totalUnread, setTotalUnread] = useState(0)
 
     // New conversation modal state
     const [showNewConversationModal, setShowNewConversationModal] =
-        useState(false);
-    const [userSearchQuery, setUserSearchQuery] = useState("");
-    const [userSearchResults, setUserSearchResults] = useState<User[]>([]);
-    const [isSearchingUsers, setIsSearchingUsers] = useState(false);
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
-    const [initialMessage, setInitialMessage] = useState("");
-    const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+        useState(false)
+    const [userSearchQuery, setUserSearchQuery] = useState("")
+    const [userSearchResults, setUserSearchResults] = useState<User[]>([])
+    const [isSearchingUsers, setIsSearchingUsers] = useState(false)
+    const [selectedUser, setSelectedUser] = useState<User | null>(null)
+    const [initialMessage, setInitialMessage] = useState("")
+    const [isCreatingConversation, setIsCreatingConversation] = useState(false)
 
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-    const messageInputRef = useRef<HTMLTextAreaElement>(null);
-    const userSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null)
+    const messageInputRef = useRef<HTMLTextAreaElement>(null)
+    const userSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
     // Scroll to bottom of messages
     const scrollToBottom = useCallback(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, []);
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    }, [])
 
     // Fetch conversations
     const fetchConversations = useCallback(async () => {
@@ -84,13 +79,13 @@ export default function MessagesPage() {
                 0,
                 50,
                 searchQuery || undefined,
-            );
-            setConversations(response.conversations);
-            setTotalUnread(response.totalUnreadCount);
+            )
+            setConversations(response.conversations)
+            setTotalUnread(response.totalUnreadCount)
         } catch (error) {
-            console.error("Failed to fetch conversations:", error);
+            console.error("Failed to fetch conversations:", error)
         }
-    }, [searchQuery]);
+    }, [searchQuery])
 
     // Fetch messages for selected conversation
     const fetchMessages = useCallback(
@@ -100,258 +95,276 @@ export default function MessagesPage() {
                     conversationId,
                     0,
                     100,
-                );
-                setMessages(response.messages);
+                )
+                setMessages(response.messages)
                 // Mark as read
-                await messageApi.markConversationAsRead(conversationId);
+                await messageApi.markConversationAsRead(conversationId)
                 // Refresh conversations to update unread count
-                fetchConversations();
+                fetchConversations()
             } catch (error) {
-                console.error("Failed to fetch messages:", error);
+                console.error("Failed to fetch messages:", error)
             }
         },
         [fetchConversations],
-    );
+    )
 
     // Initial load
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
-            router.push("/login");
-            return;
+            router.push("/login")
+            return
         }
 
         if (isAuthenticated) {
-            setIsLoading(true);
-            fetchConversations().finally(() => setIsLoading(false));
+            setIsLoading(true)
+            fetchConversations().finally(() => setIsLoading(false))
         }
-    }, [authLoading, isAuthenticated, router, fetchConversations]);
+    }, [authLoading, isAuthenticated, router, fetchConversations])
 
     // Handle URL params for direct conversation
     useEffect(() => {
-        const conversationId = searchParams.get("conversation");
+        const conversationId = searchParams.get("conversation")
         if (conversationId && conversations.length > 0) {
             const conv = conversations.find(
                 (c) => c.id === parseInt(conversationId),
-            );
+            )
             if (conv) {
-                setSelectedConversation(conv);
-                fetchMessages(conv.id);
-                setShowMobileChat(true);
+                setSelectedConversation(conv)
+                fetchMessages(conv.id)
+                setShowMobileChat(true)
             }
         }
-    }, [searchParams, conversations, fetchMessages]);
+    }, [searchParams, conversations, fetchMessages])
 
     // Fetch messages when conversation is selected
     useEffect(() => {
         if (selectedConversation?.id) {
-            fetchMessages(selectedConversation.id);
+            fetchMessages(selectedConversation.id)
         }
-    }, [selectedConversation?.id, fetchMessages]);
+    }, [selectedConversation?.id, fetchMessages])
 
     // Sync selectedConversation with updated conversations list (for online status)
     useEffect(() => {
         if (selectedConversation && conversations.length > 0) {
-            const updatedConv = conversations.find(c => c.id === selectedConversation.id);
+            const updatedConv = conversations.find(c => c.id === selectedConversation.id)
             if (updatedConv && (
                 updatedConv.otherParticipantOnline !== selectedConversation.otherParticipantOnline ||
                 updatedConv.lastMessage !== selectedConversation.lastMessage ||
                 updatedConv.lastMessageAt !== selectedConversation.lastMessageAt
             )) {
-                setSelectedConversation(updatedConv);
+                setSelectedConversation(updatedConv)
             }
         }
-    }, [conversations, selectedConversation]);
+    }, [conversations, selectedConversation])
 
     // Scroll to bottom when messages change
     useEffect(() => {
-        scrollToBottom();
-    }, [messages, scrollToBottom]);
+        scrollToBottom()
+    }, [messages, scrollToBottom])
 
     // WebSocket connection
     useEffect(() => {
         if (isAuthenticated && user?.id) {
             socketService.connect(user.id, (message: MessageResponse) => {
-                console.log("WebSocket Message Received:", message);
+                console.log("WebSocket Message Received:", message)
                 // Handle new message
                 if (selectedConversation && message.conversationId === selectedConversation.id) {
-                    setMessages((prev) => [...prev, message]);
-                    scrollToBottom();
+                    setMessages((prev) => [...prev, message])
+                    scrollToBottom()
                     // Mark as read immediately if current conversation is open
-                    messageApi.markConversationAsRead(message.conversationId);
+                    messageApi.markConversationAsRead(message.conversationId)
                 }
-                
-                // Refresh conversations list to update last message/unread count
-                fetchConversations();
-            });
-        }
 
-        return () => {
-            socketService.disconnect();
-        };
-    }, [isAuthenticated, user, selectedConversation, scrollToBottom, fetchConversations]);
+                // Refresh conversations list to update last message/unread count
+                fetchConversations()
+            })
+
+            // Subscribe to presence updates
+            const handlePresenceUpdate = (update: PresenceUpdate) => {
+                // Update the selected conversation's online status if it matches
+                if (selectedConversation && update.userId === selectedConversation.otherParticipantId) {
+                    setSelectedConversation(prev => prev ? {
+                        ...prev,
+                        otherParticipantOnline: update.online
+                    } : null)
+                }
+                // Update conversations list
+                setConversations(prev => prev.map(conv =>
+                    conv.otherParticipantId === update.userId
+                        ? { ...conv, otherParticipantOnline: update.online }
+                        : conv
+                ))
+            }
+            socketService.onPresenceUpdate(handlePresenceUpdate)
+
+            return () => {
+                socketService.offPresenceUpdate(handlePresenceUpdate)
+            }
+        }
+    }, [isAuthenticated, user, selectedConversation?.id, scrollToBottom, fetchConversations])
 
     // User search with debounce
     useEffect(() => {
         if (userSearchTimeoutRef.current) {
-            clearTimeout(userSearchTimeoutRef.current);
+            clearTimeout(userSearchTimeoutRef.current)
         }
 
         if (userSearchQuery.trim().length < 2) {
-            setUserSearchResults([]);
-            return;
+            setUserSearchResults([])
+            return
         }
 
         userSearchTimeoutRef.current = setTimeout(async () => {
-            setIsSearchingUsers(true);
+            setIsSearchingUsers(true)
             try {
                 const results =
-                    await userSearchApi.searchUsers(userSearchQuery);
-                setUserSearchResults(results);
+                    await userSearchApi.searchUsers(userSearchQuery)
+                setUserSearchResults(results)
             } catch (error) {
-                console.error("Failed to search users:", error);
+                console.error("Failed to search users:", error)
             } finally {
-                setIsSearchingUsers(false);
+                setIsSearchingUsers(false)
             }
-        }, 300);
+        }, 300)
 
         return () => {
             if (userSearchTimeoutRef.current) {
-                clearTimeout(userSearchTimeoutRef.current);
+                clearTimeout(userSearchTimeoutRef.current)
             }
-        };
-    }, [userSearchQuery]);
+        }
+    }, [userSearchQuery])
 
     // Send message
     const handleSendMessage = async () => {
-        if (!newMessage.trim() || !selectedConversation || isSending) return;
+        if (!newMessage.trim() || !selectedConversation || isSending) return
 
-        setIsSending(true);
+        setIsSending(true)
         try {
             const request: SendMessageRequest = {
                 conversationId: selectedConversation.id,
                 content: newMessage.trim(),
-            };
-            const sentMessage = await messageApi.sendMessage(request);
-            setMessages((prev) => [...prev, sentMessage]);
-            setNewMessage("");
-            scrollToBottom();
-            fetchConversations();
+            }
+            const sentMessage = await messageApi.sendMessage(request)
+            setMessages((prev) => [...prev, sentMessage])
+            setNewMessage("")
+            scrollToBottom()
+            fetchConversations()
         } catch (error) {
-            console.error("Failed to send message:", error);
+            console.error("Failed to send message:", error)
         } finally {
-            setIsSending(false);
+            setIsSending(false)
         }
-    };
+    }
 
     // Create new conversation
     const handleCreateConversation = async () => {
         if (!selectedUser || !initialMessage.trim() || isCreatingConversation)
-            return;
+            return
 
-        setIsCreatingConversation(true);
+        setIsCreatingConversation(true)
         try {
             const response = await messageApi.createConversation({
                 recipientId: selectedUser.id,
                 initialMessage: initialMessage.trim(),
-            });
+            })
 
             // Close modal and reset
-            setShowNewConversationModal(false);
-            setSelectedUser(null);
-            setUserSearchQuery("");
-            setUserSearchResults([]);
-            setInitialMessage("");
+            setShowNewConversationModal(false)
+            setSelectedUser(null)
+            setUserSearchQuery("")
+            setUserSearchResults([])
+            setInitialMessage("")
 
             // Refresh conversations and select the new one
-            await fetchConversations();
-            setSelectedConversation(response);
-            setShowMobileChat(true);
+            await fetchConversations()
+            setSelectedConversation(response)
+            setShowMobileChat(true)
         } catch (error) {
-            console.error("Failed to create conversation:", error);
+            console.error("Failed to create conversation:", error)
         } finally {
-            setIsCreatingConversation(false);
+            setIsCreatingConversation(false)
         }
-    };
+    }
 
     // Handle enter key
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            handleSendMessage();
+            e.preventDefault()
+            handleSendMessage()
         }
-    };
+    }
 
     // Format time
     const formatTime = (dateStr: string) => {
-        const date = new Date(dateStr);
-        const now = new Date();
+        const date = new Date(dateStr)
+        const now = new Date()
         const diffDays = Math.floor(
             (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
-        );
+        )
 
         if (diffDays === 0) {
             return date.toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
-            });
+            })
         } else if (diffDays === 1) {
-            return "Yesterday";
+            return "Yesterday"
         } else if (diffDays < 7) {
-            return date.toLocaleDateString([], { weekday: "short" });
+            return date.toLocaleDateString([], { weekday: "short" })
         } else {
             return date.toLocaleDateString([], {
                 month: "short",
                 day: "numeric",
-            });
+            })
         }
-    };
+    }
 
     // Format message time
     const formatMessageTime = (dateStr: string) => {
-        const date = new Date(dateStr);
+        const date = new Date(dateStr)
         return date.toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
-        });
-    };
+        })
+    }
 
     // Group messages by date
     const groupMessagesByDate = (msgs: MessageResponse[]) => {
-        const groups: { date: string; messages: MessageResponse[] }[] = [];
-        let currentDate = "";
+        const groups: { date: string; messages: MessageResponse[] }[] = []
+        let currentDate = ""
 
         msgs.forEach((msg) => {
-            const msgDate = new Date(msg.createdAt).toLocaleDateString();
+            const msgDate = new Date(msg.createdAt).toLocaleDateString()
             if (msgDate !== currentDate) {
-                currentDate = msgDate;
-                groups.push({ date: msgDate, messages: [msg] });
+                currentDate = msgDate
+                groups.push({ date: msgDate, messages: [msg] })
             } else {
-                groups[groups.length - 1].messages.push(msg);
+                groups[groups.length - 1].messages.push(msg)
             }
-        });
+        })
 
-        return groups;
-    };
+        return groups
+    }
 
     // Get date label
     const getDateLabel = (dateStr: string) => {
-        const date = new Date(dateStr);
-        const today = new Date();
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
+        const date = new Date(dateStr)
+        const today = new Date()
+        const yesterday = new Date(today)
+        yesterday.setDate(yesterday.getDate() - 1)
 
         if (date.toDateString() === today.toDateString()) {
-            return "Today";
+            return "Today"
         } else if (date.toDateString() === yesterday.toDateString()) {
-            return "Yesterday";
+            return "Yesterday"
         } else {
             return date.toLocaleDateString([], {
                 weekday: "long",
                 month: "long",
                 day: "numeric",
-            });
+            })
         }
-    };
+    }
 
     if (authLoading || isLoading) {
         return (
@@ -369,10 +382,10 @@ export default function MessagesPage() {
                     </div>
                 </div>
             </DashboardLayout>
-        );
+        )
     }
 
-    const messageGroups = groupMessagesByDate(messages);
+    const messageGroups = groupMessagesByDate(messages)
 
     return (
         <DashboardLayout>
@@ -421,11 +434,10 @@ export default function MessagesPage() {
                                 placeholder="Search conversations..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-sm transition-colors ${
-                                    isDark
-                                        ? "bg-white/5 text-white placeholder-slate-500 focus:bg-white/10"
-                                        : "bg-slate-100 text-slate-900 placeholder-slate-400 focus:bg-slate-200"
-                                } outline-none`}
+                                className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-sm transition-colors ${isDark
+                                    ? "bg-white/5 text-white placeholder-slate-500 focus:bg-white/10"
+                                    : "bg-slate-100 text-slate-900 placeholder-slate-400 focus:bg-slate-200"
+                                    } outline-none`}
                             />
                         </div>
                     </div>
@@ -456,11 +468,10 @@ export default function MessagesPage() {
                                     onClick={() =>
                                         setShowNewConversationModal(true)
                                     }
-                                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                                        isDark
-                                            ? "bg-primary-500 text-white hover:bg-primary-600"
-                                            : "bg-primary-500 text-white hover:bg-primary-600"
-                                    }`}
+                                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${isDark
+                                        ? "bg-primary-500 text-white hover:bg-primary-600"
+                                        : "bg-primary-500 text-white hover:bg-primary-600"
+                                        }`}
                                 >
                                     <UserPlus className="w-4 h-4" />
                                     Start a conversation
@@ -471,18 +482,17 @@ export default function MessagesPage() {
                                 <button
                                     key={conv.id}
                                     onClick={() => {
-                                        setSelectedConversation(conv);
-                                        setShowMobileChat(true);
+                                        setSelectedConversation(conv)
+                                        setShowMobileChat(true)
                                     }}
-                                    className={`w-full p-4 flex items-center gap-3 transition-colors ${
-                                        selectedConversation?.id === conv.id
-                                            ? isDark
-                                                ? "bg-white/10"
-                                                : "bg-primary-50"
-                                            : isDark
-                                              ? "hover:bg-white/5"
-                                              : "hover:bg-slate-50"
-                                    }`}
+                                    className={`w-full p-4 flex items-center gap-3 transition-colors ${selectedConversation?.id === conv.id
+                                        ? isDark
+                                            ? "bg-white/10"
+                                            : "bg-primary-50"
+                                        : isDark
+                                            ? "hover:bg-white/5"
+                                            : "hover:bg-slate-50"
+                                        }`}
                                 >
                                     {/* Avatar */}
                                     <div className="relative flex-shrink-0">
@@ -508,7 +518,7 @@ export default function MessagesPage() {
                                             </div>
                                         )}
                                         {conv.otherParticipantOnline && (
-                                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white dark:border-dark-800" />
+                                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white dark:border-dark-800 animate-pulse" />
                                         )}
                                     </div>
 
@@ -604,7 +614,7 @@ export default function MessagesPage() {
                                             </div>
                                         )}
                                         {selectedConversation.otherParticipantOnline && (
-                                            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white dark:border-dark-800" />
+                                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white dark:border-dark-800 animate-pulse" />
                                         )}
                                     </div>
                                     <div>
@@ -616,14 +626,17 @@ export default function MessagesPage() {
                                             }
                                         </h2>
                                         <p
-                                            className={`text-xs ${isDark ? "text-slate-500" : "text-slate-500"}`}
+                                            className={`text-xs flex items-center gap-1.5 ${isDark ? "text-slate-500" : "text-slate-500"}`}
                                         >
                                             {selectedConversation.otherParticipantOnline ? (
-                                                <span className="text-emerald-500">
-                                                    Online
-                                                </span>
+                                                <>
+                                                    <span className="w-2 h-2 bg-emerald-500 rounded-full inline-block animate-pulse" />
+                                                    <span className="text-emerald-500 font-medium">
+                                                        Active now
+                                                    </span>
+                                                </>
                                             ) : (
-                                                "Offline"
+                                                <span className="text-slate-400">Offline</span>
                                             )}
                                             {selectedConversation.propertyTitle && (
                                                 <span>
@@ -726,18 +739,24 @@ export default function MessagesPage() {
 
                                                             {/* Message Bubble */}
                                                             <div
-                                                                className={`px-4 py-2.5 max-w-full shadow-sm ${
-                                                                    msg.isOwnMessage
-                                                                        ? "bg-primary-600 text-white rounded-2xl rounded-tr-none ml-auto"
-                                                                        : isDark
-                                                                          ? "bg-slate-800 text-white rounded-2xl rounded-tl-none mr-auto border border-slate-700"
-                                                                          : "bg-white text-slate-800 rounded-2xl rounded-tl-none mr-auto border border-slate-200"
-                                                                }`}
+                                                                className={`px-5 py-3 max-w-full shadow-sm ${msg.isOwnMessage
+                                                                    ? "bg-gradient-to-br from-primary-600 to-primary-700 text-white rounded-3xl rounded-tr-sm ml-auto"
+                                                                    : isDark
+                                                                        ? "glass-panel bg-dark-800/60 text-white rounded-3xl rounded-tl-sm mr-auto"
+                                                                        : "glass-panel bg-white/80 text-slate-900 rounded-3xl rounded-tl-sm mr-auto"
+                                                                    }`}
                                                             >
+                                                                {msg.attachmentUrl && (
+                                                                    <div className="mb-2 rounded-lg overflow-hidden">
+                                                                        <img
+                                                                            src={msg.attachmentUrl}
+                                                                            alt={msg.attachmentName || "Attachment"}
+                                                                            className="max-w-full h-auto max-h-60 object-cover"
+                                                                        />
+                                                                    </div>
+                                                                )}
                                                                 <p className="text-sm whitespace-pre-wrap break-words">
-                                                                    {
-                                                                        msg.content
-                                                                    }
+                                                                    {msg.content}
                                                                 </p>
                                                                 <div
                                                                     className={`flex items-center justify-end gap-1 mt-1 ${msg.isOwnMessage ? "text-white/70" : isDark ? "text-slate-500" : "text-slate-400"}`}
@@ -765,12 +784,13 @@ export default function MessagesPage() {
                                 <div ref={messagesEndRef} />
                             </div>
 
-                            {/* Message Input */}
-                            <div
-                                className={`p-4 border-t ${isDark ? "border-white/10" : "border-slate-200"}`}
-                            >
+                            {/* Message Input - Floating Glass */}
+                            <div className="p-4 z-10">
                                 <div
-                                    className={`flex items-end gap-3 p-2 rounded-xl ${isDark ? "bg-white/5" : "bg-slate-100"}`}
+                                    className={`flex items-end gap-3 p-2 rounded-2xl shadow-lg border ${isDark
+                                        ? "glass-panel bg-dark-800/80 border-white/10"
+                                        : "glass-panel bg-white/90 border-white/40"
+                                        }`}
                                 >
                                     <button
                                         className={`p-2 rounded-lg transition-colors ${isDark ? "hover:bg-white/10 text-slate-400" : "hover:bg-slate-200 text-slate-500"}`}
@@ -804,13 +824,12 @@ export default function MessagesPage() {
                                         disabled={
                                             !newMessage.trim() || isSending
                                         }
-                                        className={`p-2.5 rounded-xl transition-colors ${
-                                            newMessage.trim() && !isSending
-                                                ? "bg-primary-500 text-white hover:bg-primary-600"
-                                                : isDark
-                                                  ? "bg-white/5 text-slate-600"
-                                                  : "bg-slate-200 text-slate-400"
-                                        }`}
+                                        className={`p-2.5 rounded-xl transition-colors ${newMessage.trim() && !isSending
+                                            ? "bg-primary-500 text-white hover:bg-primary-600"
+                                            : isDark
+                                                ? "bg-white/5 text-slate-600"
+                                                : "bg-slate-200 text-slate-400"
+                                            }`}
                                     >
                                         {isSending ? (
                                             <Loader2 className="w-5 h-5 animate-spin" />
@@ -846,11 +865,10 @@ export default function MessagesPage() {
                                 onClick={() =>
                                     setShowNewConversationModal(true)
                                 }
-                                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-colors ${
-                                    isDark
-                                        ? "bg-primary-500 text-white hover:bg-primary-600"
-                                        : "bg-primary-500 text-white hover:bg-primary-600"
-                                }`}
+                                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-colors ${isDark
+                                    ? "bg-primary-500 text-white hover:bg-primary-600"
+                                    : "bg-primary-500 text-white hover:bg-primary-600"
+                                    }`}
                             >
                                 <UserPlus className="w-4 h-4" />
                                 New Conversation
@@ -867,11 +885,11 @@ export default function MessagesPage() {
                     <div
                         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
                         onClick={() => {
-                            setShowNewConversationModal(false);
-                            setSelectedUser(null);
-                            setUserSearchQuery("");
-                            setUserSearchResults([]);
-                            setInitialMessage("");
+                            setShowNewConversationModal(false)
+                            setSelectedUser(null)
+                            setUserSearchQuery("")
+                            setUserSearchResults([])
+                            setInitialMessage("")
                         }}
                     />
 
@@ -890,11 +908,11 @@ export default function MessagesPage() {
                             </h2>
                             <button
                                 onClick={() => {
-                                    setShowNewConversationModal(false);
-                                    setSelectedUser(null);
-                                    setUserSearchQuery("");
-                                    setUserSearchResults([]);
-                                    setInitialMessage("");
+                                    setShowNewConversationModal(false)
+                                    setSelectedUser(null)
+                                    setUserSearchQuery("")
+                                    setUserSearchResults([])
+                                    setInitialMessage("")
                                 }}
                                 className={`p-2 rounded-lg transition-colors ${isDark ? "hover:bg-white/10 text-slate-400" : "hover:bg-slate-100 text-slate-500"}`}
                             >
@@ -921,11 +939,10 @@ export default function MessagesPage() {
                                                 )
                                             }
                                             autoFocus
-                                            className={`w-full pl-10 pr-4 py-3 rounded-xl text-sm transition-colors ${
-                                                isDark
-                                                    ? "bg-white/5 text-white placeholder-slate-500 focus:bg-white/10 border border-white/10 focus:border-primary-500/50"
-                                                    : "bg-slate-100 text-slate-900 placeholder-slate-400 focus:bg-white border border-transparent focus:border-primary-500"
-                                            } outline-none`}
+                                            className={`w-full pl-10 pr-4 py-3 rounded-xl text-sm transition-colors ${isDark
+                                                ? "bg-white/5 text-white placeholder-slate-500 focus:bg-white/10 border border-white/10 focus:border-primary-500/50"
+                                                : "bg-slate-100 text-slate-900 placeholder-slate-400 focus:bg-white border border-transparent focus:border-primary-500"
+                                                } outline-none`}
                                         />
                                     </div>
 
@@ -973,11 +990,10 @@ export default function MessagesPage() {
                                                                     searchUser,
                                                                 )
                                                             }
-                                                            className={`w-full flex items-center gap-3 p-3 transition-colors ${
-                                                                isDark
-                                                                    ? "hover:bg-white/5"
-                                                                    : "hover:bg-white"
-                                                            }`}
+                                                            className={`w-full flex items-center gap-3 p-3 transition-colors ${isDark
+                                                                ? "hover:bg-white/5"
+                                                                : "hover:bg-white"
+                                                                }`}
                                                         >
                                                             {/* Avatar */}
                                                             {searchUser.profilePictureUrl ? (
@@ -1090,11 +1106,10 @@ export default function MessagesPage() {
                                             onClick={() =>
                                                 setSelectedUser(null)
                                             }
-                                            className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-                                                isDark
-                                                    ? "text-primary-400 hover:bg-white/10"
-                                                    : "text-primary-600 hover:bg-slate-200"
-                                            }`}
+                                            className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${isDark
+                                                ? "text-primary-400 hover:bg-white/10"
+                                                : "text-primary-600 hover:bg-slate-200"
+                                                }`}
                                         >
                                             Change
                                         </button>
@@ -1117,11 +1132,10 @@ export default function MessagesPage() {
                                             placeholder={`Say hello to ${selectedUser.firstName || selectedUser.email}...`}
                                             rows={4}
                                             autoFocus
-                                            className={`w-full px-4 py-3 rounded-xl text-sm resize-none transition-colors ${
-                                                isDark
-                                                    ? "bg-white/5 text-white placeholder-slate-500 focus:bg-white/10 border border-white/10 focus:border-primary-500/50"
-                                                    : "bg-slate-100 text-slate-900 placeholder-slate-400 focus:bg-white border border-transparent focus:border-primary-500"
-                                            } outline-none`}
+                                            className={`w-full px-4 py-3 rounded-xl text-sm resize-none transition-colors ${isDark
+                                                ? "bg-white/5 text-white placeholder-slate-500 focus:bg-white/10 border border-white/10 focus:border-primary-500/50"
+                                                : "bg-slate-100 text-slate-900 placeholder-slate-400 focus:bg-white border border-transparent focus:border-primary-500"
+                                                } outline-none`}
                                         />
                                     </div>
 
@@ -1131,17 +1145,16 @@ export default function MessagesPage() {
                                             onClick={() => {
                                                 setShowNewConversationModal(
                                                     false,
-                                                );
-                                                setSelectedUser(null);
-                                                setUserSearchQuery("");
-                                                setUserSearchResults([]);
-                                                setInitialMessage("");
+                                                )
+                                                setSelectedUser(null)
+                                                setUserSearchQuery("")
+                                                setUserSearchResults([])
+                                                setInitialMessage("")
                                             }}
-                                            className={`px-4 py-2.5 text-sm font-medium rounded-xl transition-colors ${
-                                                isDark
-                                                    ? "text-slate-300 hover:bg-white/10"
-                                                    : "text-slate-700 hover:bg-slate-100"
-                                            }`}
+                                            className={`px-4 py-2.5 text-sm font-medium rounded-xl transition-colors ${isDark
+                                                ? "text-slate-300 hover:bg-white/10"
+                                                : "text-slate-700 hover:bg-slate-100"
+                                                }`}
                                         >
                                             Cancel
                                         </button>
@@ -1151,14 +1164,13 @@ export default function MessagesPage() {
                                                 !initialMessage.trim() ||
                                                 isCreatingConversation
                                             }
-                                            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl transition-colors ${
-                                                initialMessage.trim() &&
+                                            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl transition-colors ${initialMessage.trim() &&
                                                 !isCreatingConversation
-                                                    ? "bg-primary-500 text-white hover:bg-primary-600"
-                                                    : isDark
-                                                      ? "bg-white/5 text-slate-600 cursor-not-allowed"
-                                                      : "bg-slate-100 text-slate-400 cursor-not-allowed"
-                                            }`}
+                                                ? "bg-primary-500 text-white hover:bg-primary-600"
+                                                : isDark
+                                                    ? "bg-white/5 text-slate-600 cursor-not-allowed"
+                                                    : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                                                }`}
                                         >
                                             {isCreatingConversation ? (
                                                 <>
@@ -1180,5 +1192,5 @@ export default function MessagesPage() {
                 </div>
             )}
         </DashboardLayout>
-    );
+    )
 }

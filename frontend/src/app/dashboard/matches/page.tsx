@@ -22,6 +22,7 @@ interface RoommatePostDto {
   pets: boolean
   occupation: string
   matchScore?: number
+  matchExplanation?: string
 }
 
 export default function MatchesPage() {
@@ -53,7 +54,7 @@ export default function MatchesPage() {
         recipientId: matchUserId,
         initialMessage: "Hi! I saw your roommate profile and thought we might be a good match."
       })
-      router.push(`/dashboard/messages?conversationId=${conversation.id}`)
+      router.push(`/messages?conversation=${conversation.id}`)
       toast.success("Connection started!")
     } catch (error) {
       console.error("Failed to connect", error)
@@ -138,6 +139,18 @@ export default function MatchesPage() {
                 </div>
 
                 <div className="space-y-3 mb-6">
+                  {/* AI Insight Section */}
+                  {match.matchExplanation && (
+                    <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg border border-indigo-100 dark:border-indigo-900/30">
+                      <div className="flex gap-2 items-start">
+                        <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400 mt-0.5 shrink-0" />
+                        <p className="text-sm text-indigo-700 dark:text-indigo-300 italic">
+                          "{match.matchExplanation}"
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
                     <MapPin className="h-4 w-4 text-slate-400" />
                     <span>{match.location}</span>

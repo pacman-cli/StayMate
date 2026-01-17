@@ -1,13 +1,15 @@
 "use client"
 
+import Avatar from "@/components/common/Avatar"
 import { useAuth } from "@/context/AuthContext"
 import { useTheme } from "@/context/ThemeContext"
-import { savedApi } from "@/lib/api"
+import { messageApi, savedApi } from "@/lib/api"
 import {
   Bath,
   BedDouble,
   DollarSign,
   Heart,
+  Loader2,
   MapPin,
   Maximize,
   MessageSquare,
@@ -26,6 +28,7 @@ export default function SavedPage() {
   const [savedProperties, setSavedProperties] = useState<any[]>([])
   const [savedRoommates, setSavedRoommates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [messagingId, setMessagingId] = useState<number | null>(null)
 
   // Auth check handled by ProtectedRoute in layout, but double check doesn't hurt
   useEffect(() => {
@@ -81,11 +84,24 @@ export default function SavedPage() {
   }
 
   // Helper for images
-  const getImage = (item: any, type: "rental" | "roommate") => {
-    if (type === "rental") {
-      return item.imageUrl || "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80"
-    } else {
-      return item.userAvatar || item.user?.profilePictureUrl || `https://ui-avatars.com/api/?name=${item.userName || "User"}`
+  const getPropertyImage = (item: any) => {
+    return item.imageUrl || "/images/property-placeholder.svg"
+  }
+
+  // Handle message button click
+  const handleMessage = async (post: any) => {
+    setMessagingId(post.userId)
+    try {
+      const conversation = await messageApi.createConversation({
+        recipientId: post.userId,
+        initialMessage: `Hi ${post.userName?.split(' ')[0] || 'there'}! I saved your roommate profile and wanted to connect.`
+      })
+      router.push(`/messages?conversation=${conversation.id}`)
+    } catch (error) {
+      console.error("Failed to start conversation:", error)
+      toast.error("Failed to start conversation")
+    } finally {
+      setMessagingId(null)
     }
   }
 
@@ -174,8 +190,9 @@ export default function SavedPage() {
                 >
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <img
-                      src={getImage(property, 'rental')}
+                      src={getPropertyImage(property)}
                       alt={property.title}
+                      onError={(e) => { e.currentTarget.src = "/images/property-placeholder.svg" }}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <button
@@ -245,11 +262,7 @@ export default function SavedPage() {
                     }`}
                 >
                   <div className="flex items-start gap-3">
-                    <img
-                      src={getImage(post, 'roommate')}
-                      alt={post.userName}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
+                    <Avatar name={post.userName || "User"} src={post.userAvatar || post.user?.profilePictureUrl} size="lg" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <h3 className={`font-semibold truncate ${isDark ? "text-white" : "text-slate-900"}`}>
@@ -272,14 +285,19 @@ export default function SavedPage() {
 
                   <div className="flex gap-2 mt-4">
                     <button
-                      onClick={() => router.push(`/messages?userId=${post.userId}`)}
-                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${isDark
+                      onClick={() => handleMessage(post)}
+                      disabled={messagingId === post.userId}
+                      className={`flex-1 flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${isDark
                         ? "bg-white/10 text-white hover:bg-white/20"
                         : "bg-slate-100 text-slate-900 hover:bg-slate-200"
                         }`}
                     >
-                      <MessageSquare className="w-4 h-4" />
-                      Message
+                      {messagingId === post.userId ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <MessageSquare className="w-4 h-4" />
+                      )}
+                      {messagingId === post.userId ? "Connecting..." : "Message"}
                     </button>
                     <button
                       onClick={() => handleRemove(post.id, "roommate")}

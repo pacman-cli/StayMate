@@ -1,5 +1,6 @@
 "use client"
 
+import Avatar from "@/components/common/Avatar"
 import DashboardLayout from "@/components/DashboardLayout"
 import { useAuth } from "@/context/AuthContext"
 import { useTheme } from "@/context/ThemeContext"
@@ -52,11 +53,11 @@ export default function ListingDetailPage() {
           ...data,
           // TODO: Backend should return array of images
           images: [
-            data.imageUrl || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80",
-            "https://images.unsplash.com/photo-1484154218962-a1c002085d2f?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80",
-            "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80"
+            data.imageUrl || "/images/property-placeholder.svg",
+            "/images/property-placeholder.svg",
+            "/images/property-placeholder.svg",
+            "/images/property-placeholder.svg",
+            "/images/property-placeholder.svg"
           ]
         })
       } catch (error) {
@@ -283,9 +284,7 @@ export default function ListingDetailPage() {
               <div className="py-6 border-b border-slate-200 dark:border-white/10">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-slate-200 overflow-hidden">
-                      <img src={`https://ui-avatars.com/api/?name=${property.ownerName}&background=random`} alt={property.ownerName} />
-                    </div>
+                    <Avatar name={property.ownerName} size="xl" />
                     <div>
                       <h3 className={`font-semibold text-lg ${isDark ? "text-white" : "text-slate-900"}`}>
                         Hosted by {property.ownerName}

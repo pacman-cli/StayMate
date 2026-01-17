@@ -115,8 +115,9 @@ export default function MyBookingsPage() {
                             <div className="flex flex-col md:flex-row">
                                 <div className="w-full md:w-48 h-48 md:h-auto relative bg-slate-200">
                                     <img
-                                        src={booking.propertyImage || `https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=400&q=80`}
+                                        src={booking.propertyImage || "/images/property-placeholder.svg"}
                                         alt={booking.propertyTitle}
+                                        onError={(e) => { e.currentTarget.src = "/images/property-placeholder.svg" }}
                                         className="w-full h-full object-cover"
                                     />
                                 </div>

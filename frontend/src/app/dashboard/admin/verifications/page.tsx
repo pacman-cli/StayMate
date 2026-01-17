@@ -99,8 +99,9 @@ export default function AdminVerificationsPage() {
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex items-center gap-3">
                         <img
-                          src={req.user.profilePictureUrl || `https://ui-avatars.com/api/?name=${req.user.firstName}`}
+                          src={req.user.profilePictureUrl || "/images/property-placeholder.svg"}
                           alt=""
+                          onError={(e) => { e.currentTarget.src = "/images/property-placeholder.svg" }}
                           className="w-10 h-10 rounded-full bg-slate-200"
                         />
                         <div>

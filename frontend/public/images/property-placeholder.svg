@@ -1,0 +1,16 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#334155;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bgGrad)"/>
+  <!-- House Icon -->
+  <g transform="translate(300, 200)">
+    <path d="M100 0L200 80V200H140V120H60V200H0V80L100 0Z" fill="#475569"/>
+    <rect x="80" y="60" width="40" height="40" fill="#64748b"/>
+    <rect x="60" y="120" width="80" height="80" fill="#64748b"/>
+  </g>
+  <text x="400" y="480" text-anchor="middle" fill="#64748b" font-family="system-ui" font-size="24">No Image Available</text>
+</svg>
