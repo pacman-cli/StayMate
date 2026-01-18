@@ -16,6 +16,7 @@ import com.webapp.domain.booking.enums.BookingStatus;
 import com.webapp.domain.booking.mapper.BookingMapper;
 import com.webapp.domain.booking.repository.BookingRepository;
 import com.webapp.domain.booking.service.BookingService;
+import com.webapp.domain.finance.service.FinanceService;
 import com.webapp.domain.notification.enums.NotificationType;
 import com.webapp.domain.notification.service.NotificationService;
 import com.webapp.domain.property.repository.PropertyRepository;
@@ -36,6 +37,7 @@ public class BookingServiceImpl implements BookingService {
     private final AuditService auditService;
     private final NotificationService notificationService;
     private final VerificationService verificationService;
+    private final FinanceService financeService;
 
     @Override
     @Transactional
@@ -66,6 +68,17 @@ public class BookingServiceImpl implements BookingService {
             throw new IllegalStateException("Property is already booked for these dates");
         }
 
+        // Calculate Financials
+        long days = java.time.temporal.ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate());
+        if (days < 1)
+            days = 1;
+
+        java.math.BigDecimal pricePerNight = property.getPriceAmount() != null ? property.getPriceAmount()
+                : java.math.BigDecimal.ZERO;
+        java.math.BigDecimal totalPrice = pricePerNight.multiply(java.math.BigDecimal.valueOf(days));
+        java.math.BigDecimal commission = totalPrice.multiply(new java.math.BigDecimal("0.05")); // 5% Platform Fee
+        java.math.BigDecimal netAmount = totalPrice.subtract(commission);
+
         Booking booking = Booking.builder()
                 .tenant(tenant)
                 .landlord(landlord)
@@ -74,6 +87,9 @@ public class BookingServiceImpl implements BookingService {
                 .endDate(request.getEndDate())
                 .notes(request.getNotes())
                 .status(BookingStatus.PENDING)
+                .totalPrice(totalPrice)
+                .commission(commission)
+                .netAmount(netAmount)
                 .build();
 
         Booking savedBooking = bookingRepository.save(booking);
@@ -120,6 +136,10 @@ public class BookingServiceImpl implements BookingService {
                 com.webapp.domain.property.entity.Property property = booking.getProperty();
                 property.setStatus(com.webapp.domain.property.enums.PropertyStatus.RENTED);
                 propertyRepository.save(property);
+
+                // Record Earning and Payment
+                financeService.recordEarning(booking);
+                financeService.recordPayment(booking);
             }
         }
 
@@ -223,6 +243,9 @@ public class BookingServiceImpl implements BookingService {
         Booking saved = bookingRepository.save(booking);
 
         auditService.log(userId, AuditAction.BOOKING_APPROVE, "Booking CheckOut", bookingId);
+
+        // Funds become available
+        financeService.markEarningAvailable(booking);
 
         // Notify other party
         Long notifyUserId = booking.getTenant().getId().equals(userId) ? booking.getLandlord().getId()

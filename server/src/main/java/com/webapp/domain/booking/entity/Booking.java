@@ -63,6 +63,15 @@ public class Booking {
     @Column(name = "payment_method")
     private String paymentMethod; // e.g., "bKash", "CREDIT_CARD", "Nagad"
 
+    @Column(name = "total_price")
+    private java.math.BigDecimal totalPrice;
+
+    @Column(name = "commission")
+    private java.math.BigDecimal commission;
+
+    @Column(name = "net_amount")
+    private java.math.BigDecimal netAmount;
+
     @Column(name = "refund_amount")
     private java.math.BigDecimal refundAmount;
 
