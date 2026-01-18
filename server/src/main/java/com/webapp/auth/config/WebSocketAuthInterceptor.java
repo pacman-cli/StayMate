@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.webapp.auth.security.JwtTokenProvider;
+import com.webapp.auth.security.UserPrincipal;
+import com.webapp.domain.messaging.service.PresenceService;
 import com.webapp.domain.user.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -24,15 +26,24 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
 
   private final JwtTokenProvider tokenProvider;
   private final UserService userService;
+  private final PresenceService presenceService;
 
-  public WebSocketAuthInterceptor(JwtTokenProvider tokenProvider, @Lazy UserService userService) {
+  public WebSocketAuthInterceptor(
+      JwtTokenProvider tokenProvider,
+      @Lazy UserService userService,
+      @Lazy PresenceService presenceService) {
     this.tokenProvider = tokenProvider;
     this.userService = userService;
+    this.presenceService = presenceService;
   }
 
   @Override
   public Message<?> preSend(Message<?> message, MessageChannel channel) {
     StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+
+    if (accessor == null) {
+      return message;
+    }
 
     if (StompCommand.CONNECT.equals(accessor.getCommand())) {
       String jwt = getJwtFromHeader(accessor);
@@ -46,14 +57,33 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
 
         accessor.setUser(authentication);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        log.info("User {} authenticated via WebSocket. Principal Name: {}", userId, authentication.getName());
+
+        // Mark user as online
+        String email = userDetails.getUsername();
+        presenceService.setUserOnline(userId, email);
+
+        log.info("User {} ({}) connected via WebSocket", userId, email);
       } else {
-        log.error("Invalid or missing JWT token for WebSocket connection. JWT: {}", jwt);
+        log.error("Invalid or missing JWT token for WebSocket connection");
         throw new IllegalArgumentException("Invalid Token");
       }
+    } else if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
+      // Handle disconnect - mark user offline
+      if (accessor.getUser() != null) {
+        try {
+          UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) accessor.getUser();
+          if (auth.getPrincipal() instanceof UserPrincipal) {
+            UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
+            presenceService.setUserOffline(principal.getId());
+            log.info("User {} disconnected from WebSocket", principal.getId());
+          }
+        } catch (Exception e) {
+          log.warn("Error handling WebSocket disconnect: {}", e.getMessage());
+        }
+      }
     }
-    return message;
 
+    return message;
   }
 
   private String getJwtFromHeader(StompHeaderAccessor accessor) {

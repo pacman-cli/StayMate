@@ -94,7 +94,11 @@ public class SecurityConfig {
                                                                 "/api/uploads/**",
                                                                 // Hidden admin endpoints (protected by secret key, not
                                                                 // JWT)
-                                                                "/api/v1/internal/sudo/**")
+                                                                "/api/v1/internal/sudo/**",
+                                                                // Public Browse Endpoints (GET only, controller handles
+                                                                // auth for POST)
+                                                                "/api/properties/**",
+                                                                "/api/roommates/**")
                                                 .permitAll()
                                                 // Admin only endpoints
                                                 .requestMatchers("/api/admin/**")
