@@ -48,6 +48,7 @@ public class DashboardServiceImpl implements DashboardService {
         private final com.webapp.domain.notification.repository.NotificationRepository notificationRepository;
 
         private final com.webapp.domain.ai.service.MatchingService matchingService;
+        private final com.webapp.domain.roommate.RoommateService roommateService;
         private final com.webapp.domain.verification.repository.VerificationRequestRepository verificationRequestRepository;
         private final com.webapp.domain.dashboard.repository.ExpenseRepository expenseRepository;
 
@@ -400,8 +401,17 @@ public class DashboardServiceImpl implements DashboardService {
                 // Next Rent Due (Mock -> Booking end date or fixed date?)
                 // Let's assume next rent is due on 1st of next month for active booking?
                 // Or just show 0 if no active booking.
+                // Next Rent Due - Fixed logic
                 java.math.BigDecimal nextRent = java.math.BigDecimal.ZERO;
-                // TODO: Logic to get rent amount from active booking
+                List<com.webapp.domain.booking.entity.Booking> activeBookings = bookingRepository
+                                .findActiveBookingsByTenantId(user.getId());
+                if (!activeBookings.isEmpty()) {
+                        // Sum up the price/rent of all active properties (usually just one)
+                        nextRent = activeBookings.stream()
+                                        .map(b -> b.getProperty().getPriceAmount())
+                                        .filter(java.util.Objects::nonNull)
+                                        .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+                }
 
                 UserDashboardDTO.FinanceStats finance = UserDashboardDTO.FinanceStats.builder()
                                 .totalSpentMonth(totalSpentMonth)
@@ -418,7 +428,7 @@ public class DashboardServiceImpl implements DashboardService {
                                 .map(this::mapToPropertyResponse)
                                 .collect(Collectors.toList());
 
-                // Calculate Average Compatibility Score if matches exist
+                // Calculate Average Compatibility Score
                 double avgMatchScore = 0.0;
                 if (!aiMatches.isEmpty()) {
                         avgMatchScore = aiMatches.stream()
@@ -426,6 +436,50 @@ public class DashboardServiceImpl implements DashboardService {
                                                         : 0)
                                         .average()
                                         .orElse(0.0);
+                } else {
+                        // Fallback: Use RoommateService scores when AI is unavailable
+                        try {
+                                List<com.webapp.domain.roommate.RoommatePostDto> roommateMatches = roommateService
+                                                .getMatches(user.getId());
+                                if (!roommateMatches.isEmpty()) {
+                                        // First, try to use actual match scores
+                                        List<Integer> validScores = roommateMatches.stream()
+                                                        .filter(m -> m.getMatchScore() != null && m.getMatchScore() > 0)
+                                                        .map(com.webapp.domain.roommate.RoommatePostDto::getMatchScore)
+                                                        .collect(Collectors.toList());
+
+                                        if (!validScores.isEmpty()) {
+                                                avgMatchScore = validScores.stream()
+                                                                .mapToInt(Integer::intValue)
+                                                                .average()
+                                                                .orElse(0.0);
+                                        } else {
+                                                // If no matchScores (user has no roommate post), estimate based on post
+                                                // quality
+                                                avgMatchScore = roommateMatches.stream()
+                                                                .mapToInt(m -> {
+                                                                        int score = 50; // Base score
+                                                                        if (m.getBio() != null
+                                                                                        && m.getBio().length() > 20)
+                                                                                score += 10;
+                                                                        if (m.getLocation() != null
+                                                                                        && !m.getLocation().isEmpty())
+                                                                                score += 10;
+                                                                        if (m.getPersonalityTags() != null && !m
+                                                                                        .getPersonalityTags().isEmpty())
+                                                                                score += 10;
+                                                                        if (m.getInterests() != null
+                                                                                        && !m.getInterests().isEmpty())
+                                                                                score += 10;
+                                                                        return Math.min(score, 90); // Cap at 90
+                                                                })
+                                                                .average()
+                                                                .orElse(50.0);
+                                        }
+                                }
+                        } catch (Exception e) {
+                                // Silently fail, keep avgMatchScore at 0
+                        }
                 }
 
                 return UserDashboardDTO.builder()
