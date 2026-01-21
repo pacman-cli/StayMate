@@ -2,6 +2,9 @@ package com.webapp.domain.admin.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.webapp.domain.admin.enums.FraudSeverity;
 import com.webapp.domain.admin.enums.FraudType;
 import com.webapp.domain.user.entity.User;
@@ -40,10 +43,12 @@ public class FraudEvent {
   private User user;
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(name = "fraud_type", nullable = false)
   private FraudType type;
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false)
   private FraudSeverity severity;
 

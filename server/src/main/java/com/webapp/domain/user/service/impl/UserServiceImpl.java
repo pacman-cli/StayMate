@@ -142,10 +142,11 @@ public class UserServiceImpl implements UserService {
                 .map(existingUser -> {
                     existingUser.setFirstName(firstName);
                     existingUser.setLastName(lastName);
-                    // Only overwrite profile picture if it's not a locally uploaded one (checking
-                    // key signature)
+                    // Only overwrite profile picture if it's not a locally uploaded one
+                    // Checking for both controller-based uploads and MinIO bucket uploads
                     if (existingUser.getProfilePictureUrl() == null
-                            || !existingUser.getProfilePictureUrl().contains("/api/uploads/")) {
+                            || (!existingUser.getProfilePictureUrl().contains("/api/uploads/")
+                                    && !existingUser.getProfilePictureUrl().contains("staymate-uploads"))) {
                         existingUser.setProfilePictureUrl(profilePictureUrl);
                     }
                     existingUser.setLastLoginAt(LocalDateTime.now());

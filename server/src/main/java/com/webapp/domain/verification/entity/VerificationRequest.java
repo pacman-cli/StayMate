@@ -3,6 +3,8 @@ package com.webapp.domain.verification.entity;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import com.webapp.domain.user.entity.User;
 
@@ -45,6 +47,7 @@ public class VerificationRequest {
   private String documentType; // e.g., "ID_CARD", "PASSPORT"
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false)
   private VerificationStatus status; // PENDING, APPROVED, REJECTED
 

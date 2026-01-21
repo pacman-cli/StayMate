@@ -3,7 +3,9 @@ package com.webapp.domain.property.entity;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import com.webapp.domain.property.enums.SeatStatus;
 
@@ -43,6 +45,7 @@ public class Seat {
   private String label; // Bed 1, Bed 2...
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false)
   private SeatStatus status;
 

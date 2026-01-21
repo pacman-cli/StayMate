@@ -4,12 +4,17 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
+import com.webapp.domain.property.enums.PropertyType;
 import com.webapp.domain.user.entity.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -60,9 +65,10 @@ public class Property {
     private int baths;
     private int sqft;
 
-    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "property_type", nullable = false)
-    private com.webapp.domain.property.enums.PropertyType propertyType;
+    private PropertyType propertyType;
 
     @Column(name = "image_url", length = 500)
     private String imageUrl;
@@ -80,6 +86,7 @@ public class Property {
     private int inquiries = 0;
 
     @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false)
     @Builder.Default
     private com.webapp.domain.property.enums.PropertyStatus status = com.webapp.domain.property.enums.PropertyStatus.PENDING; // Default

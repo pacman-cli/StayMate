@@ -2,6 +2,9 @@ package com.webapp.domain.application.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.webapp.domain.application.enums.ApplicationStatus;
 import com.webapp.domain.user.entity.User;
 
@@ -48,6 +51,7 @@ public class Application {
     private com.webapp.domain.property.entity.Property property;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, columnDefinition = "varchar(255)")
     private ApplicationStatus status;
 

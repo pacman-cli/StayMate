@@ -2,6 +2,9 @@ package com.webapp.domain.notification.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.webapp.domain.notification.enums.NotificationType;
 import com.webapp.domain.user.entity.User;
 
@@ -45,6 +48,7 @@ public class Notification {
     private User user;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "type", nullable = false, columnDefinition = "varchar(255)")
     private NotificationType type;
 

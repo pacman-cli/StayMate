@@ -36,8 +36,11 @@ public class RoommateController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<RoommatePostDto> getPostById(@PathVariable Long id) {
-    return ResponseEntity.ok(roommateService.getPostById(id));
+  public ResponseEntity<RoommatePostDto> getPostById(
+      @AuthenticationPrincipal UserPrincipal userPrincipal,
+      @PathVariable Long id) {
+    Long userId = userPrincipal != null ? userPrincipal.getId() : null;
+    return ResponseEntity.ok(roommateService.getPostById(id, userId));
   }
 
   @GetMapping

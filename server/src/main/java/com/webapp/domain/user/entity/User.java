@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.webapp.domain.user.enums.AuthProvider;
 import com.webapp.domain.user.enums.RoleName;
 
@@ -92,6 +95,7 @@ public class User {
     private boolean pushNotifications = true;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "auth_provider", nullable = false, columnDefinition = "varchar(255)")
     private AuthProvider authProvider;
 
@@ -101,6 +105,7 @@ public class User {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "role", columnDefinition = "varchar(50)")
     @Builder.Default
     private Set<RoleName> roles = new HashSet<>();
@@ -129,6 +134,7 @@ public class User {
     }
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "account_status", nullable = false, columnDefinition = "varchar(255)")
     @Builder.Default
     private com.webapp.domain.user.enums.AccountStatus accountStatus = com.webapp.domain.user.enums.AccountStatus.ACTIVE;

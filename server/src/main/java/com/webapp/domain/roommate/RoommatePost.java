@@ -3,6 +3,9 @@ package com.webapp.domain.roommate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.webapp.domain.user.entity.User;
 
 import jakarta.persistence.Column;
@@ -63,20 +66,25 @@ public class RoommatePost {
   // AI Matching Fields
   @Column(name = "cleanliness")
   @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   private CleanlinessLevel cleanliness;
 
   @Column(name = "sleep_schedule")
   @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   private SleepSchedule sleepSchedule;
 
   @Column(name = "personality_tags")
+  @JdbcTypeCode(SqlTypes.JSON)
   private java.util.List<String> personalityTags;
 
   @Column(name = "interests")
+  @JdbcTypeCode(SqlTypes.JSON)
   private java.util.List<String> interests;
 
   @Column(name = "status")
   @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Builder.Default
   private RoommatePostStatus status = RoommatePostStatus.PENDING;
 

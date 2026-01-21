@@ -2,6 +2,9 @@ package com.webapp.domain.messaging.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.webapp.domain.messaging.enums.MessageType;
 import com.webapp.domain.user.entity.User;
 
@@ -57,6 +60,7 @@ public class Message {
     private String content;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "message_type", nullable = false, columnDefinition = "varchar(255)")
     @Builder.Default
     private MessageType messageType = MessageType.TEXT;

@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.webapp.domain.user.entity.User;
 
 import jakarta.persistence.CascadeType;
@@ -50,10 +53,12 @@ public class SupportTicket {
   private String category; // e.g., "Billing", "Account", "Technical"
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Builder.Default
   private TicketStatus status = TicketStatus.OPEN;
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Builder.Default
   private TicketPriority priority = TicketPriority.MEDIUM;
 

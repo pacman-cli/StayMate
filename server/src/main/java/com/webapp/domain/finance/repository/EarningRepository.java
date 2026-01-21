@@ -28,4 +28,21 @@ public interface EarningRepository extends JpaRepository<Earning, Long> {
   BigDecimal sumTotalEarningsByUserId(Long userId);
 
   List<Earning> findByPayoutRequestId(Long payoutRequestId);
+
+  // Admin summary queries
+  @Query("SELECT SUM(e.amount) FROM Earning e")
+  BigDecimal sumTotalAmount();
+
+  @Query("SELECT SUM(e.commission) FROM Earning e")
+  BigDecimal sumTotalCommission();
+
+  @Query("SELECT SUM(e.netAmount) FROM Earning e")
+  BigDecimal sumTotalNetAmount();
+
+  @Query("SELECT e FROM Earning e WHERE e.user.id = :userId " +
+      "AND (:startDate IS NULL OR e.createdAt >= :startDate) " +
+      "AND (:endDate IS NULL OR e.createdAt <= :endDate) " +
+      "AND (:status IS NULL OR e.status = :status)")
+  Page<Earning> findByUserIdWithFilters(Long userId, java.time.LocalDateTime startDate,
+      java.time.LocalDateTime endDate, com.webapp.domain.finance.enums.EarningStatus status, Pageable pageable);
 }

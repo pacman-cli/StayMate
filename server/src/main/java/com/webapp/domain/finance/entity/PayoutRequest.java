@@ -4,7 +4,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import com.webapp.domain.finance.enums.PayoutStatus;
 import com.webapp.domain.user.entity.User;
@@ -20,6 +22,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -49,11 +52,20 @@ public class PayoutRequest {
   private BigDecimal amount;
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false)
   private PayoutStatus status;
 
   @Column(columnDefinition = "TEXT")
   private String adminNote;
+
+  // Idempotency key to prevent duplicate payout requests
+  @Column(name = "idempotency_key", unique = true, length = 100)
+  private String idempotencyKey;
+
+  // Optimistic locking for concurrent access
+  @Version
+  private Long version;
 
   @CreationTimestamp
   @Column(name = "created_at", updatable = false)

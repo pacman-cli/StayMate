@@ -18,28 +18,31 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ContentController {
 
-  private final SystemSettingService settingService;
+    private final SystemSettingService settingService;
 
-  private static final List<String> PUBLIC_KEYS = List.of(
-      "siteName",
-      "privacy_policy",
-      "terms_of_service",
-      "faq_content",
-      "about_us",
-      "contact_email",
-      "social_links");
+    private static final List<String> PUBLIC_KEYS = List.of(
+            "siteName",
+            "privacy_policy",
+            "terms_of_service",
+            "faq_content",
+            "about_us",
+            "contact_email",
+            "social_links");
 
-  @GetMapping("/public")
-  public ResponseEntity<Map<String, String>> getPublicContent() {
-    Map<String, String> allSettings = settingService.getAllSettings();
-    Map<String, String> publicSettings = new HashMap<>();
+    /**
+     * Returns public settings from available settings
+     */
+    @GetMapping("/public")
+    public ResponseEntity<Map<String, String>> getPublicContent() {
+        Map<String, String> allSettings = settingService.getAllSettings();
+        Map<String, String> publicSettings = new HashMap<>();
 
-    for (String key : PUBLIC_KEYS) {
-      if (allSettings.containsKey(key)) {
-        publicSettings.put(key, allSettings.get(key));
-      }
+        for (String key : PUBLIC_KEYS) {
+            if (allSettings.containsKey(key)) {
+                publicSettings.put(key, allSettings.get(key));
+            }
+        }
+
+        return ResponseEntity.ok(publicSettings);
     }
-
-    return ResponseEntity.ok(publicSettings);
-  }
 }

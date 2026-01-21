@@ -105,13 +105,27 @@ public class RateLimitFilter extends OncePerRequestFilter {
   }
 
   private boolean isExcludedPath(String path) {
-    return path.startsWith("/actuator") ||
+    // Static resources
+    if (path.startsWith("/actuator") ||
         path.startsWith("/swagger") ||
         path.startsWith("/v3/api-docs") ||
         path.startsWith("/favicon") ||
         path.endsWith(".css") ||
         path.endsWith(".js") ||
-        path.endsWith(".ico");
+        path.endsWith(".ico")) {
+      return true;
+    }
+
+    // High-frequency read endpoints - exclude from rate limiting
+    // These are safe GET operations that users trigger frequently
+    if (path.contains("/check") || // Save status checks
+        path.contains("/saved/") || // Saved items (read)
+        path.contains("/notifications") || // Notifications polling
+        path.contains("/matches")) { // Match listing
+      return true;
+    }
+
+    return false;
   }
 
   private void cleanupIfNeeded() {
