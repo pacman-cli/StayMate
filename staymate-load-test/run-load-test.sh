@@ -5,6 +5,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOCUST_FILE="$SCRIPT_DIR/locustfile.py"
+#LOCUST_FILE="$SCRIPT_DIR/minimalLocustFile.py"
 DEFAULT_HOST="http://localhost:8080"
 
 # Check if locust is installed
