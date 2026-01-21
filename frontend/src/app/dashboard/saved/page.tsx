@@ -16,7 +16,7 @@ import {
   Trash2
 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "react-hot-toast"
 
 export default function SavedPage() {
@@ -30,6 +30,9 @@ export default function SavedPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [messagingId, setMessagingId] = useState<number | null>(null)
 
+  // Prevent duplicate fetches (React Strict Mode protection)
+  const fetchedRef = useRef(false)
+
   // Auth check handled by ProtectedRoute in layout, but double check doesn't hurt
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -37,27 +40,34 @@ export default function SavedPage() {
     }
   }, [authLoading, isAuthenticated, router])
 
-  // Fetch data
-  const fetchData = async () => {
+  // Fetch data with duplicate protection
+  const fetchData = useCallback(async () => {
     if (!isAuthenticated) return
+    if (fetchedRef.current) return // Already fetched
+    fetchedRef.current = true
 
     try {
       setIsLoading(true)
       const [properties, roommates] = await Promise.all([
-        savedApi.getProperties(),
-        savedApi.getRoommates()
+        savedApi.getProperties().catch(() => []),
+        savedApi.getRoommates().catch(() => [])
       ])
 
       setSavedProperties(properties || [])
       setSavedRoommates(roommates || [])
     } catch (error: any) {
       console.error(error)
-      const message = error.response?.data?.message || "Failed to load saved items"
-      toast.error(message)
+      // Handle rate limit specifically
+      if (error.response?.status === 429) {
+        toast.error("Please wait a moment before refreshing")
+      } else {
+        const message = error.response?.data?.message || "Failed to load saved items"
+        toast.error(message)
+      }
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [isAuthenticated])
 
   useEffect(() => {
     fetchData()
@@ -78,7 +88,8 @@ export default function SavedPage() {
     } catch (error) {
       console.error("Failed to remove saved item:", error)
       toast.error("Failed to remove item")
-      // Revert on error
+      // Revert on error - reset ref to allow refetch
+      fetchedRef.current = false
       fetchData()
     }
   }

@@ -14,4 +14,6 @@ public class MatchRequest {
 
     @NotNull(message = "Target User ID is required")
     private Long targetUserId;
+
+    private Double matchPercentage;
 }

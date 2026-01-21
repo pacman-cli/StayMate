@@ -1,5 +1,10 @@
 package com.webapp.domain.match.service.impl;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.webapp.domain.match.dto.MatchRequest;
 import com.webapp.domain.match.dto.MatchResponse;
 import com.webapp.domain.match.entity.Match;
@@ -8,11 +13,8 @@ import com.webapp.domain.match.repository.MatchRepository;
 import com.webapp.domain.match.service.MatchService;
 import com.webapp.domain.user.entity.User;
 import com.webapp.domain.user.service.UserService;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +41,7 @@ public class MatchServiceImpl implements MatchService {
         Match match = Match.builder()
                 .user1(user1)
                 .user2(user2)
-                .matchPercentage(0.0) // Placeholder logic
+                .matchPercentage(request.getMatchPercentage() != null ? request.getMatchPercentage() : 0.0)
                 .build();
 
         return matchMapper.toResponse(matchRepository.save(match), userId);

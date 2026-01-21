@@ -120,7 +120,7 @@ export default function OwnerPropertyDetailPage() {
   // Fallback images if list is empty (though backend should now return valid list)
   const images = property.images && property.images.length > 0
     ? property.images
-    : [property.imageUrl || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80"]
+    : [property.imageUrl || "/images/property-placeholder.jpg"]
 
   return (
     <PageContainer

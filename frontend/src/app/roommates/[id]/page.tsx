@@ -3,7 +3,7 @@
 import Avatar from "@/components/common/Avatar"
 import { useAuth } from "@/context/AuthContext"
 import { useTheme } from "@/context/ThemeContext"
-import { messageApi, roommateApi } from "@/lib/api"
+import { matchApi, messageApi, roommateApi } from "@/lib/api"
 import { BadgeCheck, Calendar, Cat, Cigarette, Heart, MapPin, MessageCircle, Share2, User } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -47,6 +47,17 @@ export default function RoommatePostDetailsPage({ params }: { params: { id: stri
     console.log("Starting conversation with:", post.userId, post.userName)
     setSendingMessage(true)
     try {
+      // 1. Create Official Match (for tracking/history)
+      // We do this first so if it fails (duplicate), we proceed to message anyway (soft fail)
+      try {
+        await matchApi.createMatch(post.userId, post.matchScore)
+        console.log("Match officially created")
+      } catch (e) {
+        // Ignore duplicate match errors
+        console.warn("Match creation skipped (likely exists)", e)
+      }
+
+      // 2. Start Conversation
       const conversation = await messageApi.createConversation({
         recipientId: post.userId,
         initialMessage: `Hi ${post.userName.split(' ')[0]}! I saw your roommate profile and I'm interested in connecting.`

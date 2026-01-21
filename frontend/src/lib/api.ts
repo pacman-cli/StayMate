@@ -784,6 +784,38 @@ export const adminApi = {
     triggerFraudScan: async (): Promise<void> => {
         await api.post("/api/admin/fraud/scan")
     },
+
+    // Financial Management
+    getFinancialSummary: async (): Promise<{
+        totalPlatformRevenue: number
+        totalPlatformCommission: number
+        totalOwnerEarnings: number
+        pendingPayouts: number
+        processingPayouts: number
+        completedPayouts: number
+        totalPayoutRequests: number
+        pendingPayoutCount: number
+    }> => {
+        const response = await api.get("/api/finance/admin/summary")
+        return response.data
+    },
+
+    getPayoutRequests: async (status?: string, page = 0, size = 20): Promise<{
+        content: any[]
+        totalPages: number
+        totalElements: number
+    }> => {
+        const params: Record<string, unknown> = { page, size }
+        if (status) params.status = status
+        const response = await api.get("/api/finance/admin/payout-requests", { params })
+        return response.data
+    },
+
+    processPayoutRequest: async (id: number, status: string, notes?: string): Promise<void> => {
+        await api.post(`/api/finance/admin/payout-requests/${id}/process`, null, {
+            params: { status, notes }
+        })
+    },
 }
 
 export const landlordApi = {
@@ -822,6 +854,12 @@ export const landlordApi = {
 
     getReviews: async (): Promise<ReviewResponse[]> => {
         const response = await api.get<ReviewResponse[]>("/api/landlord/reviews")
+        return response.data
+    },
+
+    // Get single property for owner (for editing)
+    getMyProperty: async (id: number): Promise<any> => {
+        const response = await api.get<any>(`/api/properties/my-properties/${id}`)
         return response.data
     },
 }
@@ -888,8 +926,8 @@ export const bookingApi = {
 
 // Match API
 export const matchApi = {
-    createMatch: async (targetUserId: number) => {
-        const response = await api.post("/api/matches", { targetUserId })
+    createMatch: async (targetUserId: number, matchPercentage?: number) => {
+        const response = await api.post("/api/matches", { targetUserId, matchPercentage })
         return response.data
     },
     getMatches: async () => {
@@ -1201,8 +1239,13 @@ export const financeApi = {
         const response = await api.get("/api/finance/my-spending-summary")
         return response.data
     },
-    getHistory: async (page = 0, size = 10) => {
-        const response = await api.get("/api/finance/history", { params: { page, size } })
+    getHistory: async (page = 0, size = 10, startDate?: string, endDate?: string, status?: string) => {
+        const params: any = { page, size }
+        if (startDate) params.startDate = startDate
+        if (endDate) params.endDate = endDate
+        if (status) params.status = status
+
+        const response = await api.get("/api/finance/history", { params })
         return response.data
     },
 
@@ -1239,7 +1282,63 @@ export const financeApi = {
     requestPayout: async () => {
         const response = await api.post("/api/finance/payout-requests")
         return response.data
+    },
+    exportReport: async (): Promise<void> => {
+        const response = await api.get("/api/finance/export", {
+            responseType: 'blob'
+        })
+        // Create download link
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'earnings-report.csv')
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+    },
+    exportPdf: async (): Promise<void> => {
+        const response = await api.get("/api/finance/export/pdf", {
+            responseType: 'blob'
+        })
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'earnings-report.pdf')
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+    }
+}
+
+// Maintenance API
+export const maintenanceApi = {
+    createRequest: async (data: { propertyId: number; title: string; description: string; type?: string; priority?: string }) => {
+        const response = await api.post("/api/maintenance", data)
+        return response.data
+    },
+    getMyRequests: async (page = 0, size = 20) => {
+        const response = await api.get("/api/maintenance/my-requests", { params: { page, size } })
+        return response.data
+    },
+    getPropertyRequests: async (page = 0, size = 20) => {
+        const response = await api.get("/api/maintenance/property-requests", { params: { page, size } })
+        return response.data
+    },
+    getRequest: async (id: number) => {
+        const response = await api.get(`/api/maintenance/${id}`)
+        return response.data
+    },
+    updateStatus: async (id: number, status: string, resolution?: string) => {
+        const response = await api.patch(`/api/maintenance/${id}/status`, null, { params: { status, resolution } })
+        return response.data
+    },
+    deleteRequest: async (id: number) => {
+        const response = await api.delete(`/api/maintenance/${id}`)
+        return response.data
     }
 }
 
 export default api
+

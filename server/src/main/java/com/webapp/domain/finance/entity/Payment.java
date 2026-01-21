@@ -4,7 +4,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import com.webapp.domain.booking.entity.Booking;
 import com.webapp.domain.finance.enums.PaymentStatus;
@@ -51,6 +53,7 @@ public class Payment {
   private BigDecimal amount;
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false)
   private PaymentStatus status;
 

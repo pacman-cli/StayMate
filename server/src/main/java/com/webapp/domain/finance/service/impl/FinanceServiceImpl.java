@@ -189,6 +189,12 @@ public class FinanceServiceImpl implements FinanceService {
         .orElse(payoutMethodRepository.findByUserId(userId).stream().findFirst()
             .orElseThrow(() -> new IllegalStateException("No payout method added")));
 
+    // Check if payout method is verified
+    if (method.getVerificationStatus() != com.webapp.domain.finance.enums.PayoutMethodVerificationStatus.VERIFIED) {
+      throw new IllegalStateException("Payout method must be verified before requesting payout. Current status: "
+          + method.getVerificationStatus());
+    }
+
     List<Earning> availableEarnings = earningRepository.findByUserIdAndStatus(userId, EarningStatus.AVAILABLE);
     if (availableEarnings.isEmpty()) {
       throw new IllegalStateException("No available earnings to payout");
@@ -198,11 +204,15 @@ public class FinanceServiceImpl implements FinanceService {
         .map(Earning::getNetAmount)
         .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+    // Generate idempotency key based on user and available earnings
+    String idempotencyKey = "payout-" + userId + "-" + System.currentTimeMillis();
+
     PayoutRequest payoutRequest = PayoutRequest.builder()
         .user(user)
         .payoutMethod(method)
         .amount(totalAmount)
         .status(PayoutStatus.PENDING)
+        .idempotencyKey(idempotencyKey)
         .build();
 
     payoutRequestRepository.save(payoutRequest);
@@ -218,6 +228,23 @@ public class FinanceServiceImpl implements FinanceService {
   @Transactional(readOnly = true)
   public Page<EarningDto> getEarningsHistory(Long userId, Pageable pageable) {
     return earningRepository.findByUserId(userId, pageable)
+        .map(this::mapToEarningDto);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<EarningDto> getEarningsHistory(Long userId, java.time.LocalDate startDate,
+      java.time.LocalDate endDate, EarningStatus status, Pageable pageable) {
+    // If no filters, use simple query
+    if (startDate == null && endDate == null && status == null) {
+      return getEarningsHistory(userId, pageable);
+    }
+
+    // Convert dates to LocalDateTime for comparison
+    java.time.LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
+    java.time.LocalDateTime endDateTime = endDate != null ? endDate.atTime(23, 59, 59) : null;
+
+    return earningRepository.findByUserIdWithFilters(userId, startDateTime, endDateTime, status, pageable)
         .map(this::mapToEarningDto);
   }
 
@@ -244,10 +271,16 @@ public class FinanceServiceImpl implements FinanceService {
   }
 
   private EarningDto mapToEarningDto(Earning e) {
+    Long bookingId = e.getBooking() != null ? e.getBooking().getId() : null;
+    String propertyTitle = "Unknown Property";
+    if (e.getBooking() != null && e.getBooking().getProperty() != null) {
+      propertyTitle = e.getBooking().getProperty().getTitle();
+    }
+
     return EarningDto.builder()
         .id(e.getId())
-        .bookingId(e.getBooking().getId())
-        .propertyTitle(e.getBooking().getProperty().getTitle())
+        .bookingId(bookingId)
+        .propertyTitle(propertyTitle)
         .amount(e.getAmount())
         .commission(e.getCommission())
         .netAmount(e.getNetAmount())
@@ -257,12 +290,19 @@ public class FinanceServiceImpl implements FinanceService {
   }
 
   private PaymentDto mapToPaymentDto(Payment p) {
+    Long bookingId = p.getBooking() != null ? p.getBooking().getId() : null;
+    String propertyTitle = "Unknown Property";
+    if (p.getBooking() != null && p.getBooking().getProperty() != null) {
+      propertyTitle = p.getBooking().getProperty().getTitle();
+    }
+    String statusName = p.getStatus() != null ? p.getStatus().name() : "UNKNOWN";
+
     return PaymentDto.builder()
         .id(p.getId())
-        .bookingId(p.getBooking().getId())
-        .propertyTitle(p.getBooking().getProperty().getTitle())
+        .bookingId(bookingId)
+        .propertyTitle(propertyTitle)
         .amount(p.getAmount())
-        .status(p.getStatus().name())
+        .status(statusName)
         .date(p.getPaymentDate())
         .paymentMethod(p.getPaymentMethod())
         .build();
@@ -319,5 +359,34 @@ public class FinanceServiceImpl implements FinanceService {
         earningRepository.save(e);
       });
     }
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public com.webapp.domain.finance.dto.AdminFinancialSummaryResponse getAdminFinancialSummary() {
+    // Calculate totals from earnings
+    BigDecimal totalRevenue = earningRepository.sumTotalAmount();
+    BigDecimal totalCommission = earningRepository.sumTotalCommission();
+    BigDecimal totalOwnerEarnings = earningRepository.sumTotalNetAmount();
+
+    // Calculate payout totals by status
+    BigDecimal pendingPayouts = payoutRequestRepository.sumAmountByStatus(PayoutStatus.PENDING);
+    BigDecimal processingPayouts = payoutRequestRepository.sumAmountByStatus(PayoutStatus.PROCESSING);
+    BigDecimal completedPayouts = payoutRequestRepository.sumAmountByStatus(PayoutStatus.PAID);
+
+    // Count requests
+    long totalRequests = payoutRequestRepository.count();
+    long pendingCount = payoutRequestRepository.countByStatus(PayoutStatus.PENDING);
+
+    return com.webapp.domain.finance.dto.AdminFinancialSummaryResponse.builder()
+        .totalPlatformRevenue(totalRevenue != null ? totalRevenue : BigDecimal.ZERO)
+        .totalPlatformCommission(totalCommission != null ? totalCommission : BigDecimal.ZERO)
+        .totalOwnerEarnings(totalOwnerEarnings != null ? totalOwnerEarnings : BigDecimal.ZERO)
+        .pendingPayouts(pendingPayouts != null ? pendingPayouts : BigDecimal.ZERO)
+        .processingPayouts(processingPayouts != null ? processingPayouts : BigDecimal.ZERO)
+        .completedPayouts(completedPayouts != null ? completedPayouts : BigDecimal.ZERO)
+        .totalPayoutRequests(totalRequests)
+        .pendingPayoutCount(pendingCount)
+        .build();
   }
 }

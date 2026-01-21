@@ -1,6 +1,6 @@
 "use client"
 
-import { propertyApi } from "@/lib/api"
+import { landlordApi, propertyApi } from "@/lib/api"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { AnimatePresence, motion } from "framer-motion"
 import {
@@ -87,7 +87,7 @@ export default function EditPropertyPage() {
       if (!propertyId) return
 
       try {
-        const property = await propertyApi.getProperty(Number(propertyId))
+        const property = await landlordApi.getMyProperty(Number(propertyId))
 
         reset({
           title: property.title || "",

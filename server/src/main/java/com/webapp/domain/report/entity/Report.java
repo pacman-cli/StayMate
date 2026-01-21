@@ -3,7 +3,9 @@ package com.webapp.domain.report.entity;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import com.webapp.domain.report.enums.ReportReason;
 import com.webapp.domain.report.enums.ReportSeverity;
@@ -48,6 +50,7 @@ public class Report {
   private User reportedUser;
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false, columnDefinition = "varchar(255)")
   private ReportReason reason;
 
@@ -55,10 +58,12 @@ public class Report {
   private String description;
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false, columnDefinition = "varchar(255)")
   private ReportSeverity severity; // LOW, MEDIUM, HIGH, CRITICAL
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false, columnDefinition = "varchar(255)")
   private ReportStatus status; // PENDING, INVESTIGATING, RESOLVED, DISMISSED
 

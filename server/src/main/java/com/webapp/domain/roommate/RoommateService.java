@@ -25,10 +25,18 @@ public class RoommateService {
   private final AiService aiService;
 
   @Transactional(readOnly = true)
-  public RoommatePostDto getPostById(@NonNull Long id) {
+  public RoommatePostDto getPostById(@NonNull Long id, Long currentUserId) {
     RoommatePost post = roommatePostRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("Post not found"));
-    return mapToDto(post);
+    RoommatePostDto dto = mapToDto(post);
+
+    if (currentUserId != null && !post.getUser().getId().equals(currentUserId)) {
+      List<RoommatePost> myPosts = roommatePostRepository.findByUserId(currentUserId);
+      if (!myPosts.isEmpty()) {
+        dto.setMatchScore(calculateMatchScore(myPosts.get(0), post));
+      }
+    }
+    return dto;
   }
 
   @Transactional
@@ -161,11 +169,17 @@ public class RoommateService {
   }
 
   private RoommatePostDto mapToDto(RoommatePost post) {
+    User user = post.getUser();
+    String userName = user != null
+        ? (user.getFirstName() + " " + user.getLastName()).trim()
+        : "Unknown User";
+    String userAvatar = user != null ? user.getProfilePictureUrl() : null;
+
     return RoommatePostDto.builder()
         .id(post.getId())
-        .userId(post.getUser() != null ? post.getUser().getId() : null)
-        .userName(post.getUser().getFirstName() + " " + post.getUser().getLastName())
-        .userAvatar(post.getUser().getProfilePictureUrl())
+        .userId(user != null ? user.getId() : null)
+        .userName(userName)
+        .userAvatar(userAvatar)
         .location(post.getLocation())
         .budget(post.getBudget())
         .moveInDate(post.getMoveInDate())
@@ -181,7 +195,7 @@ public class RoommateService {
         .latitude(post.getLatitude())
         .longitude(post.getLongitude())
         .status(post.getStatus())
-        .createdAt(post.getCreatedAt().toString())
+        .createdAt(post.getCreatedAt() != null ? post.getCreatedAt().toString() : null)
         .build();
   }
 

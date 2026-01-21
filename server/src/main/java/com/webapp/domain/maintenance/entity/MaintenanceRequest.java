@@ -3,7 +3,9 @@ package com.webapp.domain.maintenance.entity;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import com.webapp.domain.property.entity.Property;
 import com.webapp.domain.user.entity.User;
@@ -66,16 +68,19 @@ public class MaintenanceRequest {
   private String description;
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false)
   @Builder.Default
   private RequestType type = RequestType.MAINTENANCE;
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false)
   @Builder.Default
   private Priority priority = Priority.MEDIUM;
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false)
   @Builder.Default
   private Status status = Status.OPEN;

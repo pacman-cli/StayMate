@@ -3,6 +3,9 @@ package com.webapp.domain.booking.entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.webapp.domain.booking.enums.BookingStatus;
 import com.webapp.domain.user.entity.User;
 
@@ -76,6 +79,7 @@ public class Booking {
     private java.math.BigDecimal refundAmount;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, columnDefinition = "varchar(255)")
     private BookingStatus status;
 

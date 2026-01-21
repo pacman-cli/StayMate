@@ -34,6 +34,10 @@ public interface FinanceService {
 
   Page<EarningDto> getEarningsHistory(Long userId, Pageable pageable);
 
+  // With filters
+  Page<EarningDto> getEarningsHistory(Long userId, java.time.LocalDate startDate,
+      java.time.LocalDate endDate, com.webapp.domain.finance.enums.EarningStatus status, Pageable pageable);
+
   // Admin
   Page<com.webapp.domain.finance.dto.PaymentDto> getAllPayments(Pageable pageable);
 
@@ -43,4 +47,7 @@ public interface FinanceService {
       com.webapp.domain.finance.enums.PayoutStatus status, Pageable pageable);
 
   void processPayoutRequest(Long id, com.webapp.domain.finance.enums.PayoutStatus status, String notes);
+
+  // Admin financial summary
+  com.webapp.domain.finance.dto.AdminFinancialSummaryResponse getAdminFinancialSummary();
 }

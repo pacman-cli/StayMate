@@ -2,6 +2,9 @@ package com.webapp.domain.admin.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.webapp.domain.admin.enums.CMSContentType;
 
 import jakarta.persistence.Column;
@@ -35,6 +38,7 @@ public class CMSContent {
   private String key;
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false)
   private CMSContentType type;
 

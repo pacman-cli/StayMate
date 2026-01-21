@@ -24,6 +24,7 @@ import com.webapp.domain.finance.dto.PayoutMethodDto;
 import com.webapp.domain.finance.dto.PayoutMethodRequest;
 import com.webapp.domain.finance.dto.SpendingSummaryResponse;
 import com.webapp.domain.finance.entity.PayoutRequest;
+import com.webapp.domain.finance.enums.EarningStatus;
 import com.webapp.domain.finance.enums.PayoutStatus;
 import com.webapp.domain.finance.service.FinanceService;
 
@@ -36,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 public class FinanceController {
 
   private final FinanceService financeService;
+  private final com.webapp.domain.finance.service.PdfReportService pdfReportService;
 
   @GetMapping("/earnings")
   @PreAuthorize("hasAnyRole('HOUSE_OWNER', 'ADMIN')")
@@ -46,9 +48,14 @@ public class FinanceController {
 
   @GetMapping("/history")
   @PreAuthorize("hasAnyRole('HOUSE_OWNER', 'ADMIN')")
-  public ResponseEntity<Page<EarningDto>> getEarningsHistory(@AuthenticationPrincipal UserPrincipal currentUser,
+  public ResponseEntity<Page<EarningDto>> getEarningsHistory(
+      @AuthenticationPrincipal UserPrincipal currentUser,
+      @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
+      @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate endDate,
+      @RequestParam(required = false) EarningStatus status,
       Pageable pageable) {
-    return ResponseEntity.ok(financeService.getEarningsHistory(currentUser.getId(), pageable));
+    return ResponseEntity
+        .ok(financeService.getEarningsHistory(currentUser.getId(), startDate, endDate, status, pageable));
   }
 
   @GetMapping("/my-payments")
@@ -122,5 +129,70 @@ public class FinanceController {
       @RequestParam(required = false) String notes) {
     financeService.processPayoutRequest(id, status, notes);
     return ResponseEntity.ok().build();
+  }
+
+  /**
+   * Get admin financial summary with platform commission totals
+   */
+  @GetMapping("/admin/summary")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<com.webapp.domain.finance.dto.AdminFinancialSummaryResponse> getAdminSummary() {
+    return ResponseEntity.ok(financeService.getAdminFinancialSummary());
+  }
+
+  /**
+   * Export earnings history as CSV file
+   */
+  @GetMapping("/export")
+  @PreAuthorize("hasAnyRole('HOUSE_OWNER', 'ADMIN')")
+  public ResponseEntity<byte[]> exportEarningsCSV(@AuthenticationPrincipal UserPrincipal currentUser) {
+    Page<EarningDto> earningsPage = financeService.getEarningsHistory(
+        currentUser.getId(),
+        Pageable.ofSize(1000) // Limit to 1000 records
+    );
+
+    StringBuilder csv = new StringBuilder();
+    csv.append("Date,Booking ID,Property,Gross Amount,Commission,Net Amount,Status\n");
+
+    for (EarningDto e : earningsPage.getContent()) {
+      csv.append(String.format("%s,%d,%s,%.2f,%.2f,%.2f,%s\n",
+          e.getDate() != null ? e.getDate().toString() : "",
+          e.getBookingId() != null ? e.getBookingId() : 0,
+          e.getPropertyTitle() != null ? "\"" + e.getPropertyTitle().replace("\"", "\"\"") + "\"" : "",
+          e.getAmount() != null ? e.getAmount() : 0,
+          e.getCommission() != null ? e.getCommission() : 0,
+          e.getNetAmount() != null ? e.getNetAmount() : 0,
+          e.getStatus() != null ? e.getStatus().name() : ""));
+    }
+
+    byte[] csvBytes = csv.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+
+    return ResponseEntity.ok()
+        .header("Content-Type", "text/csv")
+        .header("Content-Disposition", "attachment; filename=\"earnings-report.csv\"")
+        .body(csvBytes);
+  }
+
+  /**
+   * Export earnings history as PDF file
+   */
+  @GetMapping("/export/pdf")
+  @PreAuthorize("hasAnyRole('HOUSE_OWNER', 'ADMIN')")
+  public ResponseEntity<byte[]> exportEarningsPDF(@AuthenticationPrincipal UserPrincipal currentUser) {
+    try {
+      Page<EarningDto> earningsPage = financeService.getEarningsHistory(
+          currentUser.getId(),
+          Pageable.ofSize(1000) // Limit to 1000 records
+      );
+
+      byte[] pdfBytes = pdfReportService.generateEarningsReport(earningsPage.getContent());
+
+      return ResponseEntity.ok()
+          .header("Content-Type", "application/pdf")
+          .header("Content-Disposition", "attachment; filename=\"earnings-report.pdf\"")
+          .body(pdfBytes);
+    } catch (Exception e) {
+      return ResponseEntity.internalServerError().build();
+    }
   }
 }

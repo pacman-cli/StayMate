@@ -5,7 +5,7 @@ import { messageApi, roommateApi } from "@/lib/api"
 import { Calendar, Loader2, MapPin, MessageSquare, Sparkles, User } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "react-hot-toast"
 
 interface RoommatePostDto {
@@ -32,13 +32,23 @@ export default function MatchesPage() {
   const [loading, setLoading] = useState(true)
   const [connectingId, setConnectingId] = useState<number | null>(null)
 
+  // Prevent duplicate fetches (React Strict Mode protection)
+  const fetchedRef = useRef(false)
+
   useEffect(() => {
     const fetchMatches = async () => {
+      if (fetchedRef.current) return // Already fetched
+      fetchedRef.current = true
+
       try {
         const data = await roommateApi.getMatches()
-        setMatches(data)
-      } catch (error) {
+        setMatches(data || [])
+      } catch (error: any) {
         console.error("Failed to fetch matches", error)
+        // Don't show error toast for empty matches - show empty state instead
+        if (error.response?.status !== 404) {
+          toast.error("Unable to load matches. Please try again.")
+        }
       } finally {
         setLoading(false)
       }

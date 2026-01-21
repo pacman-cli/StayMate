@@ -15,8 +15,7 @@ export default function ProfileSettings() {
     lastName: "",
     city: "",
     address: "",
-    bio: "",
-    phoneNumber: ""
+    bio: ""
   })
 
   useEffect(() => {
@@ -26,8 +25,7 @@ export default function ProfileSettings() {
         lastName: user.lastName || "",
         city: user.city || "",
         address: user.address || "",
-        bio: user.bio || "",
-        phoneNumber: user.phoneNumber || ""
+        bio: user.bio || ""
       })
     }
   }, [user])
@@ -90,15 +88,7 @@ export default function ProfileSettings() {
             onChange={e => setProfileData({ ...profileData, address: e.target.value })}
           />
         </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Phone</label>
-          <input
-            type="text"
-            className="w-full px-4 py-2 border rounded-lg dark:bg-slate-900 dark:border-slate-600"
-            value={profileData.phoneNumber}
-            onChange={e => setProfileData({ ...profileData, phoneNumber: e.target.value })}
-          />
-        </div>
+        {/* Phone number is verified separately via OTP on /verification page */}
         <div className="col-span-1 md:col-span-2 space-y-2">
           <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Bio</label>
           <textarea

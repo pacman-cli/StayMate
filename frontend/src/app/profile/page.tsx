@@ -5,13 +5,52 @@ import { useAuth } from "@/context/AuthContext"
 import { useTheme } from "@/context/ThemeContext"
 import { getRoleBadgeColor, getRoleDisplayName } from "@/types/auth"
 import { format } from "date-fns"
-import { Calendar, Mail, MapPin, Phone, Shield } from "lucide-react"
+import { Calendar, Loader2, Mail, MapPin, Phone, Shield } from "lucide-react"
+import { useState } from "react"
+import { toast } from "react-hot-toast"
 
 export default function ProfilePage() {
   const { user, isHouseOwner, refreshUser } = useAuth()
   const { isDark } = useTheme()
+  const [uploading, setUploading] = useState(false)
 
   if (!user) return null
+
+  const handleProfilePictureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file")
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be smaller than 5MB")
+      return
+    }
+
+    setUploading(true)
+    try {
+      const { userApi } = await import("@/lib/api")
+      await userApi.uploadProfilePicture(file)
+
+      // Refresh user data to get updated profile picture URL
+      if (refreshUser) {
+        await refreshUser()
+      }
+
+      toast.success("Profile picture updated!")
+    } catch (error: any) {
+      console.error("Failed to upload profile picture", error)
+      const message = error.response?.data?.message || "Failed to upload profile picture"
+      toast.error(message)
+    } finally {
+      setUploading(false)
+      // Reset file input
+      e.target.value = ""
+    }
+  }
 
   return (
     <DashboardLayout title="My Profile" description="Manage your personal information and account settings">
@@ -22,7 +61,11 @@ export default function ProfilePage() {
           <div className="absolute -bottom-12 left-8 group">
             <div className={`relative w-24 h-24 rounded-full border-4 overflow-hidden ${isDark ? "border-dark-800" : "border-white"}`}>
               {user.profilePictureUrl ? (
-                <img src={user.profilePictureUrl} alt={user.firstName || "Profile"} className="w-full h-full object-cover" />
+                <img
+                  src={`${user.profilePictureUrl}?t=${Date.now()}`}
+                  alt={user.firstName || "Profile"}
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 <div className="w-full h-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-2xl">
                   {(user.firstName?.[0] || user.email[0]).toUpperCase()}
@@ -30,29 +73,18 @@ export default function ProfilePage() {
               )}
 
               {/* Upload Overlay */}
-              <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                <span className="text-white text-xs font-medium">Change</span>
+              <label className={`absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity cursor-pointer ${uploading ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
+                {uploading ? (
+                  <Loader2 className="w-6 h-6 text-white animate-spin" />
+                ) : (
+                  <span className="text-white text-xs font-medium">Change</span>
+                )}
                 <input
                   type="file"
                   className="hidden"
                   accept="image/*"
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0]
-                    if (!file) return
-
-                    try {
-                      // Start upload
-                      const { userApi } = await import("@/lib/api")
-                      await userApi.uploadProfilePicture(file)
-                      if (refreshUser) {
-                        await refreshUser()
-                      }
-                      // Minimal feedback, page doesn't need full reload
-                    } catch (error) {
-                      console.error("Failed to upload profile picture", error)
-                      alert("Failed to upload profile picture")
-                    }
-                  }}
+                  disabled={uploading}
+                  onChange={handleProfilePictureUpload}
                 />
               </label>
             </div>

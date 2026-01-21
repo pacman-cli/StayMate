@@ -791,3 +791,36 @@ export interface PayoutRequest {
     processedAt?: string
     createdAt: string
 }
+
+// Maintenance Request Types
+export type MaintenanceRequestType = 'MAINTENANCE' | 'COMPLAINT' | 'IMPROVEMENT' | 'EMERGENCY'
+export type MaintenancePriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
+export type MaintenanceStatus = 'OPEN' | 'IN_PROGRESS' | 'ON_HOLD' | 'RESOLVED' | 'CLOSED' | 'CANCELLED'
+
+export interface MaintenanceRequestDto {
+    propertyId: number
+    title: string
+    description: string
+    type?: MaintenanceRequestType
+    priority?: MaintenancePriority
+}
+
+export interface MaintenanceResponseDto {
+    id: number
+    propertyId: number
+    propertyTitle: string
+    requesterId: number
+    requesterName: string
+    assignedToId?: number
+    assignedToName?: string
+    title: string
+    description: string
+    type: MaintenanceRequestType
+    priority: MaintenancePriority
+    status: MaintenanceStatus
+    resolution?: string
+    resolvedAt?: string
+    createdAt: string
+    updatedAt: string
+}
+

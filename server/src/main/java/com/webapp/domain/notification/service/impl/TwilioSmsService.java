@@ -38,17 +38,22 @@ public class TwilioSmsService implements SmsService {
 
   @Override
   public void sendSms(String phoneNumber, String messageText) {
+    // ALWAYS log to console first (so code is visible even if Twilio fails)
+    log.info("╔════════════════════════════════════════════════════════════╗");
+    log.info("║  VERIFICATION CODE for {}  ║", phoneNumber);
+    log.info("║  {}  ║", messageText);
+    log.info("╚════════════════════════════════════════════════════════════╝");
+
+    // Then attempt to send via Twilio (may fail due to 5 msg/day trial limit)
     try {
       Message message = Message.creator(
           new PhoneNumber(phoneNumber),
           new PhoneNumber(fromNumber),
           messageText).create();
-      log.info("Sent SMS to {}: SID {}", phoneNumber, message.getSid());
+      log.info("✓ SMS sent successfully to {}: SID {}", phoneNumber, message.getSid());
     } catch (Exception e) {
-      log.error("Failed to send SMS to {}: {}", phoneNumber, e.getMessage());
-      log.warn("FALLBACK: SMS content for {}: {}", phoneNumber, messageText);
-      // Suppress exception to allow verification flow to continue (Dev/Demo
-      // resilience)
+      log.warn("SMS delivery failed (Twilio limit?): {} - Code is logged above", e.getMessage());
+      // Suppress exception to allow verification flow to continue
     }
   }
 }

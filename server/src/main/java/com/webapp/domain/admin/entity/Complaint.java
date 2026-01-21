@@ -2,6 +2,9 @@ package com.webapp.domain.admin.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.webapp.domain.admin.enums.ComplaintPriority;
 import com.webapp.domain.admin.enums.ComplaintStatus;
 import com.webapp.domain.admin.enums.ComplaintType;
@@ -46,14 +49,17 @@ public class Complaint {
   private User reportedUser;
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false)
   private ComplaintType type;
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false)
   private ComplaintPriority priority;
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   @Column(nullable = false)
   private ComplaintStatus status;
 

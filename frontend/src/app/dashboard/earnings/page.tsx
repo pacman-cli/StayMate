@@ -85,10 +85,36 @@ export default function EarningsPage() {
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Earnings & Payouts</h1>
           <p className="text-slate-500 dark:text-slate-400">Manage your revenue and withdrawal settings</p>
         </div>
-        <button className="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl text-sm font-medium transition flex items-center gap-2">
-          <Download className="w-4 h-4" />
-          Export Report
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={async () => {
+              try {
+                await financeApi.exportReport()
+                toast.success("CSV Report downloaded!")
+              } catch (error) {
+                toast.error("Failed to export CSV")
+              }
+            }}
+            className="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl text-sm font-medium transition flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
+          </button>
+          <button
+            onClick={async () => {
+              try {
+                await financeApi.exportPdf()
+                toast.success("PDF Report downloaded!")
+              } catch (error) {
+                toast.error("Failed to export PDF")
+              }
+            }}
+            className="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-xl text-sm font-medium transition flex items-center gap-2 border border-red-200 dark:border-red-800"
+          >
+            <Download className="w-4 h-4" />
+            Export PDF
+          </button>
+        </div>
       </div>
 
       {/* Stats Grid */}
