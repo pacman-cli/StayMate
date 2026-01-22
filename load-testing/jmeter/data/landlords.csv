@@ -1,0 +1,4 @@
+email,password,firstName,lastName
+loadtest_landlord_001@test.com,TestPassword123+,Test,Landlord001
+loadtest_landlord_002@test.com,TestPassword123+,Test,Landlord002
+loadtest_landlord_003@test.com,TestPassword123+,Test,Landlord003

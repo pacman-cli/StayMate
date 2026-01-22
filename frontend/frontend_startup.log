@@ -1,0 +1,15 @@
+
+> spring-boot-auth-frontend@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.3
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+DEBUG: process.env.BACKEND_URL = undefined
+DEBUG: Using backendUrl = http://localhost:8080
+ ✓ Ready in 2.2s
+ ○ Compiling / ...
+ ✓ Compiled / in 2.5s (1706 modules)
+ GET / 200 in 3415ms
+ ✓ Compiled in 814ms (819 modules)

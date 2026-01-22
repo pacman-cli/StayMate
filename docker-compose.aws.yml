@@ -1,5 +1,14 @@
+# ============================================================
+# StayMate Production Docker Compose - AWS EC2 Deployment
+# ============================================================
+# Startup Order: db -> flyway -> minio -> server -> frontend -> nginx
+# ============================================================
+
 services:
-  # Nginx Reverse Proxy
+  # ============================================================
+  # NGINX REVERSE PROXY
+  # ============================================================
+  # Routes traffic to frontend (/) and backend (/api)
   nginx:
     image: nginx:alpine
     container_name: staymate-nginx
@@ -10,8 +19,10 @@ services:
       - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./deploy/nginx/staymate.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - frontend
-      - server
+      frontend:
+        condition: service_healthy
+      server:
+        condition: service_healthy
     networks:
       - staymate-net
     healthcheck:
@@ -25,7 +36,9 @@ services:
           cpus: '0.25'
           memory: 128M
 
-  # Frontend Service
+  # ============================================================
+  # FRONTEND (Next.js)
+  # ============================================================
   frontend:
     build:
       context: ./frontend
@@ -36,7 +49,7 @@ services:
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-      - BACKEND_URL=${BACKEND_URL}
+      - BACKEND_URL=http://server:8080
     expose:
       - "3000"
     depends_on:
@@ -54,26 +67,61 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 40s
 
-  # Flyway Migrator (Runs ONCE before server starts)
+  # ============================================================
+  # FLYWAY MIGRATOR (Runs ONCE before server starts)
+  # ============================================================
+  # This container runs database migrations and exits.
+  # Backend waits for this to complete successfully.
   flyway:
     image: flyway/flyway:9-alpine
     container_name: staymate-migrator
-    command: -connectRetries=60 -baselineOnMigrate=true migrate
+    command: >
+      -url=jdbc:mysql://db:3306/${DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false -user=${DB_USERNAME} -password=${DB_PASSWORD} -connectRetries=60 -baselineOnMigrate=true migrate
     volumes:
-      - ./server/src/main/resources/db/migration:/flyway/sql
-    environment:
-      - FLYWAY_URL=jdbc:mysql://db:3306/${DB_NAME}?allowPublicKeyRetrieval=true&useSSL=false
-      - FLYWAY_USER=${DB_USERNAME}
-      - FLYWAY_PASSWORD=${DB_PASSWORD}
+      - ./server/src/main/resources/db/migration:/flyway/sql:ro
     networks:
       - staymate-net
     depends_on:
       db:
         condition: service_healthy
 
-  # Backend Service
+  # ============================================================
+  # MINIO (Object Storage for Files/Images)
+  # ============================================================
+  # S3-compatible storage for user uploads
+  minio:
+    image: minio/minio:latest
+    container_name: staymate-minio
+    restart: always
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY:-minioadmin}
+    ports:
+      - "9000:9000" # API
+      - "9001:9001" # Console (optional, for debugging)
+    volumes:
+      - minio_data:/data
+    networks:
+      - staymate-net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # ============================================================
+  # BACKEND (Spring Boot)
+  # ============================================================
+  # Waits for: DB healthy + Flyway complete + MinIO healthy
   server:
     build:
       context: ./server
@@ -82,24 +130,37 @@ services:
     container_name: staymate-backend-prod
     restart: always
     environment:
+      # Spring Profile
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_FLYWAY_ENABLED=false # Disable auto-migration in app
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
+      # Disable Flyway in app (handled by flyway container)
+      - SPRING_FLYWAY_ENABLED=false
+      # Database Configuration
+      - DB_HOST=db
+      - DB_PORT=3306
       - DB_NAME=${DB_NAME}
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
+      # JWT Security
       - JWT_SECRET=${JWT_SECRET}
-      - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS}
-      - JWT_REFRESH_EXPIRATION_MS=${JWT_REFRESH_EXPIRATION_MS}
+      - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS:-900000}
+      - JWT_REFRESH_EXPIRATION_MS=${JWT_REFRESH_EXPIRATION_MS:-604800000}
+      # Google OAuth2
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      # Admin Configuration
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - ADMIN_SECRET_KEY=${ADMIN_SECRET_KEY}
+      # CORS & Rate Limiting
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
-      - RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED}
-      - RATE_LIMIT_REQUESTS_PER_MINUTE=${RATE_LIMIT_REQUESTS_PER_MINUTE}
+      - RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED:-true}
+      - RATE_LIMIT_REQUESTS_PER_MINUTE=${RATE_LIMIT_REQUESTS_PER_MINUTE:-60}
+      # MinIO Configuration (passed to application.properties)
+      - MINIO_URL=http://minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin}
+      - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-staymate-uploads}
+      - MINIO_PUBLIC_URL=${MINIO_PUBLIC_URL:-http://localhost:9000}
     expose:
       - "8080"
     depends_on:
@@ -107,6 +168,8 @@ services:
         condition: service_healthy
       flyway:
         condition: service_completed_successfully
+      minio:
+        condition: service_healthy
     networks:
       - staymate-net
     volumes:
@@ -124,15 +187,17 @@ services:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 60s
+      retries: 5
+      start_period: 90s
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
 
-  # Database Service
+  # ============================================================
+  # MYSQL DATABASE
+  # ============================================================
   db:
     image: mysql:8.0
     container_name: staymate-db-prod
@@ -146,22 +211,33 @@ services:
       - db_data:/var/lib/mysql
     networks:
       - staymate-net
-    command: --default-authentication-plugin=mysql_native_password
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 30s
     deploy:
       resources:
         limits:
           cpus: '1.0'
           memory: 1G
 
+# ============================================================
+# NETWORKS
+# ============================================================
 networks:
   staymate-net:
     driver: bridge
 
+# ============================================================
+# VOLUMES (Persistent Data)
+# ============================================================
 volumes:
   db_data:
+    name: staymate_db_data
   uploads:
+    name: staymate_uploads
+  minio_data:
+    name: staymate_minio_data
