@@ -1,4 +1,4 @@
-USE authdb;
+-- Flyway manages the database context, do not use USE statements
 
 -- Add account status enum column
 ALTER TABLE users ADD COLUMN account_status ENUM('ACTIVE', 'PENDING_DELETION', 'DELETED') NOT NULL DEFAULT 'ACTIVE';

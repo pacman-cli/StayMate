@@ -1,4 +1,4 @@
-USE authdb;
+-- Flyway manages the database context, do not use USE statements
 
 -- Create Reviews Table
 CREATE TABLE reviews (

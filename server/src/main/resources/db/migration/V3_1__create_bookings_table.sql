@@ -1,4 +1,4 @@
-USE authdb;
+-- Flyway manages the database context, do not use USE statements
 
 CREATE TABLE IF NOT EXISTS bookings (
     id          BIGINT AUTO_INCREMENT PRIMARY KEY,

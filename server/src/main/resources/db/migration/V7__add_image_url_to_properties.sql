@@ -1,4 +1,4 @@
-USE authdb;
+-- Flyway manages the database context, do not use USE statements
 
 ALTER TABLE properties ADD COLUMN image_url VARCHAR(500);
 

@@ -1,4 +1,4 @@
-USE authdb;
+-- Flyway manages the database context, do not use USE statements
 -- ==========================================
 -- SEED DATA COMMENTED OUT
 -- Uncomment if you need sample bookings for testing
