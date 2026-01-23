@@ -77,7 +77,7 @@ app:
     access-token-expiration-ms: ${JWT_EXPIRATION_MS:900000}
     refresh-token-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:604800000}
   admin:
-    email: ${ADMIN_EMAIL:admin@staymate.com}
+    email: ${ADMIN_EMAIL:admin@gmail.com}
     password: ${ADMIN_PASSWORD}
     secret-key: ${ADMIN_SECRET_KEY}
   oauth2:
@@ -91,8 +91,8 @@ minio:
   access-key: ${MINIO_ACCESS_KEY:minioadmin}
   secret-key: ${MINIO_SECRET_KEY:minioadmin}
   bucket-name: ${MINIO_BUCKET_NAME:staymate-uploads}
+  # public-url: ${MINIO_PUBLIC_URL:https://api.staymate.puspo.online/files}
   public-url: ${MINIO_PUBLIC_URL:http://localhost:9000}
-
 # ============================================================
 # CORS & RATE LIMITING
 # ============================================================

@@ -19,15 +19,26 @@ import com.webapp.domain.booking.service.BookingService;
 import com.webapp.domain.finance.service.FinanceService;
 import com.webapp.domain.notification.enums.NotificationType;
 import com.webapp.domain.notification.service.NotificationService;
+import com.webapp.domain.property.entity.Seat;
 import com.webapp.domain.property.repository.PropertyRepository;
+import com.webapp.domain.property.service.SeatService;
 import com.webapp.domain.user.entity.User;
 import com.webapp.domain.user.service.UserService;
 import com.webapp.domain.verification.service.VerificationService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Booking service implementation with atomic seat management.
+ *
+ * CRITICAL: When a booking is CONFIRMED, a seat is atomically blocked.
+ * When a booking is CANCELLED, the seat is released.
+ * This prevents overbooking and race conditions.
+ */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
@@ -38,6 +49,7 @@ public class BookingServiceImpl implements BookingService {
     private final NotificationService notificationService;
     private final VerificationService verificationService;
     private final FinanceService financeService;
+    private final SeatService seatService;
 
     @Override
     @Transactional
@@ -68,6 +80,11 @@ public class BookingServiceImpl implements BookingService {
             throw new IllegalStateException("Property is already booked for these dates");
         }
 
+        // Check if seats are available (pre-check, not authoritative)
+        if (!seatService.hasAvailableSeats(property.getId())) {
+            throw new IllegalStateException("No seats available for this property");
+        }
+
         // Calculate Financials
         long days = java.time.temporal.ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate());
         if (days < 1)
@@ -90,6 +107,7 @@ public class BookingServiceImpl implements BookingService {
                 .totalPrice(totalPrice)
                 .commission(commission)
                 .netAmount(netAmount)
+                // seat is NULL at creation - assigned on approval
                 .build();
 
         Booking savedBooking = bookingRepository.save(booking);
@@ -117,13 +135,23 @@ public class BookingServiceImpl implements BookingService {
         return bookingMapper.toResponse(booking);
     }
 
+    /**
+     * Update booking status with atomic seat management.
+     *
+     * CONFIRMED: Block a seat atomically (prevents overbooking)
+     * CANCELLED: Release the seat if one was assigned
+     * REJECTED: No seat changes (seat was never assigned)
+     */
     @Override
     @Transactional
     public BookingResponse updateBookingStatus(Long userId, Long bookingId, BookingStatus status) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
 
-        // Similar logic: Landlord accepts/rejects, Tenant cancels
+        log.info("Updating booking {} status from {} to {} by user {}",
+                bookingId, booking.getStatus(), status, userId);
+
+        // Authorization checks
         if (status == BookingStatus.CANCELLED) {
             if (!booking.getTenant().getId().equals(userId) && !booking.getLandlord().getId().equals(userId)) {
                 throw new SecurityException("Not authorized to cancel this booking");
@@ -132,15 +160,13 @@ public class BookingServiceImpl implements BookingService {
             if (!booking.getLandlord().getId().equals(userId)) {
                 throw new SecurityException("Only landlord can confirm/reject booking");
             }
-            if (status == BookingStatus.CONFIRMED) {
-                com.webapp.domain.property.entity.Property property = booking.getProperty();
-                property.setStatus(com.webapp.domain.property.enums.PropertyStatus.RENTED);
-                propertyRepository.save(property);
+        }
 
-                // Record Earning and Payment
-                financeService.recordEarning(booking);
-                financeService.recordPayment(booking);
-            }
+        // Handle status-specific logic
+        if (status == BookingStatus.CONFIRMED) {
+            handleBookingConfirmation(booking);
+        } else if (status == BookingStatus.CANCELLED) {
+            handleBookingCancellation(booking);
         }
 
         booking.setStatus(status);
@@ -155,7 +181,88 @@ public class BookingServiceImpl implements BookingService {
         };
         auditService.log(userId, action, "Booking", bookingId);
 
+        // Notify relevant party
+        notifyStatusChange(booking, status, userId);
+
         return bookingMapper.toResponse(savedBooking);
+    }
+
+    /**
+     * Handle booking confirmation: block seat atomically.
+     *
+     * CRITICAL TRANSACTION:
+     * 1. Acquire pessimistic lock on available seat
+     * 2. Set seat status to OCCUPIED
+     * 3. Link seat to booking
+     * 4. Update property status
+     *
+     * If no seats available, throws exception and transaction rolls back.
+     */
+    private void handleBookingConfirmation(Booking booking) {
+        log.info("Processing booking confirmation for booking {}", booking.getId());
+
+        // Atomically block a seat (throws if none available)
+        Seat seat = seatService.blockSeatForBooking(booking);
+        booking.setSeat(seat);
+
+        // Update property status
+        com.webapp.domain.property.entity.Property property = booking.getProperty();
+
+        // Only set to RENTED if this was the last available seat
+        if (!seatService.hasAvailableSeats(property.getId())) {
+            property.setStatus(com.webapp.domain.property.enums.PropertyStatus.RENTED);
+            propertyRepository.save(property);
+            log.info("Property {} is now fully booked, status set to RENTED", property.getId());
+        }
+
+        // Record financial transactions
+        financeService.recordEarning(booking);
+        financeService.recordPayment(booking);
+
+        log.info("Booking {} confirmed with seat {} (label: {})",
+                booking.getId(), seat.getId(), seat.getLabel());
+    }
+
+    /**
+     * Handle booking cancellation: release seat if assigned.
+     */
+    private void handleBookingCancellation(Booking booking) {
+        log.info("Processing booking cancellation for booking {}", booking.getId());
+
+        Seat seat = booking.getSeat();
+        if (seat != null) {
+            seatService.releaseSeat(seat);
+            booking.setSeat(null);
+
+            // Check if property should be available again
+            com.webapp.domain.property.entity.Property property = booking.getProperty();
+            if (property.getStatus() == com.webapp.domain.property.enums.PropertyStatus.RENTED) {
+                property.setStatus(com.webapp.domain.property.enums.PropertyStatus.APPROVED);
+                propertyRepository.save(property);
+                log.info("Property {} status restored to APPROVED after seat release", property.getId());
+            }
+
+            log.info("Seat released for cancelled booking {}", booking.getId());
+        } else {
+            log.debug("Booking {} had no seat assigned, nothing to release", booking.getId());
+        }
+    }
+
+    private void notifyStatusChange(Booking booking, BookingStatus status, Long actorUserId) {
+        Long notifyUserId = booking.getTenant().getId().equals(actorUserId)
+                ? booking.getLandlord().getId()
+                : booking.getTenant().getId();
+
+        String title = "Booking " + status.name();
+        String message = "Your booking for " + booking.getProperty().getTitle() + " has been "
+                + status.name().toLowerCase();
+
+        notificationService.createNotificationForUser(
+                notifyUserId,
+                NotificationType.GENERAL,
+                title,
+                message,
+                "/dashboard/bookings");
     }
 
     @Override
@@ -180,6 +287,11 @@ public class BookingServiceImpl implements BookingService {
 
         if (!booking.getTenant().getId().equals(userId) && !booking.getLandlord().getId().equals(userId)) {
             throw new SecurityException("Not authorized");
+        }
+
+        // Release seat if assigned
+        if (booking.getSeat() != null) {
+            seatService.releaseSeat(booking.getSeat());
         }
 
         bookingRepository.delete(booking);
@@ -239,6 +351,19 @@ public class BookingServiceImpl implements BookingService {
 
         booking.setStatus(BookingStatus.CHECKED_OUT);
         booking.setCheckOutTime(LocalDateTime.now());
+
+        // Release seat on checkout
+        if (booking.getSeat() != null) {
+            seatService.releaseSeat(booking.getSeat());
+            booking.setSeat(null);
+
+            // Update property availability if needed
+            com.webapp.domain.property.entity.Property property = booking.getProperty();
+            if (property.getStatus() == com.webapp.domain.property.enums.PropertyStatus.RENTED) {
+                property.setStatus(com.webapp.domain.property.enums.PropertyStatus.APPROVED);
+                propertyRepository.save(property);
+            }
+        }
 
         Booking saved = bookingRepository.save(booking);
 
