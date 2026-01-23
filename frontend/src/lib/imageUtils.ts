@@ -39,7 +39,10 @@ export function isValidImageUrl(url: string | undefined | null): boolean {
         '/api/uploads/',
         'localhost:8080',
         'localhost:9005',
+        // '/api/uploads/',
+        // 'api.staymate.puspo.online',
         'minio',
+        // process.env.NEXT_PUBLIC_API_URL?.replace('https://', '').replace('http://', '') || 'localhost',
     ]
 
     return validPatterns.some(pattern => url.includes(pattern))

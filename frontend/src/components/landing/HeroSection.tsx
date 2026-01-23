@@ -15,6 +15,8 @@ export default function HeroSection() {
 
   const VIDEO_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/uploads/staymate-uploads/StayMate_Cinematic_Housing_Platform_Concept.mp4`
 
+  // const VIDEO_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/uploads/staymate-uploads/StayMate_Cinematic_Housing_Platform_Concept.mp4`
+
   return (
     <section className="relative min-h-[110vh] flex flex-col justify-center overflow-hidden">
 

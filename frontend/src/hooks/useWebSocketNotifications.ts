@@ -2,6 +2,8 @@ import { Client, IMessage } from '@stomp/stompjs'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import SockJS from 'sockjs-client'
 
+// const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
+
 const API_BASE_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
     ? 'http://localhost:8080'
     : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
