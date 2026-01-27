@@ -185,6 +185,11 @@ export default function Sidebar() {
                             href: "/dashboard/inquiries",
                             icon: <Inbox className="w-5 h-5" />,
                         },
+                        {
+                            name: "Applications",
+                            href: "/dashboard/applications/received",
+                            icon: <FileText className="w-5 h-5" />,
+                        },
                     ],
                 },
                 {
@@ -253,8 +258,13 @@ export default function Sidebar() {
                 items: [
                     {
                         name: "My Applications",
-                        href: "/applications",
+                        href: "/dashboard/applications",
                         icon: <FileText className="w-5 h-5" />,
+                    },
+                    {
+                        name: "My Inquiries",
+                        href: "/dashboard/my-inquiries",
+                        icon: <MessageSquare className="w-5 h-5" />,
                     },
                     {
                         name: "My Bookings",
@@ -297,12 +307,14 @@ export default function Sidebar() {
 
     return (
         <aside
-            className={`glass-panel fixed left-0 top-0 h-screen flex flex-col z-40 ${collapsed ? "w-20" : "w-64"
-                }`}
+            className={`fixed inset-y-0 left-0 z-50 h-full flex flex-col border-r transition-all duration-300 ${isDark
+                ? "bg-dark-900 border-dark-800"
+                : "bg-slate-50 border-slate-200"
+                } ${collapsed ? "w-[72px]" : "w-64"}`}
         >
             {/* Logo Section */}
             <div
-                className={`h-16 flex items-center justify-between px-4 border-b ${isDark ? "border-white/10" : "border-slate-200"
+                className={`h-16 flex items-center justify-between px-4 border-b ${isDark ? "border-dark-800" : "border-slate-200"
                     }`}
             >
                 {!collapsed && <Logo size="md" linkTo="/dashboard" />}
@@ -313,8 +325,8 @@ export default function Sidebar() {
                 <button
                     onClick={() => setCollapsed(!collapsed)}
                     className={`p-1.5 rounded-lg transition-colors ${isDark
-                        ? "hover:bg-white/10 text-slate-400"
-                        : "hover:bg-slate-900/5 text-slate-500"
+                        ? "hover:bg-dark-800 text-slate-400"
+                        : "hover:bg-slate-100 text-slate-500"
                         }`}
                 >
                     {collapsed ? (
@@ -337,21 +349,21 @@ export default function Sidebar() {
                                 {section.title}
                             </h3>
                         )}
-                        <ul className="space-y-1">
+                        <ul className="space-y-0.5">
                             {section.items.map((item) => (
                                 <li key={item.href}>
                                     <Link
                                         href={item.href}
-                                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group relative ${isActive(item.href)
+                                        className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative ${isActive(item.href)
                                             ? isDark
-                                                ? "bg-dark-800 text-white"
-                                                : "bg-slate-900 text-white"
+                                                ? "bg-dark-800 text-white shadow-elevation-low"
+                                                : "bg-white text-primary-600 shadow-sm border border-slate-200"
                                             : isDark
                                                 ? "text-slate-400 hover:text-white hover:bg-dark-800"
                                                 : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                                             } ${collapsed ? "justify-center" : ""}`}
                                     >
-                                        <span className="flex-shrink-0">
+                                        <span className={`flex-shrink-0 ${isActive(item.href) && isDark ? "text-primary-400" : ""}`}>
                                             {item.icon}
                                         </span>
                                         {!collapsed && (
@@ -362,10 +374,12 @@ export default function Sidebar() {
                                                 {item.badge && (
                                                     <span
                                                         className={`px-2 py-0.5 text-xs font-medium rounded-full ${isActive(item.href)
-                                                            ? "bg-white/20 text-white"
-                                                            : isDark
+                                                            ? isDark
                                                                 ? "bg-primary-500/20 text-primary-400"
                                                                 : "bg-primary-100 text-primary-600"
+                                                            : isDark
+                                                                ? "bg-dark-700 text-slate-400"
+                                                                : "bg-slate-100 text-slate-600"
                                                             }`}
                                                     >
                                                         {item.badge}
@@ -378,8 +392,8 @@ export default function Sidebar() {
                                         {collapsed && (
                                             <div
                                                 className={`absolute left-full ml-2 px-2 py-1 text-sm font-medium rounded-md whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 ${isDark
-                                                    ? "bg-white text-slate-900"
-                                                    : "bg-slate-900 text-white"
+                                                    ? "bg-dark-800 text-white border border-dark-700 shadow-xl"
+                                                    : "bg-white text-slate-900 border border-slate-200 shadow-lg"
                                                     }`}
                                             >
                                                 {item.name}
@@ -400,15 +414,14 @@ export default function Sidebar() {
 
             {/* Bottom Section */}
             <div
-                className={`p-3 border-t ${isDark ? "border-white/10" : "border-slate-200"
+                className={`p-3 border-t ${isDark ? "border-dark-800" : "border-slate-200"
                     }`}
             >
-                {/* Help */}
                 {/* Help - Hidden for Admins */}
                 {!isAdmin && (
                     <Link
                         href="/dashboard/support"
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${isDark
+                        className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${isDark
                             ? "text-slate-400 hover:text-white hover:bg-dark-800"
                             : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                             } ${collapsed ? "justify-center" : ""}`}
@@ -425,7 +438,7 @@ export default function Sidebar() {
                 {/* Logout */}
                 <button
                     onClick={() => logout()}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${isDark
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${isDark
                         ? "text-red-400 hover:text-red-300 hover:bg-red-500/10"
                         : "text-red-600 hover:text-red-700 hover:bg-red-50"
                         } ${collapsed ? "justify-center" : ""}`}
@@ -439,3 +452,4 @@ export default function Sidebar() {
         </aside>
     )
 }
+

@@ -112,7 +112,7 @@ export default function AdminSettingsPage() {
                 <ToggleRight className="w-5 h-5 text-slate-400" /> Features & System Status
               </h3>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg">
                   <div>
                     <h4 className="font-medium text-slate-900 dark:text-white">Maintenance Mode</h4>
                     <p className="text-xs text-slate-500">Enable to block user access for maintenance.</p>
@@ -128,7 +128,7 @@ export default function AdminSettingsPage() {
                   </label>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg">
                   <div>
                     <h4 className="font-medium text-slate-900 dark:text-white">New User Registration</h4>
                     <p className="text-xs text-slate-500">Allow new users to sign up.</p>

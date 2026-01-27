@@ -18,12 +18,17 @@ export default function CreateRoommatePostPage() {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     location: "",
-    budget: "",
+    budgetMin: "",
+    budgetMax: "",
     moveInDate: "",
     bio: "",
     genderPreference: "ANY",
     smoking: false,
+    alcohol: false,
     pets: false,
+    stayDuration: "LONG_TERM",
+    guestsAllowed: "WEEKENDS",
+    cookingHabits: "OFTEN",
     occupation: "",
     cleanliness: "MODERATE" as CleanlinessLevel,
     sleepSchedule: "IRREGULAR" as SleepSchedule,
@@ -44,7 +49,9 @@ export default function CreateRoommatePostPage() {
     try {
       await roommateApi.createPost({
         ...formData,
-        budget: Number(formData.budget),
+        budgetMin: Number(formData.budgetMin),
+        budgetMax: Number(formData.budgetMax),
+        budget: Number(formData.budgetMax), // Legacy
         latitude: 0, // Should use geocoding in real app
         longitude: 0,
         personalityTags: formData.personalityTags.split(",").map(t => t.trim()).filter(Boolean),
@@ -80,48 +87,61 @@ export default function CreateRoommatePostPage() {
               <div>
                 <label className="block text-sm font-medium mb-2 opacity-70">Target Location / City</label>
                 <div className={`flex items-center gap-3 p-3 rounded-xl border ${isDark ? "bg-dark-900 border-white/10" : "bg-slate-50 border-slate-200"}`}>
-                  <MapPin className="w-5 h-5 opacity-50" />
+                  <MapPin className="w-5 h-5 opacity-50 flex-shrink-0" />
                   <input
                     type="text"
                     required
                     placeholder="e.g. New York, NY"
                     value={formData.location}
                     onChange={e => setFormData({ ...formData, location: e.target.value })}
-                    className="flex-1 bg-transparent outline-none"
+                    className="flex-1 bg-transparent outline-none min-w-0"
                   />
                 </div>
               </div>
 
-              {/* Budget & Date */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium mb-2 opacity-70">Monthly Budget</label>
-                  <div className={`flex items-center gap-3 p-3 rounded-xl border ${isDark ? "bg-dark-900 border-white/10" : "bg-slate-50 border-slate-200"}`}>
-                    <DollarSign className="w-5 h-5 opacity-50" />
+              {/* Budget */}
+              <div>
+                <label className="block text-sm font-medium mb-2 opacity-70">Budget Range (Min - Max)</label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className={`flex items-center gap-2 p-3 rounded-xl border ${isDark ? "bg-dark-900 border-white/10" : "bg-slate-50 border-slate-200"}`}>
+                    <DollarSign className="w-4 h-4 opacity-50 flex-shrink-0" />
                     <input
                       type="number"
                       required
                       min="0"
-                      placeholder="1000"
-                      value={formData.budget}
-                      onChange={e => setFormData({ ...formData, budget: e.target.value })}
-                      className="flex-1 bg-transparent outline-none"
+                      placeholder="Min"
+                      value={formData.budgetMin}
+                      onChange={e => setFormData({ ...formData, budgetMin: e.target.value })}
+                      className="flex-1 bg-transparent outline-none min-w-0 text-sm"
+                    />
+                  </div>
+                  <div className={`flex items-center gap-2 p-3 rounded-xl border ${isDark ? "bg-dark-900 border-white/10" : "bg-slate-50 border-slate-200"}`}>
+                    <DollarSign className="w-4 h-4 opacity-50 flex-shrink-0" />
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      placeholder="Max"
+                      value={formData.budgetMax}
+                      onChange={e => setFormData({ ...formData, budgetMax: e.target.value })}
+                      className="flex-1 bg-transparent outline-none min-w-0 text-sm"
                     />
                   </div>
                 </div>
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2 opacity-70">Move-in Date</label>
-                  <div className={`flex items-center gap-3 p-3 rounded-xl border ${isDark ? "bg-dark-900 border-white/10" : "bg-slate-50 border-slate-200"}`}>
-                    <Calendar className="w-5 h-5 opacity-50" />
-                    <input
-                      type="date"
-                      required
-                      value={formData.moveInDate}
-                      onChange={e => setFormData({ ...formData, moveInDate: e.target.value })}
-                      className={`flex-1 bg-transparent outline-none ${!formData.moveInDate && "text-slate-500"}`}
-                    />
-                  </div>
+              {/* Date */}
+              <div>
+                <label className="block text-sm font-medium mb-2 opacity-70">Move-in Date</label>
+                <div className={`flex items-center gap-3 p-3 rounded-xl border ${isDark ? "bg-dark-900 border-white/10" : "bg-slate-50 border-slate-200"}`}>
+                  <Calendar className="w-5 h-5 opacity-50 flex-shrink-0" />
+                  <input
+                    type="date"
+                    required
+                    value={formData.moveInDate}
+                    onChange={e => setFormData({ ...formData, moveInDate: e.target.value })}
+                    className={`flex-1 bg-transparent outline-none min-w-0 ${!formData.moveInDate && "text-slate-500"}`}
+                  />
                 </div>
               </div>
 
@@ -142,14 +162,14 @@ export default function CreateRoommatePostPage() {
               <div>
                 <label className="block text-sm font-medium mb-2 opacity-70">Occupation</label>
                 <div className={`flex items-center gap-3 p-3 rounded-xl border ${isDark ? "bg-dark-900 border-white/10" : "bg-slate-50 border-slate-200"}`}>
-                  <Briefcase className="w-5 h-5 opacity-50" />
+                  <Briefcase className="w-5 h-5 opacity-50 flex-shrink-0" />
                   <input
                     type="text"
                     required
                     placeholder="e.g. Software Engineer"
                     value={formData.occupation}
                     onChange={e => setFormData({ ...formData, occupation: e.target.value })}
-                    className="flex-1 bg-transparent outline-none"
+                    className="flex-1 bg-transparent outline-none min-w-0"
                   />
                 </div>
               </div>
@@ -212,13 +232,13 @@ export default function CreateRoommatePostPage() {
                   <div>
                     <label className="block text-sm font-medium mb-2 opacity-70">Interests & Hobbies (Comma separated)</label>
                     <div className={`flex items-center gap-3 p-3 rounded-xl border ${isDark ? "bg-dark-900 border-white/10" : "bg-slate-50 border-slate-200"}`}>
-                      <Heart className="w-5 h-5 opacity-50" />
+                      <Heart className="w-5 h-5 opacity-50 flex-shrink-0" />
                       <input
                         type="text"
                         placeholder="e.g. Hiking, Cooking, Tech, Movies"
                         value={formData.interests}
                         onChange={e => setFormData({ ...formData, interests: e.target.value })}
-                        className="flex-1 bg-transparent outline-none"
+                        className="flex-1 bg-transparent outline-none min-w-0"
                       />
                     </div>
                   </div>
@@ -226,7 +246,7 @@ export default function CreateRoommatePostPage() {
               </div>
 
               {/* Preferences */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {/* Gender */}
                 <div className={`p-3 rounded-xl border ${isDark ? "bg-dark-900 border-white/10" : "bg-slate-50 border-slate-200"}`}>
                   <label className="block text-xs font-bold uppercase mb-2 opacity-50">Gender Preference</label>
@@ -259,6 +279,21 @@ export default function CreateRoommatePostPage() {
                   </div>
                 </div>
 
+                {/* Alcohol */}
+                <div
+                  onClick={() => setFormData({ ...formData, alcohol: !formData.alcohol })}
+                  className={`p-3 rounded-xl border cursor-pointer transition-all ${formData.alcohol
+                    ? "bg-primary-500/10 border-primary-500 text-primary-500"
+                    : isDark ? "bg-dark-900 border-white/10 hover:border-white/20" : "bg-slate-50 border-slate-200 hover:border-slate-300"
+                    }`}
+                >
+                  <label className="block text-xs font-bold uppercase mb-2 opacity-70 pointer-events-none">Alcohol</label>
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4" />
+                    <span className="text-sm font-medium">{formData.alcohol ? "Drinks" : "No Alcohol"}</span>
+                  </div>
+                </div>
+
                 {/* Pets */}
                 <div
                   onClick={() => setFormData({ ...formData, pets: !formData.pets })}
@@ -271,6 +306,57 @@ export default function CreateRoommatePostPage() {
                   <div className="flex items-center gap-2">
                     <Dog className="w-4 h-4" />
                     <span className="text-sm font-medium">{formData.pets ? "Have Pets" : "No Pets"}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Stay Duration */}
+                <div>
+                  <label className="block text-sm font-medium mb-2 opacity-70">Duration</label>
+                  <div className={`p-3 rounded-xl border ${isDark ? "bg-dark-900 border-white/10" : "bg-slate-50 border-slate-200"}`}>
+                    <select
+                      value={formData.stayDuration}
+                      onChange={e => setFormData({ ...formData, stayDuration: e.target.value })}
+                      className="bg-transparent outline-none w-full"
+                    >
+                      <option value="SHORT_TERM">Short Term</option>
+                      <option value="LONG_TERM">Long Term</option>
+                      <option value="INDEFINITE">Indefinite</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Guests */}
+                <div>
+                  <label className="block text-sm font-medium mb-2 opacity-70">Guests</label>
+                  <div className={`p-3 rounded-xl border ${isDark ? "bg-dark-900 border-white/10" : "bg-slate-50 border-slate-200"}`}>
+                    <select
+                      value={formData.guestsAllowed}
+                      onChange={e => setFormData({ ...formData, guestsAllowed: e.target.value })}
+                      className="bg-transparent outline-none w-full"
+                    >
+                      <option value="NEVER">No Guests</option>
+                      <option value="WEEKENDS">Weekends Only</option>
+                      <option value="ALWAYS">Anytime</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Cooking */}
+                <div>
+                  <label className="block text-sm font-medium mb-2 opacity-70">Cooking</label>
+                  <div className={`p-3 rounded-xl border ${isDark ? "bg-dark-900 border-white/10" : "bg-slate-50 border-slate-200"}`}>
+                    <select
+                      value={formData.cookingHabits}
+                      onChange={e => setFormData({ ...formData, cookingHabits: e.target.value })}
+                      className="bg-transparent outline-none w-full"
+                    >
+                      <option value="NEVER">Don't Cook</option>
+                      <option value="RARELY">Rarely</option>
+                      <option value="OFTEN">Often</option>
+                      <option value="VEGETARIAN">Vegetarian</option>
+                    </select>
                   </div>
                 </div>
               </div>

@@ -24,7 +24,7 @@ export default function AnimatedCard({
     const baseClasses = `
         rounded-xl border transition-all duration-300
         ${isDark
-            ? "bg-dark-800/50 border-white/10 hover:border-white/20"
+            ? "bg-dark-800 border-dark-700 hover:border-dark-600 shadow-elevation-low hover:shadow-elevation-mid"
             : "bg-white border-slate-200 hover:border-primary-200 shadow-md hover:shadow-lg"
         }
         ${onClick ? "cursor-pointer" : ""}

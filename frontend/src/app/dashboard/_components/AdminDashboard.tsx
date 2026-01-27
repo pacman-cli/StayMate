@@ -56,20 +56,21 @@ export function AdminDashboard({ stats, isDark }: AdminDashboardProps) {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
       {/* 1. Top Row: 4 Cards */}
+      {/* 1. Top Row: 4 Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {cards.map((card, index) => (
-          <div key={index} className={`p-6 rounded-2xl border ${isDark ? "bg-slate-900/50 border-white/10" : "bg-white border-slate-100"
-            } backdrop-blur-xl transition-all duration-300 hover:shadow-lg`}>
+          <div key={index} className={`p-6 rounded-xl border ${isDark ? "bg-dark-800 border-dark-700" : "bg-white border-slate-200"
+            } transition-all duration-300 hover:shadow-elevation-low`}>
             <div className="flex justify-between items-start">
-              <div className={`p-3 rounded-xl ${card.color === 'blue' ? 'bg-blue-500/10 text-blue-500' :
-                card.color === 'emerald' ? 'bg-emerald-500/10 text-emerald-500' :
-                  card.color === 'purple' ? 'bg-purple-500/10 text-purple-500' :
-                    'bg-red-500/10 text-red-500'
+              <div className={`p-3 rounded-lg ${card.color === 'blue' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
+                card.color === 'emerald' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                  card.color === 'purple' ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' :
+                    'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
                 }`}>
                 <card.icon className="w-6 h-6" />
               </div>
-              <span className={`text-xs font-medium px-2 py-1 rounded-full ${card.color === 'red' ? 'bg-red-500/10 text-red-500' :
-                isDark ? 'bg-white/5 text-slate-400' : 'bg-slate-100 text-slate-500'
+              <span className={`text-xs font-medium px-2 py-1 rounded-full ${card.color === 'red' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' :
+                isDark ? 'bg-dark-750 text-slate-400' : 'bg-slate-100 text-slate-600'
                 }`}>
                 {card.trend}
               </span>
@@ -90,13 +91,13 @@ export function AdminDashboard({ stats, isDark }: AdminDashboardProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* Seat Occupancy Analytics (Chart) */}
-        <div className={`lg:col-span-2 p-6 rounded-2xl border ${isDark ? "bg-slate-900/50 border-white/10" : "bg-white border-slate-100"
-          } backdrop-blur-xl`}>
+        <div className={`lg:col-span-2 p-6 rounded-xl border ${isDark ? "bg-dark-800 border-dark-700" : "bg-white border-slate-200"
+          }`}>
           <div className="flex items-center justify-between mb-6">
             <h3 className={`font-semibold text-lg ${isDark ? "text-white" : "text-slate-900"}`}>
               Seat Occupancy Analytics
             </h3>
-            <div className={`text-sm px-3 py-1 rounded-full ${isDark ? "bg-white/5 text-slate-400" : "bg-slate-100 text-slate-500"}`}>
+            <div className={`text-sm px-3 py-1 rounded-full ${isDark ? "bg-dark-750 text-slate-400" : "bg-slate-100 text-slate-600"}`}>
               Avg Occupancy: {stats.seatOccupancyRate ? stats.seatOccupancyRate.toFixed(1) : 0}%
             </div>
           </div>
@@ -121,9 +122,9 @@ export function AdminDashboard({ stats, isDark }: AdminDashboardProps) {
                   cursor={{ fill: isDark ? "#334155" : "#f1f5f9", opacity: 0.4 }}
                   contentStyle={{
                     backgroundColor: isDark ? '#1e293b' : '#fff',
-                    borderRadius: '12px',
-                    border: 'none',
-                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
+                    borderRadius: '8px',
+                    border: isDark ? '1px solid #334155' : '1px solid #e2e8f0',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
                   }}
                 />
                 <Bar

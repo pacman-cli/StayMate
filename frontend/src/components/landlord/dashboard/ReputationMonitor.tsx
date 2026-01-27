@@ -7,8 +7,8 @@ interface ReputationMonitorProps {
 
 export const ReputationMonitor = ({ reviews }: ReputationMonitorProps) => {
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm h-full flex flex-col">
-      <div className="p-5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-gradient-to-r from-amber-50/50 to-transparent dark:from-amber-900/10">
+    <div className="bg-white dark:bg-dark-800 rounded-xl border border-slate-200 dark:border-dark-700 shadow-sm h-full flex flex-col">
+      <div className="p-5 border-b border-slate-100 dark:border-dark-700 flex justify-between items-center bg-gradient-to-r from-amber-50/50 to-transparent dark:from-amber-900/10">
         <h3 className="font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
           <Star className="w-5 h-5 text-amber-500" /> Recent Reviews
         </h3>

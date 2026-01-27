@@ -233,14 +233,14 @@ export default function UserManagementPage() {
 
     return (
         <>
-            <div className={`h-[calc(100vh-120px)] flex flex-col rounded-xl overflow-hidden border ${isDark ? "bg-dark-800/50 border-white/10" : "bg-white border-slate-200"}`}>
+            <div className={`h-[calc(100vh-120px)] flex flex-col rounded-xl overflow-hidden border ${isDark ? "bg-dark-800 border-dark-700" : "bg-white border-slate-200"}`}>
 
                 {/* Header Section */}
-                <div className={`flex-shrink-0 border-b ${isDark ? "border-white/10" : "border-slate-200"}`}>
+                <div className={`flex-shrink-0 border-b ${isDark ? "border-dark-700" : "border-slate-200"}`}>
                     <div className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
                             <h1 className={`text-xl font-bold ${isDark ? "text-white" : "text-slate-900"}`}>User Management</h1>
-                            <p className={`text-sm ${isDark ? "text-slate-500" : "text-slate-500"}`}>
+                            <p className={`text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                                 Manage system users, roles, and permissions
                             </p>
                         </div>
@@ -254,9 +254,9 @@ export default function UserManagementPage() {
                                     placeholder="Search users..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className={`w-full pl-10 pr-4 py-2 rounded-lg text-sm transition-colors outline-none ${isDark
-                                        ? "bg-white/5 text-white placeholder-slate-500 focus:bg-white/10"
-                                        : "bg-slate-100 text-slate-900 placeholder-slate-400 focus:bg-slate-200"
+                                    className={`w-full pl-10 pr-4 py-2 rounded-lg text-sm transition-colors outline-none border ${isDark
+                                        ? "bg-dark-950 border-white/10 text-white placeholder-slate-600 focus:border-primary-500/50"
+                                        : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-primary-500"
                                         }`}
                                 />
                             </div>
@@ -266,7 +266,7 @@ export default function UserManagementPage() {
                                     setFormData({ firstName: "", lastName: "", email: "", password: "", roles: ["ROLE_USER"], enabled: true, gender: "PREFER_NOT_TO_SAY", seekingMode: "ROOM", emailNotifications: true, pushNotifications: true })
                                     setShowCreateModal(true)
                                 }}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors text-white ${isDark ? "bg-primary-500 hover:bg-primary-600" : "bg-primary-600 hover:bg-primary-700"}`}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors text-white ${isDark ? "bg-primary-600 hover:bg-primary-500" : "bg-primary-600 hover:bg-primary-700"}`}
                             >
                                 <Plus className="w-4 h-4" />
                                 <span className="hidden sm:inline">Add User</span>
@@ -276,10 +276,10 @@ export default function UserManagementPage() {
                 </div>
 
                 {/* Users List */}
-                <div className={`flex-1 overflow-y-auto ${isDark ? "bg-dark-900/20" : "bg-slate-50/50"}`}>
+                <div className={`flex-1 overflow-y-auto ${isDark ? "bg-dark-900" : "bg-slate-50"}`}>
                     {users.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-                            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${isDark ? "bg-white/5" : "bg-white"}`}>
+                            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${isDark ? "bg-dark-800" : "bg-white"}`}>
                                 <Users className={`w-8 h-8 ${isDark ? "text-slate-500" : "text-slate-400"}`} />
                             </div>
                             <h3 className={`text-lg font-semibold mb-2 ${isDark ? "text-white" : "text-slate-900"}`}>No users found</h3>
@@ -292,11 +292,11 @@ export default function UserManagementPage() {
                             {users.map((user) => (
                                 <div
                                     key={user.id}
-                                    className={`group flex items-start gap-4 p-4 border-b transition-colors ${isDark ? "border-white/5 hover:bg-white/5" : "border-slate-100 hover:bg-slate-50"
+                                    className={`group flex items-start gap-4 p-4 border-b transition-colors ${isDark ? "border-dark-800 bg-dark-900 hover:bg-dark-800/80" : "border-slate-100 bg-white hover:bg-slate-50"
                                         }`}
                                 >
                                     {/* Avatar */}
-                                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${isDark ? "bg-white/10 text-primary-400" : "bg-primary-100 text-primary-600"
+                                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center border ${isDark ? "bg-dark-800 border-dark-700 text-slate-300" : "bg-primary-50 border-primary-100 text-primary-600"
                                         }`}>
                                         {user.profilePictureUrl ? (
                                             <img src={user.profilePictureUrl} alt="" className="w-10 h-10 rounded-full object-cover" />
@@ -316,10 +316,10 @@ export default function UserManagementPage() {
                                                     </h3>
                                                     {user.roles.map(role => (
                                                         <span key={role} className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${role === "ROLE_ADMIN"
-                                                            ? (isDark ? "bg-red-500/20 text-red-400" : "bg-red-100 text-red-700")
+                                                            ? (isDark ? "bg-red-900/30 text-red-400 border border-red-900/50" : "bg-red-100 text-red-700")
                                                             : role === "ROLE_HOUSE_OWNER"
-                                                                ? (isDark ? "bg-blue-500/20 text-blue-400" : "bg-blue-100 text-blue-700")
-                                                                : (isDark ? "bg-white/10 text-slate-400" : "bg-slate-100 text-slate-600")
+                                                                ? (isDark ? "bg-blue-900/30 text-blue-400 border border-blue-900/50" : "bg-blue-100 text-blue-700")
+                                                                : (isDark ? "bg-dark-800 text-slate-400 border border-dark-700" : "bg-slate-100 text-slate-600")
                                                             }`}>
                                                             {role.replace("ROLE_", "")}
                                                         </span>
@@ -343,17 +343,17 @@ export default function UserManagementPage() {
                                             {/* Status Badge & Actions */}
                                             <div className="flex items-center gap-2">
                                                 {user.accountStatus === "PENDING_DELETION" ? (
-                                                    <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${isDark ? "text-amber-400 bg-amber-500/10" : "text-amber-700 bg-amber-50"}`}>
+                                                    <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${isDark ? "text-amber-400 bg-amber-900/30 border border-amber-900/50" : "text-amber-700 bg-amber-50"}`}>
                                                         <AlertTriangle className="w-3 h-3" />
                                                         Pending Deletion
                                                     </div>
                                                 ) : (
-                                                    <div className={`hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${user.accountStatus === 'BANNED' ? 'text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400' :
-                                                        user.accountStatus === 'WARNING' ? 'text-amber-700 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400' :
-                                                            user.accountStatus === 'SUSPENDED' ? 'text-orange-700 bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400' :
+                                                    <div className={`hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium border ${user.accountStatus === 'BANNED' ? 'text-red-700 bg-red-100 dark:bg-red-950/50 dark:text-red-400 dark:border-red-900' :
+                                                        user.accountStatus === 'WARNING' ? 'text-amber-700 bg-amber-100 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-900' :
+                                                            user.accountStatus === 'SUSPENDED' ? 'text-orange-700 bg-orange-100 dark:bg-orange-950/50 dark:text-orange-400 dark:border-orange-900' :
                                                                 user.enabled
-                                                                    ? (isDark ? "text-emerald-400 bg-emerald-500/10" : "text-emerald-700 bg-emerald-50")
-                                                                    : (isDark ? "text-red-400 bg-red-500/10" : "text-red-700 bg-red-50")
+                                                                    ? (isDark ? "text-emerald-400 bg-emerald-950/50 border-emerald-900" : "text-emerald-700 bg-emerald-50 border-emerald-200")
+                                                                    : (isDark ? "text-red-400 bg-red-950/50 border-red-900" : "text-red-700 bg-red-50 border-red-200")
                                                         }`}>
                                                         {user.accountStatus === 'BANNED' ? <XCircle className="w-3 h-3" /> :
                                                             user.accountStatus === 'WARNING' ? <AlertTriangle className="w-3 h-3" /> :
@@ -368,7 +368,7 @@ export default function UserManagementPage() {
                                                 <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                                                     <button
                                                         onClick={() => openEditModal(user)}
-                                                        className={`p-1.5 rounded transition-colors ${isDark ? "hover:bg-white/10 text-slate-400 hover:text-white" : "hover:bg-slate-200 text-slate-500 hover:text-slate-900"}`}
+                                                        className={`p-1.5 rounded transition-colors ${isDark ? "hover:bg-dark-750 text-slate-400 hover:text-white" : "hover:bg-slate-200 text-slate-500 hover:text-slate-900"}`}
                                                         title="Edit User"
                                                     >
                                                         <Edit className="w-4 h-4" />
@@ -377,7 +377,7 @@ export default function UserManagementPage() {
                                                     {user.accountStatus === "PENDING_DELETION" ? (
                                                         <button
                                                             onClick={() => handleCancelDeletion(user.id)}
-                                                            className={`p-1.5 rounded transition-colors ${isDark ? "hover:bg-emerald-500/20 text-slate-400 hover:text-emerald-400" : "hover:bg-emerald-100 text-slate-500 hover:text-emerald-600"}`}
+                                                            className={`p-1.5 rounded transition-colors ${isDark ? "hover:bg-emerald-900/30 text-slate-400 hover:text-emerald-400" : "hover:bg-emerald-100 text-slate-500 hover:text-emerald-600"}`}
                                                             title="Cancel Deletion"
                                                         >
                                                             <Undo2 className="w-4 h-4" />
@@ -386,7 +386,7 @@ export default function UserManagementPage() {
                                                         currentUser?.id !== user.id && (
                                                             <button
                                                                 onClick={() => confirmDelete(user)}
-                                                                className={`p-1.5 rounded transition-colors ${isDark ? "hover:bg-red-500/20 text-slate-400 hover:text-red-400" : "hover:bg-red-100 text-slate-500 hover:text-red-600"}`}
+                                                                className={`p-1.5 rounded transition-colors ${isDark ? "hover:bg-red-900/30 text-slate-400 hover:text-red-400" : "hover:bg-red-100 text-slate-500 hover:text-red-600"}`}
                                                                 title="Schedule Deletion"
                                                                 disabled={user.roles.includes("ROLE_ADMIN")}
                                                             >
@@ -398,7 +398,7 @@ export default function UserManagementPage() {
                                                     {user.accountStatus !== 'BANNED' && (
                                                         <button
                                                             onClick={() => handleBanUser(user)}
-                                                            className={`p-1.5 rounded transition-colors ${isDark ? "hover:bg-red-500/20 text-slate-400 hover:text-red-400" : "hover:bg-red-100 text-slate-500 hover:text-red-600"}`}
+                                                            className={`p-1.5 rounded transition-colors ${isDark ? "hover:bg-red-900/30 text-slate-400 hover:text-red-400" : "hover:bg-red-100 text-slate-500 hover:text-red-600"}`}
                                                             title="Ban User"
                                                         >
                                                             <XCircle className="w-4 h-4" />
@@ -407,7 +407,7 @@ export default function UserManagementPage() {
                                                     {user.accountStatus === 'BANNED' && (
                                                         <button
                                                             onClick={() => handleActivateUser(user)}
-                                                            className={`p-1.5 rounded transition-colors ${isDark ? "hover:bg-emerald-500/20 text-slate-400 hover:text-emerald-400" : "hover:bg-emerald-100 text-slate-500 hover:text-emerald-600"}`}
+                                                            className={`p-1.5 rounded transition-colors ${isDark ? "hover:bg-emerald-900/30 text-slate-400 hover:text-emerald-400" : "hover:bg-emerald-100 text-slate-500 hover:text-emerald-600"}`}
                                                             title="Activate User"
                                                         >
                                                             <CheckCircle className="w-4 h-4" />
@@ -428,7 +428,7 @@ export default function UserManagementPage() {
                             <button
                                 onClick={loadMore}
                                 disabled={isLoadingMore}
-                                className={`flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-medium transition-colors ${isDark ? "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
+                                className={`flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-medium transition-colors ${isDark ? "bg-dark-800 text-slate-400 hover:bg-dark-750 hover:text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
                                     }`}
                             >
                                 {isLoadingMore ? (

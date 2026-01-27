@@ -9,8 +9,8 @@ interface TenantRequestManagerProps {
 
 export const TenantRequestManager = ({ requests, onApprove, onReject }: TenantRequestManagerProps) => {
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm h-full flex flex-col">
-      <div className="p-5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-gradient-to-r from-blue-50/50 to-transparent dark:from-blue-900/10">
+    <div className="bg-white dark:bg-dark-800 rounded-xl border border-slate-200 dark:border-dark-700 shadow-sm h-full flex flex-col">
+      <div className="p-5 border-b border-slate-100 dark:border-dark-700 flex justify-between items-center bg-gradient-to-r from-blue-50/50 to-transparent dark:from-blue-900/10">
         <h3 className="font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
           <Clock className="w-5 h-5 text-blue-500" /> Pending Requests
         </h3>

@@ -76,9 +76,9 @@ export function ListingGrid() {
             {/* Status Badge */}
             <div className="absolute left-3 top-3 z-10">
               <span
-                className={`rounded-full px-2.5 py-1 text-xs font-bold backdrop-blur-md ${listing.status === "ACTIVE"
-                  ? "bg-emerald-500/90 text-white"
-                  : "bg-amber-500/90 text-white"
+                className={`rounded-full px-2.5 py-1 text-xs font-bold ${listing.status === "ACTIVE"
+                  ? "bg-emerald-600 text-white"
+                  : "bg-amber-600 text-white"
                   }`}
               >
                 {listing.status}
@@ -144,7 +144,7 @@ export function ListingGrid() {
         <Link
           href="/create-listing"
           className={`flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-6 transition-colors ${isDark
-            ? "border-dark-700 bg-dark-800/50 hover:bg-dark-800 text-slate-400 hover:text-white"
+            ? "border-dark-700 bg-dark-800 hover:bg-dark-750 text-slate-400 hover:text-white"
             : "border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-900"
             }`}
         >

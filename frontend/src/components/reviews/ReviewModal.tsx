@@ -39,8 +39,8 @@ export function ReviewModal({ isOpen, onClose, onSubmit, title, subtitle }: Revi
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl scale-100 animate-in zoom-in-95 duration-200">
-        <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800">
+      <div className="bg-white dark:bg-dark-900 rounded-2xl w-full max-w-md shadow-2xl scale-100 animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-dark-700">
+        <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-dark-700">
           <div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white">Write a Review</h3>
             <p className="text-sm text-slate-500">{subtitle || title}</p>
@@ -66,7 +66,7 @@ export function ReviewModal({ isOpen, onClose, onSubmit, title, subtitle }: Revi
                   <Star
                     className={`w-10 h-10 ${(hoveredRating || rating) >= star
                       ? "fill-amber-400 text-amber-400"
-                      : "fill-slate-100 text-slate-200 dark:fill-slate-800 dark:text-slate-700"
+                      : "fill-slate-100 text-slate-200 dark:fill-dark-800 dark:text-dark-700"
                       } transition-colors duration-200`}
                   />
                 </button>
@@ -91,7 +91,7 @@ export function ReviewModal({ isOpen, onClose, onSubmit, title, subtitle }: Revi
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Tell others about your stay and the host..."
-              className="w-full h-32 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none transition-all placeholder:text-slate-400"
+              className="w-full h-32 p-4 rounded-xl border border-slate-200 dark:border-dark-700 bg-slate-50 dark:bg-dark-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none transition-all placeholder:text-slate-400"
               required
             />
           </div>
@@ -101,7 +101,7 @@ export function ReviewModal({ isOpen, onClose, onSubmit, title, subtitle }: Revi
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              className="flex-1 py-3 px-4 rounded-xl border border-slate-200 dark:border-dark-700 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-dark-800 transition-colors"
             >
               Cancel
             </button>

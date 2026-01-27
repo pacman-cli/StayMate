@@ -1,7 +1,11 @@
 import {
     AdminDashboardDTO,
     AdminDashboardStatDto,
+    Amenity,
     AnalyticsDashboardData,
+    ApplicationRequest,
+    ApplicationResponse,
+    ApplicationStatus,
     AuthResponse,
     Booking,
     ConversationListResponse,
@@ -566,6 +570,53 @@ export const notificationApi = {
     },
 }
 
+
+// Application API functions
+export const applicationApi = {
+    sendApplication: async (data: ApplicationRequest): Promise<ApplicationResponse> => {
+        const response = await api.post<ApplicationResponse>("/api/applications", data)
+        return response.data
+    },
+
+    getSentApplications: async (
+        page: number = 0,
+        size: number = 20
+    ): Promise<{ content: ApplicationResponse[]; totalPages: number }> => {
+        const response = await api.get<{ content: ApplicationResponse[]; totalPages: number }>(
+            "/api/applications/sent",
+            { params: { page, size } }
+        )
+        return response.data
+    },
+
+    getReceivedApplications: async (
+        page: number = 0,
+        size: number = 20
+    ): Promise<{ content: ApplicationResponse[]; totalPages: number }> => {
+        const response = await api.get<{ content: ApplicationResponse[]; totalPages: number }>(
+            "/api/applications/received",
+            { params: { page, size } }
+        )
+        return response.data
+    },
+
+    updateApplicationStatus: async (
+        id: number,
+        status: ApplicationStatus
+    ): Promise<ApplicationResponse> => {
+        const response = await api.patch<ApplicationResponse>(
+            `/api/applications/${id}/status`,
+            null,
+            { params: { status } }
+        )
+        return response.data
+    },
+
+    deleteApplication: async (id: number): Promise<void> => {
+        await api.delete(`/api/applications/${id}`)
+    }
+}
+
 // User search API functions
 export const userSearchApi = {
     // Search for users to message
@@ -867,30 +918,7 @@ export const landlordApi = {
 
 
 // Application API
-export const applicationApi = {
-    sendApplication: async (data: { receiverId: number; message: string }) => {
-        const response = await api.post("/api/applications", data)
-        return response.data
-    },
-    getSentApplications: async () => {
-        const response = await api.get("/api/applications/sent")
-        return response.data
-    },
-    getReceivedApplications: async () => {
-        const response = await api.get("/api/applications/received")
-        return response.data
-    },
-    updateStatus: async (id: number, status: string) => {
-        const response = await api.patch(`/api/applications/${id}/status`, null, {
-            params: { status },
-        })
-        return response.data
-    },
-    deleteApplication: async (id: number) => {
-        const response = await api.delete(`/api/applications/${id}`)
-        return response.data
-    },
-}
+
 
 // Booking API
 export const bookingApi = {
@@ -1092,6 +1120,25 @@ export const roommateApi = {
             .then((res) => res.data),
     getMatches: () =>
         api.get<any[]>("/api/roommates/matches").then((res) => res.data),
+
+    sendRequest: (targetUserId: number, message?: string) =>
+        api.post(`/api/roommates/request/${targetUserId}`, { message }).then((res) => res.data),
+
+    respondToRequest: (requestId: number, accept: boolean) =>
+        api.post(`/api/roommates/request/${requestId}/respond`, null, { params: { accept } }).then((res) => res.data),
+
+    getIncomingRequests: () =>
+        api.get("/api/roommates/requests/incoming").then((res) => res.data),
+
+    getRequestStatus: (targetUserId: number) =>
+        api.get<string>(`/api/roommates/request/${targetUserId}/status`).then((res) => res.data),
+}
+
+export const amenityApi = {
+    getAll: async () => {
+        const response = await api.get<Amenity[]>("/api/amenities")
+        return response.data
+    }
 }
 
 export const savedApi = {
@@ -1227,6 +1274,21 @@ export const supportApi = {
 
 // Finance API
 export const financeApi = {
+    getAdminFinancialSummary: async (startDate?: string, endDate?: string) => {
+        const params = new URLSearchParams()
+        if (startDate) params.append('startDate', startDate)
+        if (endDate) params.append('endDate', endDate)
+        const response = await api.get(`/api/finance/admin/summary?${params.toString()}`)
+        return response.data
+    },
+
+    getAnalyticsData: async (startDate?: string, endDate?: string) => {
+        const params = new URLSearchParams()
+        if (startDate) params.append('startDate', startDate)
+        if (endDate) params.append('endDate', endDate)
+        const response = await api.get(`/api/finance/admin/analytics?${params.toString()}`)
+        return response.data
+    },
     getEarningsSummary: async () => {
         const response = await api.get("/api/finance/earnings")
         return response.data
@@ -1336,6 +1398,26 @@ export const maintenanceApi = {
     },
     deleteRequest: async (id: number) => {
         const response = await api.delete(`/api/maintenance/${id}`)
+        return response.data
+    }
+}
+
+// Inquiry API
+export const inquiryApi = {
+    getReceivedInquiries: async (page = 0, size = 20) => {
+        const response = await api.get("/api/inquiries/received", { params: { page, size } })
+        return response.data
+    },
+    getMyInquiries: async (page = 0, size = 20) => {
+        const response = await api.get("/api/inquiries/my", { params: { page, size } })
+        return response.data
+    },
+    createInquiry: async (propertyId: number, message: string) => {
+        const response = await api.post("/api/inquiries", { propertyId, message })
+        return response.data
+    },
+    replyToInquiry: async (id: number, reply: string) => {
+        const response = await api.patch(`/api/inquiries/${id}/reply`, { reply })
         return response.data
     }
 }

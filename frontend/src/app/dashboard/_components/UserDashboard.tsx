@@ -211,7 +211,7 @@ export function UserDashboard({ user, stats, isDark }: UserDashboardProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {stats.recommendedRooms?.slice(0, 4).map((room: any) => (
-              <Link href={`/properties/${room.id}`} key={room.id} className={`group rounded-2xl overflow-hidden border ${isDark ? "bg-slate-900/50 border-white/10" : "bg-white border-slate-100"
+              <Link href={`/listings/${room.id}`} key={room.id} className={`group rounded-2xl overflow-hidden border ${isDark ? "bg-slate-900/50 border-white/10" : "bg-white border-slate-100"
                 } hover:shadow-lg transition-all`}>
                 <div className="aspect-[4/3] bg-slate-200 relative overflow-hidden">
                   {room.imageUrl ? (
@@ -261,7 +261,7 @@ export function UserDashboard({ user, stats, isDark }: UserDashboardProps) {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {stats.emergencyRooms.map((room: any) => (
-                  <Link href={`/properties/${room.id}`} key={room.id} className={`group rounded-2xl overflow-hidden border border-red-200 ${isDark ? "bg-red-950/10 border-red-900/50" : "bg-red-50"
+                  <Link href={`/listings/${room.id}`} key={room.id} className={`group rounded-2xl overflow-hidden border border-red-200 ${isDark ? "bg-red-950/10 border-red-900/50" : "bg-red-50"
                     } hover:shadow-lg transition-all`}>
                     <div className="p-4">
                       <div className="flex justify-between items-start mb-2">

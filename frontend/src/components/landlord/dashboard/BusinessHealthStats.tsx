@@ -15,7 +15,7 @@ export const BusinessHealthStats = ({ stats }: BusinessHealthStatsProps) => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+      <div className="bg-white dark:bg-dark-800 p-6 rounded-xl border border-slate-200 dark:border-dark-700 shadow-sm relative overflow-hidden group hover:shadow-elevation-low transition-all">
         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
           <Home className="w-16 h-16 text-blue-600" />
         </div>
@@ -28,7 +28,7 @@ export const BusinessHealthStats = ({ stats }: BusinessHealthStatsProps) => {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+      <div className="bg-white dark:bg-dark-800 p-4 rounded-xl border border-slate-200 dark:border-dark-700 shadow-sm flex flex-col justify-between hover:shadow-elevation-low transition-all">
         <div className="flex justify-between items-start">
           <div className="flex flex-col">
             <span className="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider">Occupancy</span>
@@ -66,7 +66,7 @@ export const BusinessHealthStats = ({ stats }: BusinessHealthStatsProps) => {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+      <div className="bg-white dark:bg-dark-800 p-6 rounded-xl border border-slate-200 dark:border-dark-700 shadow-sm relative overflow-hidden group hover:shadow-elevation-low transition-all">
         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
           <Bed className="w-16 h-16 text-indigo-600" />
         </div>
@@ -83,7 +83,7 @@ export const BusinessHealthStats = ({ stats }: BusinessHealthStatsProps) => {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+      <div className="bg-white dark:bg-dark-800 p-6 rounded-xl border border-slate-200 dark:border-dark-700 shadow-sm relative overflow-hidden group hover:shadow-elevation-low transition-all">
         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
           <Star className="w-16 h-16 text-amber-500" />
         </div>

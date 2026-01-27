@@ -1,8 +1,8 @@
 "use client"
 
 import { useTheme } from "@/context/ThemeContext"
-import { LucideIcon } from "lucide-react"
 import { motion } from "framer-motion"
+import { LucideIcon } from "lucide-react"
 import { ReactNode } from "react"
 
 interface EmptyStateProps {
@@ -31,30 +31,26 @@ export default function EmptyState({
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${
-                    isDark
-                        ? "bg-white/5 border border-white/10"
+                className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${isDark
+                        ? "bg-dark-800 border border-dark-700"
                         : "bg-slate-100 border border-slate-200"
-                }`}
+                    }`}
             >
                 <Icon
-                    className={`w-10 h-10 ${
-                        isDark ? "text-slate-500" : "text-slate-400"
-                    }`}
+                    className={`w-10 h-10 ${isDark ? "text-slate-500" : "text-slate-400"
+                        }`}
                 />
             </motion.div>
             <h3
-                className={`text-xl font-semibold mb-2 ${
-                    isDark ? "text-white" : "text-slate-900"
-                }`}
+                className={`text-xl font-semibold mb-2 ${isDark ? "text-white" : "text-slate-900"
+                    }`}
             >
                 {title}
             </h3>
             {description && (
                 <p
-                    className={`max-w-md text-sm mb-6 ${
-                        isDark ? "text-slate-400" : "text-slate-500"
-                    }`}
+                    className={`max-w-md text-sm mb-6 ${isDark ? "text-slate-400" : "text-slate-500"
+                        }`}
                 >
                     {description}
                 </p>

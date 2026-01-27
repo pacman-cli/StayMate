@@ -7,6 +7,7 @@ import { BarChart3, TrendingUp } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
+
 export default function AdminAnalyticsPage() {
   const [revenueData, setRevenueData] = useState<any[]>([])
   const [userGrowthData, setUserGrowthData] = useState<any[]>([])
@@ -47,7 +48,7 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* Revenue Chart */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm h-[400px]">
+        <div className="bg-white dark:bg-dark-800 p-6 rounded-xl border border-slate-200 dark:border-dark-700 shadow-sm h-[400px]">
           <h3 className="font-semibold text-slate-900 dark:text-white mb-6">Revenue Trends</h3>
           {loading ? (
             <div className="h-full flex items-center justify-center text-slate-400">Loading...</div>
@@ -72,7 +73,7 @@ export default function AdminAnalyticsPage() {
                   />
                   <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: 'rgba(30, 41, 59, 0.9)', border: 'none', borderRadius: '8px', color: '#fff' }}
+                    contentStyle={{ backgroundColor: 'rgb(30, 41, 59)', border: 'none', borderRadius: '8px', color: '#fff' }}
                     cursor={{ stroke: '#10b981', strokeWidth: 1 }}
                     formatter={(value) => [`BDT ${typeof value === 'number' ? value.toLocaleString() : '0'}`, 'Revenue']}
                   />
