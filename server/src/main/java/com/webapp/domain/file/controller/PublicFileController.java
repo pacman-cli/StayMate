@@ -32,11 +32,9 @@ public class PublicFileController {
     // If the service expects just the filename (because bucket is configured), we
     // might ignore bucket
     // or validate it.
-    // Looking at MinioFileStorageServiceImpl.loadFileAsResource(fileName), it takes
-    // just the filename.
-    // However, the URL structure we want is .../bucket/filename.
-
-    Resource file = fileStorageService.loadFileAsResource(filename);
+    // Construct path including bucket/folder to respect directory structure
+    String path = bucket + "/" + filename;
+    Resource file = fileStorageService.loadFileAsResource(path);
 
     // Fetch file size for Content-Length header (crucial for video streaming)
     long fileSize = 0;

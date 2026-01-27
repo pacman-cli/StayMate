@@ -131,6 +131,48 @@ public class LandlordServiceImpl implements LandlordService {
           .build());
     }
 
+    // Optimization: Bulk fetch reviews to avoid N+1
+    List<Long> propertyIds = properties.stream().map(Property::getId).collect(Collectors.toList());
+    java.util.Map<Long, List<com.webapp.domain.review.dto.ReviewResponse>> reviewsByProperty = new java.util.HashMap<>();
+
+    if (!propertyIds.isEmpty()) {
+      List<com.webapp.domain.review.entity.Review> allReviews = reviewRepository.findByPropertyIdIn(propertyIds);
+      for (com.webapp.domain.review.entity.Review r : allReviews) {
+        reviewsByProperty.computeIfAbsent(r.getProperty().getId(), k -> new ArrayList<>())
+            .add(com.webapp.domain.review.dto.ReviewResponse.builder()
+                .id(r.getId())
+                .authorId(r.getAuthor().getId())
+                .authorName(r.getAuthor().getFullName())
+                .authorAvatar(r.getAuthor().getProfilePictureUrl())
+                .rating(r.getRating())
+                .comment(r.getComment())
+                .createdAt(r.getCreatedAt())
+                .build());
+      }
+    }
+
+    // Second Pass: Populate Status and Reviews
+    for (PropertySeatSummaryDto dto : summaries) {
+      dto.setReviews(reviewsByProperty.getOrDefault(dto.getId(), new ArrayList<>()));
+
+      // Status determination logic:
+      // Properties are "Booked" if they have the RENTED status (set by
+      // BookingService)
+      // Otherwise they are "Vacant"
+      // We can also double check occupancy, but relying on Property status is
+      // safer/cleaner with the new BookingService logic.
+      Property p = properties.stream().filter(prop -> prop.getId().equals(dto.getId())).findFirst().orElse(null);
+      if (p != null) {
+        if (p.getStatus() == com.webapp.domain.property.enums.PropertyStatus.RENTED) {
+          dto.setStatus("Booked");
+        } else {
+          dto.setStatus("Vacant");
+        }
+      } else {
+        dto.setStatus("Vacant");
+      }
+    }
+
     return summaries;
   }
 

@@ -82,42 +82,42 @@ export default function AdminDashboardPage() {
 
       {/* Top Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:border-blue-500/30 transition-colors">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600">
+            <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400">
               <Users className="w-5 h-5" />
             </div>
-            <span className="text-sm font-medium text-slate-500">Total Users</span>
+            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Users</span>
           </div>
           <div className="text-2xl font-bold text-slate-900 dark:text-white pl-1">{totalUsers.toLocaleString()}</div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:border-emerald-500/30 transition-colors">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-emerald-600">
+            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-emerald-600 dark:text-emerald-400">
               <Home className="w-5 h-5" />
             </div>
-            <span className="text-sm font-medium text-slate-500">Active Listings</span>
+            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Active Listings</span>
           </div>
           <div className="text-2xl font-bold text-slate-900 dark:text-white pl-1">{activeListings.toLocaleString()}</div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:border-amber-500/30 transition-colors">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-amber-600">
+            <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-amber-600 dark:text-amber-400">
               <AlertCircle className="w-5 h-5" />
             </div>
-            <span className="text-sm font-medium text-slate-500">Pending Approval</span>
+            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Pending Approval</span>
           </div>
           <div className="text-2xl font-bold text-slate-900 dark:text-white pl-1">{pendingListings.toLocaleString()}</div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:border-purple-500/30 transition-colors">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-purple-600">
+            <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-purple-600 dark:text-purple-400">
               <Search className="w-5 h-5" />
             </div>
-            <span className="text-sm font-medium text-slate-500">Rented / Archived</span>
+            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Rented / Archived</span>
           </div>
           <div className="text-2xl font-bold text-slate-900 dark:text-white pl-1">{rentedListings.toLocaleString()}</div>
         </div>

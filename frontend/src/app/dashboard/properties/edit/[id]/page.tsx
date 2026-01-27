@@ -1,6 +1,7 @@
 "use client"
 
-import { landlordApi, propertyApi } from "@/lib/api"
+import { amenityApi, landlordApi, propertyApi } from "@/lib/api"
+import { Amenity } from "@/types/auth"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { AnimatePresence, motion } from "framer-motion"
 import {
@@ -46,6 +47,7 @@ const propertySchema = z.object({
   latitude: z.number().optional(),
   longitude: z.number().optional(),
   files: z.array(z.any()).optional(),
+  amenityIds: z.array(z.number()).optional(),
 })
 
 type PropertyFormData = z.infer<typeof propertySchema>
@@ -67,6 +69,19 @@ export default function EditPropertyPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [previewUrls, setPreviewUrls] = useState<string[]>([])
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null)
+  const [amenities, setAmenities] = useState<Amenity[]>([])
+
+  useEffect(() => {
+    const loadAmenities = async () => {
+      try {
+        const data = await amenityApi.getAll()
+        setAmenities(data)
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    loadAmenities()
+  }, [])
 
   const {
     register,
@@ -103,6 +118,7 @@ export default function EditPropertyPage() {
           latitude: property.latitude,
           longitude: property.longitude,
           files: [],
+          amenityIds: property.amenities ? property.amenities.map((a: Amenity) => a.id) : []
         })
 
         if (property.imageUrl) {
@@ -193,7 +209,7 @@ export default function EditPropertyPage() {
 
       await propertyApi.updateProperty(Number(propertyId), {
         ...jsonData,
-        amenities: []
+        amenityIds: jsonData.amenityIds || []
       }, files || [])
 
       toast.success("Property updated successfully!")
@@ -383,6 +399,38 @@ export default function EditPropertyPage() {
                       <FormInput label="Beds" type="number" error={errors.beds?.message} {...register("beds", { valueAsNumber: true })} />
                       <FormInput label="Baths" type="number" error={errors.baths?.message} {...register("baths", { valueAsNumber: true })} />
                       <FormInput label="Area (sq ft)" type="number" error={errors.area?.message} {...register("area", { valueAsNumber: true })} />
+                    </div>
+
+                    {/* Amenities Section */}
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">
+                        Amenities
+                      </label>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {amenities.map((amenity) => (
+                          <label
+                            key={amenity.id}
+                            className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all
+                              ${(watch("amenityIds") || []).includes(amenity.id)
+                                ? "border-blue-500 bg-blue-50/50 dark:bg-blue-900/20"
+                                : "border-slate-200 dark:border-slate-700 hover:border-slate-300"}`}
+                          >
+                            <input
+                              type="checkbox"
+                              value={amenity.id}
+                              className="mt-1 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                              {...register("amenityIds", {
+                                setValueAs: (v) => v.map((val: any) => Number(val))
+                              })}
+                            />
+                            <div>
+                              <span className="block text-sm font-medium text-slate-700 dark:text-slate-200">
+                                {amenity.name}
+                              </span>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}

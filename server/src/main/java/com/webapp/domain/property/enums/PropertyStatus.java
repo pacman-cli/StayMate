@@ -5,7 +5,8 @@ public enum PropertyStatus {
   APPROVED("Approved"),
   REJECTED("Rejected"),
   RENTED("Rented"),
-  ACTIVE("Active"); // Keeping for backward compatibility migration if needed, but aim to remove
+  ACTIVE("Active"),
+  INACTIVE("Inactive");
 
   private final String displayName;
 

@@ -50,4 +50,12 @@ public interface FinanceService {
 
   // Admin financial summary
   com.webapp.domain.finance.dto.AdminFinancialSummaryResponse getAdminFinancialSummary();
+
+  com.webapp.domain.finance.dto.AdminFinancialSummaryResponse getAdminFinancialSummary(java.time.LocalDate startDate,
+      java.time.LocalDate endDate);
+
+  com.webapp.domain.finance.dto.AnalyticsDashboardData getAnalyticsData(java.time.LocalDate startDate,
+      java.time.LocalDate endDate);
+
+  void refundBooking(com.webapp.domain.booking.entity.Booking booking);
 }

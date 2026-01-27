@@ -49,6 +49,7 @@ public class UserController {
         private final UserMapper userMapper;
         private final UserRepository userRepository;
         private final FileStorageService fileStorageService;
+        private final com.webapp.domain.user.service.UserDeletionService userDeletionService;
 
         @Operation(summary = "Get current user profile")
         @ApiResponses(value = {
@@ -105,14 +106,14 @@ public class UserController {
                 return ResponseEntity.ok(userMapper.toDto(user));
         }
 
-        @Operation(summary = "Delete user account")
+        @Operation(summary = "Delete user account (Self)")
         @DeleteMapping("/profile")
         public ResponseEntity<Map<String, String>> deleteAccount(
                         @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal currentUser) {
-                log.info("Deleting account for user: {}", currentUser.getEmail());
-                userService.deleteUser(currentUser.getId());
+                log.info("Initiating deletion for user: {}", currentUser.getEmail());
+                userDeletionService.initiateDeletion(currentUser.getId(), null, "User requested deletion");
                 return ResponseEntity.ok(
-                                Map.of("message", "Account deleted successfully."));
+                                Map.of("message", "Account scheduled for deletion. It will be permanent in 3 days."));
         }
 
         @Operation(summary = "Check if user has a specific role")
@@ -260,8 +261,12 @@ public class UserController {
         @Operation(summary = "Delete user (Admin only)")
         @DeleteMapping("/{id}")
         @PreAuthorize("hasRole('ADMIN')")
-        public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-                userService.deleteUser(id);
+        public ResponseEntity<Void> deleteUser(
+                        @PathVariable Long id,
+                        @Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal currentUser) {
+                User user = userService.getUserById(id);
+                // Directly execute deletion for admins
+                userDeletionService.executeDeletion(user);
                 return ResponseEntity.noContent().build();
         }
 }

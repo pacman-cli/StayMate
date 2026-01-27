@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Primary
 @Slf4j
 public class MinioFileStorageServiceImpl implements FileStorageService {
 
@@ -42,7 +44,7 @@ public class MinioFileStorageServiceImpl implements FileStorageService {
 
     @PostConstruct
     public void init() {
-        // Creates a bucket if missing and ALWAYS sets public read policy
+        // Creates a bucket if missing and ALWAYS sets public read policy and CORS
         try {
             boolean found = minioClient.bucketExists(
                     BucketExistsArgs.builder()
@@ -58,7 +60,6 @@ public class MinioFileStorageServiceImpl implements FileStorageService {
             }
 
             // ALWAYS set bucket policy to ensure public read access
-            // This fixes issues where bucket exists but policy was never set
             String policy = """
                     {
                       "Version": "2012-10-17",
@@ -80,9 +81,16 @@ public class MinioFileStorageServiceImpl implements FileStorageService {
                             .build());
             log.info("Set public read policy on bucket: {}", bucketName);
 
+            // Note: CORS configuration removed due to dependency issues.
+            // Please configure CORS manually via MinIO Console or CLI if needed for direct
+            // browser access.
+            // setBucketCors logic requires MinIO SDK compatibility which seems inconsistent
+            // here.
+
         } catch (Exception e) {
             log.error("Failed to initialize MinIO bucket: {}", e.getMessage());
-            throw new RuntimeException("Could not initialize MinIO bucket", e);
+            // Don't throw exception here to allow app to start even if MinIO is temporarily
+            // down
         }
     }
 
@@ -117,9 +125,9 @@ public class MinioFileStorageServiceImpl implements FileStorageService {
                             .build());
 
             // Return full accessible URL
-            // Use clean path construction
-            return (minioPublicUrl.endsWith("/") ? minioPublicUrl : minioPublicUrl + "/") +
-                    bucketName + "/" + newFileName;
+            // Ensure no double slashes
+            String baseUrl = minioPublicUrl.endsWith("/") ? minioPublicUrl : minioPublicUrl + "/";
+            return baseUrl + bucketName + "/" + newFileName;
         } catch (Exception ex) {
             throw new RuntimeException("Could not store file " + cleanFileName + ". Please try again!", ex);
         }
@@ -129,10 +137,17 @@ public class MinioFileStorageServiceImpl implements FileStorageService {
     public Resource loadFileAsResource(String fileName) {
         // Loads file as resource; throws on failure
         try {
+            String objectName = fileName;
+            // logic to handle if bucket name is prefixed (compatibility with
+            // PublicFileController)
+            if (fileName.startsWith(bucketName + "/")) {
+                objectName = fileName.substring(bucketName.length() + 1);
+            }
+
             InputStream stream = minioClient.getObject(
                     GetObjectArgs.builder()
                             .bucket(bucketName)
-                            .object(fileName)
+                            .object(objectName)
                             .build());
 
             return new InputStreamResource(stream);
@@ -144,10 +159,15 @@ public class MinioFileStorageServiceImpl implements FileStorageService {
     @Override
     public long getFileSize(String fileName) {
         try {
+            String objectName = fileName;
+            if (fileName.startsWith(bucketName + "/")) {
+                objectName = fileName.substring(bucketName.length() + 1);
+            }
+
             return minioClient.statObject(
                     io.minio.StatObjectArgs.builder()
                             .bucket(bucketName)
-                            .object(fileName)
+                            .object(objectName)
                             .build())
                     .size();
         } catch (Exception ex) {

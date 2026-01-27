@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext"
 import { messageApi, roommateApi } from "@/lib/api"
+import { formatCurrency } from "@/lib/utils"
 import { Calendar, Loader2, MapPin, MessageSquare, Sparkles, User } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -35,19 +36,24 @@ export default function MatchesPage() {
   // Prevent duplicate fetches (React Strict Mode protection)
   const fetchedRef = useRef(false)
 
+  const [incomingRequests, setIncomingRequests] = useState<any[]>([])
+
   useEffect(() => {
     const fetchMatches = async () => {
       if (fetchedRef.current) return // Already fetched
       fetchedRef.current = true
 
       try {
-        const data = await roommateApi.getMatches()
-        setMatches(data || [])
+        const [matchesData, requestsData] = await Promise.all([
+          roommateApi.getMatches(),
+          roommateApi.getIncomingRequests()
+        ])
+        setMatches(matchesData || [])
+        setIncomingRequests(requestsData || [])
       } catch (error: any) {
         console.error("Failed to fetch matches", error)
-        // Don't show error toast for empty matches - show empty state instead
         if (error.response?.status !== 404) {
-          toast.error("Unable to load matches. Please try again.")
+          toast.error("Unable to load matches.")
         }
       } finally {
         setLoading(false)
@@ -74,6 +80,29 @@ export default function MatchesPage() {
     }
   }
 
+  const handleRequestMatch = async (userId: number) => {
+    if (!confirm("Send a roommate match request? This will notify them.")) return
+    try {
+      await roommateApi.sendRequest(userId)
+      toast.success("Request sent successfully!")
+    } catch (error) {
+      toast.error("Failed to send request")
+    }
+  }
+
+  const handleRespond = async (requestId: number, accept: boolean) => {
+    try {
+      await roommateApi.respondToRequest(requestId, accept)
+      toast.success(accept ? "You have a new roommate!" : "Request declined")
+      // Refresh
+      const requests = await roommateApi.getIncomingRequests()
+      setIncomingRequests(requests)
+    } catch (error) {
+      toast.error("Failed to respond")
+    }
+  }
+
+
   if (loading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
@@ -84,6 +113,34 @@ export default function MatchesPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
+
+      {/* Incoming Requests Section */}
+      {incomingRequests.length > 0 && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6 mb-8">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+            <User className="w-5 h-5 text-blue-600" />
+            Incoming Match Requests
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {incomingRequests.map(req => (
+              <div key={req.id} className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <img src={req.requester.profilePictureUrl || "/default-avatar.png"} className="w-10 h-10 rounded-full" />
+                  <div>
+                    <p className="font-semibold text-slate-900 dark:text-white">{req.requester.firstName} {req.requester.lastName}</p>
+                    <p className="text-xs text-slate-500">Wants to be your roommate</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => handleRespond(req.id, true)} className="px-3 py-1 bg-green-600 text-white text-xs rounded-md hover:bg-green-700">Accept</button>
+                  <button onClick={() => handleRespond(req.id, false)} className="px-3 py-1 bg-red-100 text-red-600 text-xs rounded-md hover:bg-red-200">Decline</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -167,7 +224,7 @@ export default function MatchesPage() {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
                     <span className="font-semibold text-slate-900 dark:text-white">
-                      ${match.budget}
+                      {formatCurrency(match.budget)}
                     </span>
                     <span className="text-slate-400">/ month</span>
                   </div>
@@ -199,15 +256,18 @@ export default function MatchesPage() {
 
                 <div className="flex gap-3">
                   <button
+                    onClick={() => handleRequestMatch(match.userId)}
+                    className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"
+                  >
+                    <User className="h-4 w-4" />
+                    Request Match
+                  </button>
+                  <button
                     onClick={() => handleConnect(match.userId)}
                     disabled={connectingId === match.userId}
-                    className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-70 transition flex items-center justify-center gap-2"
+                    className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition"
                   >
-                    {connectingId === match.userId ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
-                    Message
-                  </button>
-                  <button className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition">
-                    View Profile
+                    <MessageSquare className="h-4 w-4" />
                   </button>
                 </div>
               </div>

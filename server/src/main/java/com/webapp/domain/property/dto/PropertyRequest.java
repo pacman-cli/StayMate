@@ -7,6 +7,7 @@ import java.util.Set;
 import com.webapp.domain.property.enums.PropertyType;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -14,7 +15,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.validation.constraints.*;
 
 @Data
 @Builder
@@ -58,7 +58,7 @@ public class PropertyRequest {
     @NotNull(message = "Property type is required")
     private PropertyType propertyType;
 
-    private Set<String> amenities;
+    private Set<Long> amenityIds;
 
     private List<String> images;
 }

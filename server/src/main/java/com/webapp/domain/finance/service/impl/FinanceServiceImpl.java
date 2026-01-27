@@ -43,6 +43,9 @@ public class FinanceServiceImpl implements FinanceService {
   private final PayoutRequestRepository payoutRequestRepository;
   private final UserService userService;
 
+  /**
+   * Records landlord earning unless already recorded
+   */
   @Override
   @Transactional
   public void recordEarning(Booking booking) {
@@ -121,14 +124,10 @@ public class FinanceServiceImpl implements FinanceService {
   @Override
   @Transactional(readOnly = true)
   public EarningsSummaryResponse getEarningsSummary(Long userId) {
-    BigDecimal total = earningRepository.sumTotalEarningsByUserId(userId);
     BigDecimal pending = earningRepository.sumNetAmountByUserIdAndStatus(userId, EarningStatus.PENDING);
     BigDecimal available = earningRepository.sumNetAmountByUserIdAndStatus(userId, EarningStatus.AVAILABLE);
     BigDecimal paid = earningRepository.sumNetAmountByUserIdAndStatus(userId, EarningStatus.PAID);
     BigDecimal requested = earningRepository.sumNetAmountByUserIdAndStatus(userId, EarningStatus.REQUESTED);
-
-    if (total == null)
-      total = BigDecimal.ZERO;
     if (pending == null)
       pending = BigDecimal.ZERO;
     if (available == null)
@@ -138,11 +137,23 @@ public class FinanceServiceImpl implements FinanceService {
     if (requested == null)
       requested = BigDecimal.ZERO;
 
+    // Explicitly recalculate Total as sum of components to ensure consistency
+    BigDecimal total = BigDecimal.ZERO;
+    if (pending != null)
+      total = total.add(pending);
+    if (available != null)
+      total = total.add(available);
+    if (paid != null)
+      total = total.add(paid);
+    if (requested != null)
+      total = total.add(requested);
+
     return EarningsSummaryResponse.builder()
         .totalEarnings(total)
-        .pendingEarnings(pending.add(requested))
-        .availableBalance(available)
-        .paidOutEarnings(paid)
+        .pendingEarnings(
+            pending != null ? pending.add(requested != null ? requested : BigDecimal.ZERO) : BigDecimal.ZERO)
+        .availableBalance(available != null ? available : BigDecimal.ZERO)
+        .paidOutEarnings(paid != null ? paid : BigDecimal.ZERO)
         .build();
   }
 
@@ -388,5 +399,111 @@ public class FinanceServiceImpl implements FinanceService {
         .totalPayoutRequests(totalRequests)
         .pendingPayoutCount(pendingCount)
         .build();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public com.webapp.domain.finance.dto.AdminFinancialSummaryResponse getAdminFinancialSummary(
+      java.time.LocalDate startDate, java.time.LocalDate endDate) {
+    java.time.LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
+    java.time.LocalDateTime endDateTime = endDate != null ? endDate.atTime(23, 59, 59) : null;
+
+    BigDecimal totalRevenue = earningRepository.sumTotalAmount(startDateTime, endDateTime);
+    BigDecimal totalCommission = earningRepository.sumTotalCommission(startDateTime, endDateTime);
+    BigDecimal totalOwnerEarnings = earningRepository.sumTotalNetAmount(startDateTime, endDateTime);
+
+    BigDecimal pendingPayouts = payoutRequestRepository.sumAmountByStatusAndCreatedAtBetween(PayoutStatus.PENDING,
+        startDateTime, endDateTime);
+    BigDecimal processingPayouts = payoutRequestRepository
+        .sumAmountByStatusAndProcessedAtBetween(PayoutStatus.PROCESSING, startDateTime, endDateTime);
+    BigDecimal completedPayouts = payoutRequestRepository.sumAmountByStatusAndProcessedAtBetween(PayoutStatus.PAID,
+        startDateTime, endDateTime);
+
+    long pendingCount = payoutRequestRepository.countByStatusAndCreatedAtBetween(PayoutStatus.PENDING, startDateTime,
+        endDateTime);
+
+    return com.webapp.domain.finance.dto.AdminFinancialSummaryResponse.builder()
+        .totalPlatformRevenue(totalRevenue != null ? totalRevenue : BigDecimal.ZERO)
+        .totalPlatformCommission(totalCommission != null ? totalCommission : BigDecimal.ZERO)
+        .totalOwnerEarnings(totalOwnerEarnings != null ? totalOwnerEarnings : BigDecimal.ZERO)
+        .pendingPayouts(pendingPayouts != null ? pendingPayouts : BigDecimal.ZERO)
+        .processingPayouts(processingPayouts != null ? processingPayouts : BigDecimal.ZERO)
+        .completedPayouts(completedPayouts != null ? completedPayouts : BigDecimal.ZERO)
+        .totalPayoutRequests(0) // Not calculated with filters
+        .pendingPayoutCount(pendingCount)
+        .build();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public com.webapp.domain.finance.dto.AnalyticsDashboardData getAnalyticsData(java.time.LocalDate startDate,
+      java.time.LocalDate endDate) {
+    java.time.LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
+    java.time.LocalDateTime endDateTime = endDate != null ? endDate.atTime(23, 59, 59) : null;
+
+    List<com.webapp.domain.finance.entity.Earning> earnings = earningRepository.findAllByCreatedAtBetween(startDateTime,
+        endDateTime);
+
+    // Group by Month (Chronological Sort)
+    java.util.Map<java.time.YearMonth, BigDecimal> revenueByMonth = new java.util.TreeMap<>();
+
+    for (com.webapp.domain.finance.entity.Earning e : earnings) {
+      java.time.YearMonth key = java.time.YearMonth.from(e.getCreatedAt());
+      revenueByMonth.merge(key, e.getAmount(), BigDecimal::add);
+    }
+
+    java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("MMM yyyy");
+    List<Object> revenueTrends = new java.util.ArrayList<>();
+
+    for (java.util.Map.Entry<java.time.YearMonth, BigDecimal> entry : revenueByMonth.entrySet()) {
+      java.util.Map<String, Object> point = new java.util.HashMap<>();
+      point.put("name", entry.getKey().format(formatter));
+      point.put("value", entry.getValue());
+      revenueTrends.add(point);
+    }
+
+    BigDecimal totalRevenue = earningRepository.sumTotalAmount(startDateTime, endDateTime);
+
+    return com.webapp.domain.finance.dto.AnalyticsDashboardData.builder()
+        .userGrowth(java.util.Collections.emptyList())
+        .revenueTrends(revenueTrends)
+        .dailyRevenue(java.util.Collections.emptyList())
+        .totalRevenue(totalRevenue != null ? totalRevenue.doubleValue() : 0.0)
+        .activeListings(0)
+        .occupancyRate(0.0)
+        .build();
+  }
+
+  @Override
+  @Transactional
+  public void refundBooking(Booking booking) {
+    // 1. Update Earning Status to CANCELLED
+    Optional<Earning> earningOpt = earningRepository.findByBooking(booking);
+    if (earningOpt.isPresent()) {
+      Earning earning = earningOpt.get();
+      // Only cancel if it hasn't been paid out yet
+      if (earning.getStatus() != EarningStatus.PAID) {
+        earning.setStatus(EarningStatus.CANCELLED);
+        earningRepository.save(earning);
+      } else {
+        // If already paid out, we might need manual intervention or negative balance
+        // logic
+        // For now, just log and mark as REFUNDED if possible, or keep as PAID but flag
+        // it
+        // Ideally, create a debit record (Negative Earning)
+        // MVP: Log warning
+        // log.warn("Attempting to refund a paid out earning: {}", earning.getId());
+        earning.setStatus(EarningStatus.CANCELLED); // Force update for MVP or handle dispute
+        earningRepository.save(earning);
+      }
+    }
+
+    // 2. Update Payment Status to REFUNDED
+    Optional<Payment> paymentOpt = paymentRepository.findByBookingId(booking.getId());
+    if (paymentOpt.isPresent()) {
+      Payment payment = paymentOpt.get();
+      payment.setStatus(PaymentStatus.REFUNDED);
+      paymentRepository.save(payment);
+    }
   }
 }

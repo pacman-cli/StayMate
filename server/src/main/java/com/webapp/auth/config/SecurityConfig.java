@@ -26,6 +26,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.webapp.auth.security.JwtAuthenticationFilter;
+import com.webapp.auth.security.MaintenanceModeFilter;
 import com.webapp.auth.security.oauth2.CustomOAuth2UserService;
 import com.webapp.auth.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.webapp.auth.security.oauth2.OAuth2AuthenticationFailureHandler;
@@ -51,6 +52,7 @@ public class SecurityConfig {
         private final PasswordEncoder passwordEncoder;
         private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
         private final RateLimitFilter rateLimitFilter;
+        private final MaintenanceModeFilter maintenanceModeFilter;
 
         @Value("${cors.allowed-origins:http://localhost:3000,http://localhost:8080}")
         private String allowedOriginsConfig;
@@ -63,7 +65,8 @@ public class SecurityConfig {
                         OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler,
                         PasswordEncoder passwordEncoder,
                         HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository,
-                        RateLimitFilter rateLimitFilter) {
+                        RateLimitFilter rateLimitFilter,
+                        MaintenanceModeFilter maintenanceModeFilter) {
                 this.jwtAuthenticationFilter = jwtAuthenticationFilter;
                 this.userDetailsService = userDetailsService;
                 this.customOAuth2UserService = customOAuth2UserService;
@@ -72,6 +75,7 @@ public class SecurityConfig {
                 this.passwordEncoder = passwordEncoder;
                 this.httpCookieOAuth2AuthorizationRequestRepository = httpCookieOAuth2AuthorizationRequestRepository;
                 this.rateLimitFilter = rateLimitFilter;
+                this.maintenanceModeFilter = maintenanceModeFilter;
         }
 
         @Bean
@@ -97,10 +101,14 @@ public class SecurityConfig {
                                                                 "/api/public/**",
                                                                 "/actuator/health",
                                                                 "/ws/**",
+                                                                "/h2-console/**",
                                                                 "/error",
                                                                 "/api/uploads/**",
                                                                 "/api/v1/internal/sudo/**",
-                                                                "/api/properties/**",
+                                                                "/api/properties/search",
+                                                                "/api/properties/recommended",
+                                                                "/api/properties/{id:[0-9]+}", // Only allow numeric IDs
+                                                                                               // publicly
                                                                 "/api/roommates/**")
                                                 .permitAll()
                                                 // Admin only endpoints
@@ -137,6 +145,7 @@ public class SecurityConfig {
                                 .authenticationProvider(authenticationProvider())
                                 .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                                .addFilterAfter(maintenanceModeFilter, UsernamePasswordAuthenticationFilter.class)
                                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
 
                 return http.build();

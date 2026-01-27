@@ -18,4 +18,6 @@ public class PropertySeatSummaryDto {
   private int availableBeds;
   private List<SeatDto> seats;
   private String imageUrl;
+  private String status; // "Vacant" or "Booked"
+  private List<com.webapp.domain.review.dto.ReviewResponse> reviews;
 }

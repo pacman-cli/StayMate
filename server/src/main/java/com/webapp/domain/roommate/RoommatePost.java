@@ -44,6 +44,13 @@ public class RoommatePost {
   private String location;
 
   @Column(nullable = false)
+  private Double budgetMin;
+
+  @Column(nullable = false)
+  private Double budgetMax;
+
+  // Deprecated: use budgetMax for backward compatibility if needed, or remove.
+  // keeping for now as simple "Target Budget"
   private Double budget;
 
   @Column(name = "move_in_date")
@@ -60,8 +67,12 @@ public class RoommatePost {
   private String genderPreference; // MALE, FEMALE, ANY
 
   private Boolean smoking; // true = ok with smoking / is smoker
+  private Boolean alcohol; // true = ok with drinking / drinks
   private Boolean pets; // true = ok with pets / has pets
   private String occupation; // STUDENT, PROFESSIONAL, ANY
+  private String stayDuration; // SHORT_TERM, LONG_TERM
+  private String guestsAllowed; // ALWAYS, WEEKENDS, NEVER
+  private String cookingHabits; // OFTEN, RARELY, NEVER
 
   // AI Matching Fields
   @Column(name = "cleanliness")

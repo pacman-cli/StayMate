@@ -208,11 +208,15 @@ public class BookingServiceImpl implements BookingService {
         // Update property status
         com.webapp.domain.property.entity.Property property = booking.getProperty();
 
-        // Only set to RENTED if this was the last available seat
-        if (!seatService.hasAvailableSeats(property.getId())) {
+        // New Logic: If ANY booking is confirmed, the property is considered "Booked"
+        // on the owner dashboard.
+        // We set it to RENTED to reflect this state.
+        // NOTE: This might affect search visibility if RENTED properties are hidden.
+        // Assuming search filters by 'availableBeds > 0' rather than just status.
+        if (property.getStatus() != com.webapp.domain.property.enums.PropertyStatus.RENTED) {
             property.setStatus(com.webapp.domain.property.enums.PropertyStatus.RENTED);
             propertyRepository.save(property);
-            log.info("Property {} is now fully booked, status set to RENTED", property.getId());
+            log.info("Property {} status set to RENTED (Booking Confirmed)", property.getId());
         }
 
         // Record financial transactions
@@ -246,6 +250,10 @@ public class BookingServiceImpl implements BookingService {
         } else {
             log.debug("Booking {} had no seat assigned, nothing to release", booking.getId());
         }
+
+        // Trigger Financial Refund Logic
+        financeService.refundBooking(booking);
+        log.info("Financial refund processed for booking {}", booking.getId());
     }
 
     private void notifyStatusChange(Booking booking, BookingStatus status, Long actorUserId) {

@@ -42,15 +42,14 @@ export default function GlassCard({
             className={`
                 relative rounded-2xl overflow-hidden transition-all duration-300
                 ${paddingClasses[padding]}
-                ${blurClasses[blur]}
                 ${isDark
-                    ? "bg-dark-800/80 border border-white/10 shadow-xl shadow-black/20"
-                    : "bg-warm-50 border border-slate-200/60 shadow-lg"
+                    ? "bg-dark-800 border-dark-700 shadow-xl shadow-black/20"
+                    : "bg-white border-slate-200 shadow-lg"
                 }
                 ${hover
                     ? isDark
-                        ? "hover:bg-white/10 hover:border-white/20 hover:shadow-glass"
-                        : "hover:bg-white/90 hover:shadow-xl hover:border-dark-300/50"
+                        ? "hover:bg-dark-750 hover:border-dark-600 hover:shadow-elevation-high"
+                        : "hover:bg-slate-50 hover:shadow-xl hover:border-slate-300"
                     : ""
                 }
                 ${glow && isDark

@@ -136,8 +136,18 @@ public class FinanceController {
    */
   @GetMapping("/admin/summary")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<com.webapp.domain.finance.dto.AdminFinancialSummaryResponse> getAdminSummary() {
-    return ResponseEntity.ok(financeService.getAdminFinancialSummary());
+  public ResponseEntity<com.webapp.domain.finance.dto.AdminFinancialSummaryResponse> getAdminSummary(
+      @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
+      @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate endDate) {
+    return ResponseEntity.ok(financeService.getAdminFinancialSummary(startDate, endDate));
+  }
+
+  @GetMapping("/admin/analytics")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<com.webapp.domain.finance.dto.AnalyticsDashboardData> getAnalyticsData(
+      @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
+      @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate endDate) {
+    return ResponseEntity.ok(financeService.getAnalyticsData(startDate, endDate));
   }
 
   /**

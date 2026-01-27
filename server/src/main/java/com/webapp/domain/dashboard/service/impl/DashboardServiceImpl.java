@@ -17,7 +17,6 @@ import com.webapp.domain.dashboard.dto.UserDashboardDTO;
 import com.webapp.domain.dashboard.service.DashboardService;
 import com.webapp.domain.dashboard.strategy.DashboardStrategy;
 import com.webapp.domain.maintenance.repository.MaintenanceRequestRepository;
-import com.webapp.domain.messaging.repository.MessageRepository;
 import com.webapp.domain.property.repository.PropertyRepository;
 import com.webapp.domain.report.repository.ReportRepository;
 import com.webapp.domain.saved.repository.SavedPropertyRepository;
@@ -34,7 +33,6 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class DashboardServiceImpl implements DashboardService {
 
-        private final MessageRepository messageRepository;
         private final UserRepository userRepository;
         private final PropertyRepository propertyRepository;
         private final BookingRepository bookingRepository;
@@ -246,8 +244,7 @@ public class DashboardServiceImpl implements DashboardService {
                                 .supplyAsync(() -> propertyRepository.sumInquiriesByOwnerId(user.getId()));
 
                 java.util.concurrent.CompletableFuture<Long> activeBookingsFuture = java.util.concurrent.CompletableFuture
-                                .supplyAsync(() -> bookingRepository.countByLandlordIdAndStatus(user.getId(),
-                                                com.webapp.domain.booking.enums.BookingStatus.CONFIRMED));
+                                .supplyAsync(() -> bookingRepository.countActiveBookingsByLandlordId(user.getId()));
 
                 // Incoming Tenant Requests (Real)
                 java.util.concurrent.CompletableFuture<List<com.webapp.domain.booking.dto.BookingResponse>> incomingRequestsFuture = java.util.concurrent.CompletableFuture
@@ -309,10 +306,12 @@ public class DashboardServiceImpl implements DashboardService {
                 long unread = notificationRepository.countUnreadByUserId(user.getId());
 
                 List<com.webapp.domain.property.dto.PropertyResponse> recommended = propertyRepository
-                                .searchProperties(user.getCity(), null, null, null, null, null,
+                                .searchProperties(null, null, null, null, null, null,
                                                 java.util.List.of(
                                                                 com.webapp.domain.property.enums.PropertyStatus.APPROVED,
-                                                                com.webapp.domain.property.enums.PropertyStatus.ACTIVE))
+                                                                com.webapp.domain.property.enums.PropertyStatus.ACTIVE),
+                                                java.util.Collections.emptyList(),
+                                                0L)
                                 .stream().limit(3)
                                 .map(p -> com.webapp.domain.property.dto.PropertyResponse.builder()
                                                 .id(p.getId())
@@ -378,7 +377,8 @@ public class DashboardServiceImpl implements DashboardService {
                 List<com.webapp.domain.dashboard.entity.Expense> expenses = expenseRepository
                                 .findByPayerId(user.getId());
                 // Filter for current month (simplified)
-                java.time.LocalDate now = java.time.LocalDate.now();
+                java.time.LocalDate now = java.time.LocalDate
+                                .now();
                 totalSpentMonth = expenses.stream()
                                 .filter(e -> e.getExpenseDate().getMonth() == now.getMonth()
                                                 && e.getExpenseDate().getYear() == now.getYear())
@@ -482,18 +482,11 @@ public class DashboardServiceImpl implements DashboardService {
                         }
                 }
 
-                return UserDashboardDTO.builder()
-                                .compatibilityMatchStats(avgMatchScore)
-                                .upcomingVisitsCount(upcoming)
-                                .unreadNotificationsCount(unread)
-                                .recommendedRooms(recommended)
-                                .recommendedRoommates(aiMatches)
-                                .savedItemsCount(savedProps + savedRoommates)
-                                .activeSearchesCount(activeSearches)
-                                .pendingVisitsCount(pendingVisits)
-                                .emergencyRooms(emergency)
-                                .verificationProgress(verProgress)
-                                .financeStats(finance)
+                return UserDashboardDTO.builder().compatibilityMatchStats(avgMatchScore).upcomingVisitsCount(upcoming)
+                                .unreadNotificationsCount(unread).recommendedRooms(recommended)
+                                .recommendedRoommates(aiMatches).savedItemsCount(savedProps + savedRoommates)
+                                .activeSearchesCount(activeSearches).pendingVisitsCount(pendingVisits)
+                                .emergencyRooms(emergency).verificationProgress(verProgress).financeStats(finance)
                                 .build();
         }
 

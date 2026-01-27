@@ -213,7 +213,7 @@ export default function DashboardLayout({
     return (
         <div
             className={`min-h-screen transition-colors duration-500 overflow-x-hidden ${isDark
-                ? "bg-[#0B1120]"
+                ? "bg-dark-950"
                 : "bg-warm-25"
                 }`}
         >
@@ -223,8 +223,8 @@ export default function DashboardLayout({
                     className="absolute inset-0"
                     style={{
                         backgroundImage: isDark
-                            ? `linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                               linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)`
+                            ? `linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                               linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px)`
                             : `linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
                                linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px)`,
                         backgroundSize: "48px 48px",
@@ -239,9 +239,9 @@ export default function DashboardLayout({
             <div className="relative z-10 pl-64 transition-all duration-300">
                 {/* Top Header */}
                 <header
-                    className={`sticky top-0 z-30 h-16 flex items-center justify-between px-6 border-b ${isDark
-                        ? "bg-dark-900 border-white/5"
-                        : "bg-warm-25/95 backdrop-blur-xl border-slate-200" // Warm background for header
+                    className={`sticky top-0 z-30 h-16 flex items-center justify-between px-6 border-b transition-colors duration-200 ${isDark
+                        ? "bg-dark-900 border-dark-800"
+                        : "bg-white border-slate-200"
                         }`}
                 >
                     {/* Left: Page Title / Search */}
@@ -266,14 +266,14 @@ export default function DashboardLayout({
                                 placeholder="Search..."
                                 onFocus={() => setSearchFocused(true)}
                                 onBlur={() => setSearchFocused(false)}
-                                className={`w-full pl-10 pr-4 py-2 text-sm rounded-lg border outline-none transition-all duration-300 ${isDark
-                                    ? "bg-dark-800 border-dark-700 text-white placeholder-slate-500 focus:border-primary-500/50 focus:bg-dark-800"
+                                className={`w-full pl-10 pr-4 py-2 text-sm rounded-lg border outline-none transition-all duration-200 ${isDark
+                                    ? "bg-dark-950 border-dark-700 text-white placeholder-slate-500 focus:border-primary-500 focus:bg-dark-950"
                                     : "bg-slate-100 border-transparent text-slate-900 placeholder-slate-400 focus:border-primary-500 focus:bg-white"
                                     }`}
                             />
                             <kbd
                                 className={`absolute right-3 px-1.5 py-0.5 text-xs font-medium rounded ${isDark
-                                    ? "bg-dark-700 text-slate-400"
+                                    ? "bg-dark-800 text-slate-400 border border-dark-700"
                                     : "bg-slate-200 text-slate-500"
                                     }`}
                             >
@@ -291,7 +291,7 @@ export default function DashboardLayout({
                         <Link
                             href="/messages"
                             className={`relative p-2 rounded-lg transition-colors ${isDark
-                                ? "hover:bg-white/10 text-slate-400 hover:text-white"
+                                ? "hover:bg-dark-800 text-slate-400 hover:text-white"
                                 : "hover:bg-slate-100 text-slate-500 hover:text-slate-900"
                                 }`}
                         >
@@ -335,14 +335,14 @@ export default function DashboardLayout({
                             {notificationOpen && (
                                 <div
                                     className={`absolute right-0 top-full mt-2 w-96 max-h-[32rem] rounded-xl shadow-xl border overflow-hidden ${isDark
-                                        ? "bg-dark-800 border-white/10"
+                                        ? "bg-dark-900 border-dark-700"
                                         : "bg-white border-slate-200"
                                         }`}
                                 >
                                     {/* Header */}
                                     <div
                                         className={`px-4 py-3 border-b flex items-center justify-between ${isDark
-                                            ? "border-white/10"
+                                            ? "border-dark-800"
                                             : "border-slate-100"
                                             }`}
                                     >
@@ -385,7 +385,7 @@ export default function DashboardLayout({
                                             <div className="py-12 text-center">
                                                 <div
                                                     className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 ${isDark
-                                                        ? "bg-white/5"
+                                                        ? "bg-dark-800"
                                                         : "bg-slate-100"
                                                         }`}
                                                 >
@@ -428,11 +428,11 @@ export default function DashboardLayout({
                                                         }}
                                                         className={`block px-4 py-3 transition-colors ${!notification.read
                                                             ? isDark
-                                                                ? "bg-primary-500/5"
+                                                                ? "bg-primary-500/10"
                                                                 : "bg-primary-50/50"
                                                             : ""
                                                             } ${isDark
-                                                                ? "hover:bg-white/5"
+                                                                ? "hover:bg-dark-800"
                                                                 : "hover:bg-slate-50"
                                                             }`}
                                                     >
@@ -507,7 +507,7 @@ export default function DashboardLayout({
                                     {/* Footer */}
                                     <div
                                         className={`px-4 py-3 border-t ${isDark
-                                            ? "border-white/10"
+                                            ? "border-dark-800"
                                             : "border-slate-100"
                                             }`}
                                     >
@@ -517,7 +517,7 @@ export default function DashboardLayout({
                                                 setNotificationOpen(false)
                                             }
                                             className={`block w-full text-center text-sm font-medium py-2 rounded-lg transition-colors ${isDark
-                                                ? "text-primary-400 hover:bg-white/5"
+                                                ? "text-primary-400 hover:bg-dark-800"
                                                 : "text-primary-600 hover:bg-slate-50"
                                                 }`}
                                         >
@@ -536,7 +536,7 @@ export default function DashboardLayout({
                                     setNotificationOpen(false)
                                 }}
                                 className={`flex items-center gap-2 p-1.5 pr-3 rounded-lg transition-colors ${isDark
-                                    ? "hover:bg-white/10"
+                                    ? "hover:bg-dark-800"
                                     : "hover:bg-slate-100"
                                     }`}
                             >
@@ -550,7 +550,7 @@ export default function DashboardLayout({
                                 ) : (
                                     <div
                                         className={`w-8 h-8 rounded-full flex items-center justify-center ${isDark
-                                            ? "bg-white/10"
+                                            ? "bg-dark-800"
                                             : "bg-slate-200"
                                             }`}
                                     >
@@ -586,14 +586,14 @@ export default function DashboardLayout({
                             {profileOpen && (
                                 <div
                                     className={`absolute right-0 top-full mt-2 w-56 rounded-xl shadow-lg border overflow-hidden ${isDark
-                                        ? "bg-dark-800 border-white/10"
+                                        ? "bg-dark-900 border-dark-700"
                                         : "bg-white border-slate-200"
                                         }`}
                                 >
                                     {/* User Info */}
                                     <div
                                         className={`px-4 py-3 border-b ${isDark
-                                            ? "border-white/10"
+                                            ? "border-dark-800"
                                             : "border-slate-100"
                                             }`}
                                     >
@@ -630,7 +630,7 @@ export default function DashboardLayout({
                                         <Link
                                             href="/profile"
                                             className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${isDark
-                                                ? "text-slate-300 hover:bg-white/5"
+                                                ? "text-slate-300 hover:bg-dark-800"
                                                 : "text-slate-700 hover:bg-slate-50"
                                                 }`}
                                         >
@@ -640,7 +640,7 @@ export default function DashboardLayout({
                                         <Link
                                             href="/settings"
                                             className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${isDark
-                                                ? "text-slate-300 hover:bg-white/5"
+                                                ? "text-slate-300 hover:bg-dark-800"
                                                 : "text-slate-700 hover:bg-slate-50"
                                                 }`}
                                         >
@@ -652,7 +652,7 @@ export default function DashboardLayout({
                                     {/* Logout */}
                                     <div
                                         className={`py-1 border-t ${isDark
-                                            ? "border-white/10"
+                                            ? "border-dark-800"
                                             : "border-slate-100"
                                             }`}
                                     >

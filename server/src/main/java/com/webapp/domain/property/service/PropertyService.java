@@ -27,6 +27,7 @@ public class PropertyService {
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
     private final VerificationService verificationService;
+    private final com.webapp.domain.property.repository.AmenityRepository amenityRepository;
 
     @Transactional
     public PropertyResponse createProperty(PropertyRequest request,
@@ -67,6 +68,12 @@ public class PropertyService {
                 .status(PropertyStatus.PENDING) // Default to Pending
                 .build();
 
+        if (request.getAmenityIds() != null && !request.getAmenityIds().isEmpty()) {
+            java.util.List<com.webapp.domain.property.entity.Amenity> amenities = amenityRepository
+                    .findAllById(request.getAmenityIds());
+            property.setAmenities(new java.util.HashSet<>(amenities));
+        }
+
         return mapToResponse(propertyRepository.save(property));
     }
 
@@ -102,14 +109,21 @@ public class PropertyService {
      */
     @Transactional(readOnly = true)
     public List<PropertyResponse> searchProperties(String query, Double minPrice, Double maxPrice, Integer minBeds,
-            Integer minBaths, String propertyType) {
+            Integer minBaths, String propertyType, java.util.List<Long> amenityIds) {
         java.math.BigDecimal decimalMinPrice = minPrice != null ? java.math.BigDecimal.valueOf(minPrice) : null;
         java.math.BigDecimal decimalMaxPrice = maxPrice != null ? java.math.BigDecimal.valueOf(maxPrice) : null;
+
+        long amenityCount = (amenityIds != null && !amenityIds.isEmpty()) ? amenityIds.size() : 0L;
+        // Ensure list is not null for SQL IN clause if count is > 0
+        java.util.List<Long> safeAmenityIds = (amenityIds != null && !amenityIds.isEmpty()) ? amenityIds
+                : java.util.Collections.emptyList();
 
         return propertyRepository
                 .searchProperties(query, decimalMinPrice, decimalMaxPrice, minBeds, minBaths,
                         propertyType,
-                        java.util.List.of(PropertyStatus.APPROVED, PropertyStatus.ACTIVE))
+                        java.util.List.of(PropertyStatus.APPROVED, PropertyStatus.ACTIVE),
+                        safeAmenityIds,
+                        amenityCount)
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -129,16 +143,20 @@ public class PropertyService {
                 .baths(property.getBaths())
                 .sqft(property.getSqft())
                 .rating(property.getRating())
+                .rating(property.getRating())
+                .reviewsCount(property.getReviewsCount())
                 .verified(property.isVerified())
                 .status(property.getStatus().getDisplayName())
                 .views(property.getViews())
                 .inquiries(property.getInquiries())
                 .priceAmount(property.getPriceAmount())
                 .ownerId(property.getOwner().getId())
-                .ownerName(property.getOwner().getFirstName() + " " + property.getOwner().getLastName())
+                .ownerName(property.getOwner().getFullName())
                 .imageUrl(property.getImageUrl())
                 .images(property.getImageUrl() != null ? java.util.List.of(property.getImageUrl())
                         : java.util.Collections.emptyList())
+                .propertyType(property.getPropertyType() != null ? property.getPropertyType().name() : null)
+                .amenities(property.getAmenities())
                 .build();
     }
 
@@ -232,6 +250,12 @@ public class PropertyService {
         property.setBaths(request.getBaths());
         property.setSqft(request.getArea().intValue());
         property.setPropertyType(request.getPropertyType());
+
+        if (request.getAmenityIds() != null) {
+            java.util.List<com.webapp.domain.property.entity.Amenity> amenities = amenityRepository
+                    .findAllById(request.getAmenityIds());
+            property.setAmenities(new java.util.HashSet<>(amenities));
+        }
 
         return mapToResponse(propertyRepository.save(property));
     }

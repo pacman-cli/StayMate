@@ -18,11 +18,6 @@ import com.webapp.auth.exception.BadRequestException;
 import com.webapp.auth.exception.ResourceNotFoundException;
 import com.webapp.auth.exception.UserAlreadyExistsException;
 import com.webapp.auth.security.UserPrincipal;
-import com.webapp.domain.application.repository.ApplicationRepository;
-import com.webapp.domain.booking.repository.BookingRepository;
-import com.webapp.domain.match.repository.MatchRepository;
-import com.webapp.domain.messaging.repository.ConversationRepository;
-import com.webapp.domain.notification.repository.NotificationRepository;
 import com.webapp.domain.user.dto.UserCreateDto;
 import com.webapp.domain.user.entity.User;
 import com.webapp.domain.user.enums.AuthProvider;
@@ -41,11 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final NotificationRepository notificationRepository;
-    private final ApplicationRepository applicationRepository;
-    private final BookingRepository bookingRepository;
-    private final MatchRepository matchRepository;
-    private final ConversationRepository conversationRepository;
+    private final com.webapp.domain.property.repository.PropertyRepository propertyRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -393,38 +384,43 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteUser(Long userId) {
         User user = getUserById(userId);
-        log.info("Starting deletion for user: {}", user.getEmail());
+        log.info("Starting soft deletion for user: {}", user.getEmail());
 
-        // 1. Delete all notifications for the user
-        // Using deleteAll to ensure potential cascades (though Notification has none)
-        List<com.webapp.domain.notification.entity.Notification> notifications = notificationRepository
-                .findAllByUserId(userId);
-        notificationRepository.deleteAll(notifications);
+        // 1. Anonymize Personal Information
+        String anonymizedEmail = "deleted_" + user.getId() + "@staymate.local";
+        user.setEmail(anonymizedEmail);
+        user.setFirstName("Deleted");
+        user.setLastName("User");
+        user.setPhoneNumber(null);
+        user.setProfilePictureUrl(null);
+        user.setBio(null);
+        user.setAddress(null);
+        user.setCity(null);
 
-        // 2. Delete all applications involving the user
-        List<com.webapp.domain.application.entity.Application> applications = applicationRepository
-                .findAllBySenderIdOrReceiverId(userId, userId);
-        applicationRepository.deleteAll(applications);
+        // 2. Disable Account and Mark as Deleted
+        user.setEnabled(false);
+        user.setAccountStatus(com.webapp.domain.user.enums.AccountStatus.DELETED);
+        user.setDeletionScheduledAt(null);
+        user.setLastLoginAt(null);
+        user.setPhoneOtp(null);
+        user.setProviderId(null);
 
-        // 3. Delete all bookings involving the user
-        List<com.webapp.domain.booking.entity.Booking> bookings = bookingRepository
-                .findAllByTenantIdOrLandlordId(userId, userId);
-        bookingRepository.deleteAll(bookings);
+        // 3. Deactivate all properties owned by this user
+        List<com.webapp.domain.property.entity.Property> properties = propertyRepository.findAllByOwnerId(userId);
+        for (com.webapp.domain.property.entity.Property property : properties) {
+            property.setStatus(com.webapp.domain.property.enums.PropertyStatus.INACTIVE);
+            propertyRepository.save(property);
+        }
 
-        // 4. Delete all matches involving the user
-        List<com.webapp.domain.match.entity.Match> matches = matchRepository.findAllByUserId(userId);
-        matchRepository.deleteAll(matches);
+        // 4. Save User (Soft Delete)
+        userRepository.save(user);
 
-        // 5. Delete all conversations (and cascaded messages) involving the user
-        // This is CRITICAL: Fetching entities and using deleteAll triggers
-        // CascadeType.ALL on messages
-        List<com.webapp.domain.messaging.entity.Conversation> conversations = conversationRepository
-                .findAllByUserId(userId);
-        conversationRepository.deleteAll(conversations);
+        // Note: We DO NOT delete notifications, applications, bookings, matches, or
+        // conversations
+        // to preserve history and prevent foreign key measurement errors.
+        // Since the user is anonymous and disabled, this data is effectively archived.
 
-        // 6. Finally delete the user
-        userRepository.delete(user);
-        log.info("User deleted successfully: {}", user.getEmail());
+        log.info("User soft deleted successfully: {}", userId);
     }
 
     @Override
@@ -470,6 +466,9 @@ public class UserServiceImpl implements UserService {
     // ==================== Role Management Methods (moved from AuthService)
     // ====================
 
+    /**
+     * Promotes user to house owner; persists the change
+     */
     @Override
     @Transactional
     public User promoteToHouseOwner(Long userId) {

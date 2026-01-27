@@ -69,7 +69,24 @@ public class ReviewServiceImpl implements ReviewService {
         .build();
 
     Review saved = java.util.Objects.requireNonNull(reviewRepository.save(review));
+
+    // Update Property Rating and Count
+    updatePropertyRating(property);
+
     return mapToResponse(saved);
+  }
+
+  private void updatePropertyRating(Property property) {
+    if (property == null)
+      return;
+
+    Double avgRating = reviewRepository.getAverageRatingForProperty(property.getId());
+    long count = reviewRepository.countByPropertyId(property.getId());
+
+    property.setRating(avgRating != null ? avgRating : 0.0);
+    property.setReviewsCount((int) count);
+
+    propertyRepository.save(property);
   }
 
   @Override

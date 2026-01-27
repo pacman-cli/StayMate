@@ -9,6 +9,9 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useDebounce } from "use-debounce"
 
+
+import { RoommatePostResponse } from "@/types/auth"
+
 export default function RoommatesPage() {
     const { isDark } = useTheme()
 
@@ -19,7 +22,7 @@ export default function RoommatesPage() {
     const [maxBudget, setMaxBudget] = useState("")
     const [genderPref, setGenderPref] = useState("")
 
-    const [posts, setPosts] = useState([])
+    const [posts, setPosts] = useState<RoommatePostResponse[]>([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -57,12 +60,20 @@ export default function RoommatesPage() {
                                 Connect with verified people looking for shared accommodation.
                             </p>
                         </div>
-                        <Link
-                            href="/roommates/create"
-                            className="px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all text-center"
-                        >
-                            Post an Ad
-                        </Link>
+                        <div className="flex gap-3">
+                            <Link
+                                href="/roommates/requests"
+                                className="px-6 py-3 bg-white text-slate-700 font-semibold rounded-xl shadow-sm border border-slate-200 hover:bg-slate-50 transition-all text-center"
+                            >
+                                Incoming Requests
+                            </Link>
+                            <Link
+                                href="/roommates/create"
+                                className="px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all text-center"
+                            >
+                                Post an Ad
+                            </Link>
+                        </div>
                     </div>
 
                     <div className="flex flex-col lg:flex-row gap-8">
@@ -87,8 +98,8 @@ export default function RoommatesPage() {
                                                 value={location}
                                                 onChange={(e) => setLocation(e.target.value)}
                                                 className={`w-full pl-9 pr-4 py-2.5 rounded-xl border text-sm ${isDark
-                                                        ? "bg-white/5 border-white/10 focus:border-primary-500/50 text-white"
-                                                        : "bg-slate-50 border-slate-200 focus:border-primary-500 text-slate-900"
+                                                    ? "bg-white/5 border-white/10 focus:border-primary-500/50 text-white"
+                                                    : "bg-slate-50 border-slate-200 focus:border-primary-500 text-slate-900"
                                                     } focus:outline-none`}
                                             />
                                         </div>
@@ -103,8 +114,8 @@ export default function RoommatesPage() {
                                                 value={minBudget}
                                                 onChange={(e) => setMinBudget(e.target.value)}
                                                 className={`w-full px-3 py-2.5 rounded-xl border text-sm ${isDark
-                                                        ? "bg-white/5 border-white/10 focus:border-primary-500/50 text-white"
-                                                        : "bg-slate-50 border-slate-200 focus:border-primary-500 text-slate-900"
+                                                    ? "bg-white/5 border-white/10 focus:border-primary-500/50 text-white"
+                                                    : "bg-slate-50 border-slate-200 focus:border-primary-500 text-slate-900"
                                                     } focus:outline-none`}
                                             />
                                             <input
@@ -113,8 +124,8 @@ export default function RoommatesPage() {
                                                 value={maxBudget}
                                                 onChange={(e) => setMaxBudget(e.target.value)}
                                                 className={`w-full px-3 py-2.5 rounded-xl border text-sm ${isDark
-                                                        ? "bg-white/5 border-white/10 focus:border-primary-500/50 text-white"
-                                                        : "bg-slate-50 border-slate-200 focus:border-primary-500 text-slate-900"
+                                                    ? "bg-white/5 border-white/10 focus:border-primary-500/50 text-white"
+                                                    : "bg-slate-50 border-slate-200 focus:border-primary-500 text-slate-900"
                                                     } focus:outline-none`}
                                             />
                                         </div>
@@ -126,8 +137,8 @@ export default function RoommatesPage() {
                                             value={genderPref}
                                             onChange={(e) => setGenderPref(e.target.value)}
                                             className={`w-full px-3 py-2.5 rounded-xl border text-sm ${isDark
-                                                    ? "bg-white/5 border-white/10 focus:border-primary-500/50 text-white"
-                                                    : "bg-slate-50 border-slate-200 focus:border-primary-500 text-slate-900"
+                                                ? "bg-white/5 border-white/10 focus:border-primary-500/50 text-white"
+                                                : "bg-slate-50 border-slate-200 focus:border-primary-500 text-slate-900"
                                                 } focus:outline-none`}
                                         >
                                             <option value="">Any</option>

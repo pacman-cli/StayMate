@@ -64,12 +64,12 @@ export function MyStayCard({ status, nextVisit }: MyStayCardProps) {
             <div
               className={`flex items-center gap-4 rounded-2xl p-4 ${isDark
                 ? "bg-dark-800 border border-dark-700"
-                : "bg-white/60 border border-slate-100 backdrop-blur-md"
+                : "bg-white border border-slate-100"
                 }`}
             >
               <div
                 className={`rounded-xl p-3 ${isDark
-                  ? "bg-indigo-900/50 text-indigo-400"
+                  ? "bg-indigo-900/30 text-indigo-400"
                   : "bg-indigo-50 text-indigo-600"
                   }`}
               >

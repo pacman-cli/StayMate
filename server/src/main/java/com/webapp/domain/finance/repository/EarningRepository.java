@@ -15,34 +15,56 @@ import com.webapp.domain.finance.enums.EarningStatus;
 
 @Repository
 public interface EarningRepository extends JpaRepository<Earning, Long> {
-  Page<Earning> findByUserId(Long userId, Pageable pageable);
+        Page<Earning> findByUserId(Long userId, Pageable pageable);
 
-  Optional<Earning> findByBooking(com.webapp.domain.booking.entity.Booking booking);
+        Optional<Earning> findByBooking(com.webapp.domain.booking.entity.Booking booking);
 
-  List<Earning> findByUserIdAndStatus(Long userId, EarningStatus status);
+        List<Earning> findByUserIdAndStatus(Long userId, EarningStatus status);
 
-  @Query("SELECT SUM(e.netAmount) FROM Earning e WHERE e.user.id = :userId AND e.status = :status")
-  BigDecimal sumNetAmountByUserIdAndStatus(Long userId, EarningStatus status);
+        @Query("SELECT SUM(e.netAmount) FROM Earning e WHERE e.user.id = :userId AND e.status = :status")
+        BigDecimal sumNetAmountByUserIdAndStatus(Long userId, EarningStatus status);
 
-  @Query("SELECT SUM(e.netAmount) FROM Earning e WHERE e.user.id = :userId")
-  BigDecimal sumTotalEarningsByUserId(Long userId);
+        @Query("SELECT SUM(e.netAmount) FROM Earning e WHERE e.user.id = :userId")
+        BigDecimal sumTotalEarningsByUserId(Long userId);
 
-  List<Earning> findByPayoutRequestId(Long payoutRequestId);
+        List<Earning> findByPayoutRequestId(Long payoutRequestId);
 
-  // Admin summary queries
-  @Query("SELECT SUM(e.amount) FROM Earning e")
-  BigDecimal sumTotalAmount();
+        // Admin summary queries
+        @Query("SELECT SUM(e.amount) FROM Earning e")
+        BigDecimal sumTotalAmount();
 
-  @Query("SELECT SUM(e.commission) FROM Earning e")
-  BigDecimal sumTotalCommission();
+        @Query("SELECT SUM(e.commission) FROM Earning e")
+        BigDecimal sumTotalCommission();
 
-  @Query("SELECT SUM(e.netAmount) FROM Earning e")
-  BigDecimal sumTotalNetAmount();
+        @Query("SELECT SUM(e.netAmount) FROM Earning e")
+        BigDecimal sumTotalNetAmount();
 
-  @Query("SELECT e FROM Earning e WHERE e.user.id = :userId " +
-      "AND (:startDate IS NULL OR e.createdAt >= :startDate) " +
-      "AND (:endDate IS NULL OR e.createdAt <= :endDate) " +
-      "AND (:status IS NULL OR e.status = :status)")
-  Page<Earning> findByUserIdWithFilters(Long userId, java.time.LocalDateTime startDate,
-      java.time.LocalDateTime endDate, com.webapp.domain.finance.enums.EarningStatus status, Pageable pageable);
+        @Query("SELECT e FROM Earning e WHERE e.user.id = :userId " +
+                        "AND (:startDate IS NULL OR e.createdAt >= :startDate) " +
+                        "AND (:endDate IS NULL OR e.createdAt <= :endDate) " +
+                        "AND (:status IS NULL OR e.status = :status)")
+        Page<Earning> findByUserIdWithFilters(Long userId, java.time.LocalDateTime startDate,
+                        java.time.LocalDateTime endDate, com.webapp.domain.finance.enums.EarningStatus status,
+                        Pageable pageable);
+
+        // Admin summary queries with date filters
+        @Query("SELECT SUM(e.amount) FROM Earning e WHERE " +
+                        "(:startDate IS NULL OR e.createdAt >= :startDate) AND " +
+                        "(:endDate IS NULL OR e.createdAt <= :endDate)")
+        BigDecimal sumTotalAmount(java.time.LocalDateTime startDate, java.time.LocalDateTime endDate);
+
+        @Query("SELECT SUM(e.commission) FROM Earning e WHERE " +
+                        "(:startDate IS NULL OR e.createdAt >= :startDate) AND " +
+                        "(:endDate IS NULL OR e.createdAt <= :endDate)")
+        BigDecimal sumTotalCommission(java.time.LocalDateTime startDate, java.time.LocalDateTime endDate);
+
+        @Query("SELECT SUM(e.netAmount) FROM Earning e WHERE " +
+                        "(:startDate IS NULL OR e.createdAt >= :startDate) AND " +
+                        "(:endDate IS NULL OR e.createdAt <= :endDate)")
+        BigDecimal sumTotalNetAmount(java.time.LocalDateTime startDate, java.time.LocalDateTime endDate);
+
+        @Query("SELECT e FROM Earning e WHERE " +
+                        "(:startDate IS NULL OR e.createdAt >= :startDate) AND " +
+                        "(:endDate IS NULL OR e.createdAt <= :endDate)")
+        List<Earning> findAllByCreatedAtBetween(java.time.LocalDateTime startDate, java.time.LocalDateTime endDate);
 }

@@ -46,6 +46,9 @@ export default function SearchRentalsPage() {
                     minPrice: searchParams.get("minPrice") ? Number(searchParams.get("minPrice")) : undefined,
                     maxPrice: searchParams.get("maxPrice") ? Number(searchParams.get("maxPrice")) : undefined,
                     minBeds: searchParams.get("minBeds") ? Number(searchParams.get("minBeds")) : undefined,
+                    amenityIds: searchParams.get("amenities")
+                        ? searchParams.get("amenities")!.split(",").filter(Boolean).map(Number)
+                        : undefined
                 }
 
                 const data = await propertyApi.searchProperties(params)
@@ -136,7 +139,7 @@ export default function SearchRentalsPage() {
                 <div className={`w-full lg:w-[60%] xl:w-[55%] flex flex-col h-full overflow-hidden ${showMobileMap ? "hidden lg:flex" : "flex"
                     }`}>
                     {/* Header */}
-                    <div className={`flex-shrink-0 px-6 py-4 border-b z-10 ${isDark ? "bg-dark-900 border-white/10" : "bg-white border-slate-200"
+                    <div className={`flex-shrink-0 px-6 py-4 border-b z-10 ${isDark ? "bg-dark-900 border-dark-700" : "bg-white border-slate-200"
                         }`}>
                         <div className="flex justify-between items-center mb-4">
                             <div>
@@ -151,7 +154,7 @@ export default function SearchRentalsPage() {
                             <button
                                 onClick={() => setShowMobileMap(true)}
                                 className={`lg:hidden flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium ${isDark
-                                    ? "bg-white/10 text-white"
+                                    ? "bg-dark-800 text-white border border-dark-700"
                                     : "bg-slate-100 text-slate-900"
                                     }`}
                             >
@@ -164,7 +167,7 @@ export default function SearchRentalsPage() {
                     </div>
 
                     {/* Scrollable List */}
-                    <div className={`flex-1 overflow-y-auto p-6 ${isDark ? "bg-dark-900" : "bg-slate-50"}`}>
+                    <div className={`flex-1 overflow-y-auto p-6 ${isDark ? "bg-dark-950" : "bg-slate-50"}`}>
                         {loading ? (
                             <div className="flex flex-col items-center justify-center h-64 gap-3">
                                 <Loader2 className="w-8 h-8 animate-spin text-primary-500" />

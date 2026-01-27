@@ -9,7 +9,6 @@ import {
   Bath,
   Bed,
   Building,
-  Calendar,
   CheckCircle,
   Clock,
   Edit,
@@ -17,10 +16,8 @@ import {
   Heart,
   MapPin,
   MessageSquare,
-  ShieldCheck,
   Star,
-  Trash2,
-  Wifi
+  Trash2
 } from "lucide-react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
@@ -225,25 +222,19 @@ export default function OwnerPropertyDetailPage() {
 
               {/* Amenities used for listing preview */}
               <div>
-                <h2 className={`text-xl font-bold mb-4 ${isDark ? "text-white" : "text-slate-900"}`}>Features</h2>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-3 opacity-80">
-                    <Wifi className="w-5 h-5" />
-                    <span>High-speed Wifi</span>
+                <h2 className={`text-xl font-bold mb-4 ${isDark ? "text-white" : "text-slate-900"}`}>Features & Amenities</h2>
+                {property.amenities && property.amenities.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-4">
+                    {property.amenities.map((amenity: any) => (
+                      <div key={amenity.id} className="flex items-center gap-3 opacity-80">
+                        <CheckCircle className="w-5 h-5 text-blue-500" />
+                        <span>{amenity.name}</span>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-3 opacity-80">
-                    <CheckCircle className="w-5 h-5" />
-                    <span>Verified Listing</span>
-                  </div>
-                  <div className="flex items-center gap-3 opacity-80">
-                    <ShieldCheck className="w-5 h-5" />
-                    <span>Secure Property</span>
-                  </div>
-                  <div className="flex items-center gap-3 opacity-80">
-                    <Calendar className="w-5 h-5" />
-                    <span>Available Now</span>
-                  </div>
-                </div>
+                ) : (
+                  <p className="text-slate-500">No specific amenities listed.</p>
+                )}
               </div>
             </div>
           </div>

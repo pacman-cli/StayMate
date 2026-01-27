@@ -1,11 +1,12 @@
 "use client"
 
 import { adminApi } from "@/lib/api"
+import { FinancialOverviewDTO } from "@/types/auth"
 import { AlertCircle, CreditCard, DollarSign } from "lucide-react"
 import { useEffect, useState } from "react"
 
 export function RevenueAnalytics() {
-  const [data, setData] = useState<any>(null)
+  const [data, setData] = useState<FinancialOverviewDTO | null>(null)
 
   // Use a predictable order for colors
   const methodColors: Record<string, string> = {

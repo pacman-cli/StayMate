@@ -85,6 +85,9 @@ public class Property {
     @Builder.Default
     private int inquiries = 0;
 
+    @Builder.Default
+    private int reviewsCount = 0;
+
     @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
     @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false)
@@ -104,6 +107,11 @@ public class Property {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @jakarta.persistence.ManyToMany(fetch = jakarta.persistence.FetchType.EAGER)
+    @jakarta.persistence.JoinTable(name = "property_amenities", joinColumns = @jakarta.persistence.JoinColumn(name = "property_id"), inverseJoinColumns = @jakarta.persistence.JoinColumn(name = "amenity_id"))
+    @Builder.Default
+    private java.util.Set<Amenity> amenities = new java.util.HashSet<>();
 
     @jakarta.persistence.Transient
     @Builder.Default

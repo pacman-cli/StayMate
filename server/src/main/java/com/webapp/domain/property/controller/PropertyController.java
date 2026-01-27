@@ -67,9 +67,11 @@ public class PropertyController {
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(required = false) Integer minBeds,
             @RequestParam(required = false) Integer minBaths,
-            @RequestParam(required = false) String propertyType) {
+            @RequestParam(required = false) String propertyType,
+            @RequestParam(required = false) List<Long> amenityIds) {
         return ResponseEntity
-                .ok(propertyService.searchProperties(query, minPrice, maxPrice, minBeds, minBaths, propertyType));
+                .ok(propertyService.searchProperties(query, minPrice, maxPrice, minBeds, minBaths, propertyType,
+                        amenityIds));
     }
 
     @GetMapping("/{id}")

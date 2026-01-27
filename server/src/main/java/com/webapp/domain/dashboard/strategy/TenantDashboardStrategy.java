@@ -58,7 +58,8 @@ public class TenantDashboardStrategy implements DashboardStrategy {
                 .label("Matches Found")
                 .value(String.valueOf(stats.getMatchesCount()))
                 .type("count")
-                .change("+0") // TODO: Implement Match history?
+                .change("+0") // Historical data not tracked yet
+
                 .trend("neutral")
                 .icon("heart")
                 .color("rose")

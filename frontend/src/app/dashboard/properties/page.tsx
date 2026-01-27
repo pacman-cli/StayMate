@@ -73,28 +73,33 @@ export default function MyPropertiesPage() {
     }
 
     const getStatusBadge = (status: string) => {
-        const statusConfig = {
-            Active: {
+        const normalizedStatus = status ? status.toUpperCase() : "ACTIVE"
+
+        const statusConfig: Record<string, { icon: any, className: string, label: string }> = {
+            ACTIVE: {
                 icon: CheckCircle,
                 className: isDark
                     ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
                     : "bg-emerald-100 text-emerald-700 border-emerald-200",
+                label: "Active"
             },
-            Pending: {
+            PENDING: {
                 icon: Clock,
                 className: isDark
                     ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
                     : "bg-yellow-100 text-yellow-700 border-yellow-200",
+                label: "Pending"
             },
-            Rented: {
+            RENTED: {
                 icon: CheckCircle,
                 className: isDark
                     ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
                     : "bg-blue-100 text-blue-700 border-blue-200",
+                label: "Rented"
             },
         }
 
-        const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.Pending
+        const config = statusConfig[normalizedStatus] || statusConfig.PENDING
         const Icon = config.icon
 
         return (
@@ -102,7 +107,7 @@ export default function MyPropertiesPage() {
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${config.className}`}
             >
                 <Icon className="w-3 h-3" />
-                {status}
+                {config.label}
             </span>
         )
     }
@@ -236,6 +241,9 @@ export default function MyPropertiesPage() {
                                                     }`}
                                             >
                                                 {property.rating?.toFixed(1) || "0.0"}
+                                                <span className={`text-xs ml-1 ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+                                                    ({property.reviewsCount || 0} reviews)
+                                                </span>
                                             </span>
                                         </div>
                                         <span

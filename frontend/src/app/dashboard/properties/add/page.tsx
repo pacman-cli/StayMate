@@ -1,6 +1,7 @@
 "use client"
 
-import { propertyApi } from "@/lib/api"
+import { amenityApi, propertyApi } from "@/lib/api"
+import { Amenity } from "@/types/auth"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { AnimatePresence, motion } from "framer-motion"
 import {
@@ -17,7 +18,7 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Script from "next/script"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useDropzone } from "react-dropzone"
 import { useForm } from "react-hook-form"
 import { toast } from "react-hot-toast"
@@ -42,6 +43,7 @@ const propertySchema = z.object({
   beds: z.number().int().positive().max(20),
   baths: z.number().int().positive().max(20),
   area: z.number().positive("Area must be positive"),
+  amenityIds: z.array(z.number()).optional(),
 
   // Location
   address: z.string().min(1, "Address is required"),
@@ -75,6 +77,19 @@ export default function AddPropertyPage() {
   const [currentStep, setCurrentStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [previewUrls, setPreviewUrls] = useState<string[]>([])
+  const [amenities, setAmenities] = useState<Amenity[]>([])
+
+  useEffect(() => {
+    const loadAmenities = async () => {
+      try {
+        const data = await amenityApi.getAll()
+        setAmenities(data)
+      } catch (err) {
+        console.error("Failed to load amenities", err)
+      }
+    }
+    loadAmenities()
+  }, [])
 
   const {
     register,
@@ -97,7 +112,8 @@ export default function AddPropertyPage() {
       address: "",
       city: "",
       zipCode: "",
-      files: []
+      files: [],
+      amenityIds: []
     }
   })
 
@@ -176,7 +192,7 @@ export default function AddPropertyPage() {
 
       await propertyApi.createProperty({
         ...jsonData,
-        amenities: []
+        amenityIds: jsonData.amenityIds || []
       }, files)
 
       toast.success("Property listed successfully!")

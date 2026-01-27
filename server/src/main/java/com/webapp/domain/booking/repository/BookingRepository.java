@@ -42,6 +42,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                         @Param("landlordId") Long landlordId,
                         @Param("status") BookingStatus status);
 
+        @Query("SELECT COUNT(b) FROM Booking b WHERE b.landlord.id = :landlordId AND b.status IN ('CONFIRMED', 'CHECKED_IN') AND b.startDate <= CURRENT_DATE AND b.endDate >= CURRENT_DATE")
+        long countActiveBookingsByLandlordId(@Param("landlordId") Long landlordId);
+
         @Query("SELECT COUNT(b) FROM Booking b WHERE b.tenant.id = :tenantId AND b.startDate > CURRENT_DATE AND b.status = com.webapp.domain.booking.enums.BookingStatus.CONFIRMED")
         long countUpcomingByTenantId(@Param("tenantId") Long tenantId);
 
@@ -104,13 +107,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
         long countByStatus(BookingStatus status);
 
-        @Query("SELECT b FROM Booking b WHERE b.property.id = :propertyId AND b.status = 'CONFIRMED' AND b.startDate <= CURRENT_DATE AND b.endDate >= CURRENT_DATE")
+        @Query("SELECT b FROM Booking b WHERE b.property.id = :propertyId AND b.status IN ('CONFIRMED', 'CHECKED_IN') AND b.startDate <= CURRENT_DATE AND b.endDate >= CURRENT_DATE")
         List<Booking> findActiveBookingsByPropertyId(@Param("propertyId") Long propertyId);
 
-        @Query("SELECT b FROM Booking b WHERE b.landlord.id = :landlordId AND b.status = 'CONFIRMED' AND b.startDate <= CURRENT_DATE AND b.endDate >= CURRENT_DATE")
+        @Query("SELECT b FROM Booking b WHERE b.landlord.id = :landlordId AND b.status IN ('CONFIRMED', 'CHECKED_IN') AND b.startDate <= CURRENT_DATE AND b.endDate >= CURRENT_DATE")
         List<Booking> findActiveBookingsByLandlordId(@Param("landlordId") Long landlordId);
 
-        @Query("SELECT COUNT(DISTINCT b.property.id) FROM Booking b WHERE b.status = 'CONFIRMED' AND b.startDate <= CURRENT_DATE AND b.endDate >= CURRENT_DATE")
+        @Query("SELECT COUNT(DISTINCT b.property.id) FROM Booking b WHERE b.status IN ('CONFIRMED', 'CHECKED_IN') AND b.startDate <= CURRENT_DATE AND b.endDate >= CURRENT_DATE")
         long countOccupiedProperties();
 
         // Financial Analytics Queries
@@ -128,6 +131,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         @Query("SELECT COUNT(b) FROM Booking b WHERE b.status IN ('CONFIRMED', 'COMPLETED') AND b.createdAt BETWEEN :startDate AND :endDate")
         long countBookingsBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
-        @Query("SELECT b FROM Booking b LEFT JOIN FETCH b.property WHERE b.tenant.id = :tenantId AND b.status = com.webapp.domain.booking.enums.BookingStatus.CONFIRMED AND b.endDate >= CURRENT_DATE")
+        @Query("SELECT b FROM Booking b LEFT JOIN FETCH b.property WHERE b.tenant.id = :tenantId AND b.status IN (com.webapp.domain.booking.enums.BookingStatus.CONFIRMED, com.webapp.domain.booking.enums.BookingStatus.CHECKED_IN) AND b.endDate >= CURRENT_DATE")
         List<Booking> findActiveBookingsByTenantId(@Param("tenantId") Long tenantId);
+
+        @Query("SELECT b FROM Booking b WHERE b.tenant.id = :tenantId AND b.endDate >= CURRENT_DATE AND b.status IN (com.webapp.domain.booking.enums.BookingStatus.PENDING, com.webapp.domain.booking.enums.BookingStatus.CONFIRMED)")
+        List<Booking> findFutureBookingsByTenantId(@Param("tenantId") Long tenantId);
+
+        @Query("SELECT b FROM Booking b WHERE b.landlord.id = :landlordId AND b.endDate >= CURRENT_DATE AND b.status IN (com.webapp.domain.booking.enums.BookingStatus.PENDING, com.webapp.domain.booking.enums.BookingStatus.CONFIRMED)")
+        List<Booking> findFutureBookingsByLandlordId(@Param("landlordId") Long landlordId);
 }

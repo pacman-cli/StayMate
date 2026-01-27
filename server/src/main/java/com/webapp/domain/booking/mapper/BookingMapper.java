@@ -23,6 +23,7 @@ public class BookingMapper {
                 .propertyId(booking.getProperty() != null ? booking.getProperty().getId() : null)
                 .propertyTitle(booking.getProperty() != null ? booking.getProperty().getTitle() : null)
                 .propertyLocation(booking.getProperty() != null ? booking.getProperty().getLocation() : null)
+                .propertyImageUrl(booking.getProperty() != null ? booking.getProperty().getImageUrl() : null)
                 .startDate(booking.getStartDate())
                 .endDate(booking.getEndDate())
                 .checkInTime(booking.getCheckInTime())

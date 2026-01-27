@@ -4,7 +4,6 @@ import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -23,8 +22,12 @@ public class RoommatePostDto {
   @NotBlank(message = "Location is required")
   private String location;
 
-  @NotNull(message = "Budget is required")
-  @Min(value = 0, message = "Budget must be positive")
+  @NotNull(message = "Min Budget is required")
+  private Double budgetMin;
+
+  @NotNull(message = "Max Budget is required")
+  private Double budgetMax;
+
   private Double budget;
 
   @NotNull(message = "Move-in date is required")
@@ -35,8 +38,12 @@ public class RoommatePostDto {
 
   private String genderPreference;
   private Boolean smoking;
+  private Boolean alcohol;
   private Boolean pets;
   private String occupation;
+  private String stayDuration;
+  private String guestsAllowed;
+  private String cookingHabits;
 
   private CleanlinessLevel cleanliness;
   private SleepSchedule sleepSchedule;

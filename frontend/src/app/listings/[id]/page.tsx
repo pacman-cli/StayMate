@@ -6,14 +6,11 @@ import { useAuth } from "@/context/AuthContext"
 import { useTheme } from "@/context/ThemeContext"
 import { bookingApi, messageApi, propertyApi, savedApi } from "@/lib/api"
 import {
-  Calendar,
   CheckCircle2,
   Heart,
   MapPin,
   Share2,
-  ShieldCheck,
-  Star,
-  Wifi
+  Star
 } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -27,6 +24,7 @@ export default function ListingDetailPage() {
 
   const [property, setProperty] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [isAskModalOpen, setIsAskModalOpen] = useState(false)
   const [bookingLoading, setBookingLoading] = useState(false)
   const [bookingSent, setBookingSent] = useState(false)
 
@@ -319,17 +317,16 @@ export default function ListingDetailPage() {
                   What this place offers
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[
-                    { icon: Wifi, label: "High-speed Wifi" },
-                    { icon: Calendar, label: "Free cancellation for 48 hours" },
-                    { icon: CheckCircle2, label: "Self check-in" },
-                    { icon: ShieldCheck, label: "Security cameras on property" },
-                  ].map((amenity, idx) => (
-                    <div key={idx} className="flex items-center gap-3 text-slate-500">
-                      <amenity.icon className="w-5 h-5" />
-                      <span>{amenity.label}</span>
-                    </div>
-                  ))}
+                  {property.amenities && property.amenities.length > 0 ? (
+                    property.amenities.map((amenity: any) => (
+                      <div key={amenity.id} className="flex items-center gap-3 text-slate-500">
+                        <CheckCircle2 className="w-5 h-5 text-primary-500" />
+                        <span>{amenity.name}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-slate-500">No specific amenities listed.</p>
+                  )}
                 </div>
               </div>
             </div>

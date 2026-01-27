@@ -25,6 +25,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final UserService userService;
     private final com.webapp.domain.property.repository.PropertyRepository propertyRepository;
     private final ApplicationMapper applicationMapper;
+    private final com.webapp.domain.notification.service.NotificationService notificationService;
 
     @Override
     @Transactional
@@ -58,6 +59,16 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .build();
 
         Application savedApplication = applicationRepository.save(application);
+
+        // Notify Owner
+        notificationService.createNotificationForUser(
+                receiver.getId(),
+                com.webapp.domain.notification.enums.NotificationType.APPLICATION_RECEIVED,
+                "New Application for " + property.getTitle(),
+                sender.getFirstName() + " has applied for your property: " + property.getTitle(),
+                "/dashboard/applications/received" // Link to owner dashboard
+        );
+
         return applicationMapper.toResponse(savedApplication);
     }
 
@@ -91,6 +102,27 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         application.setStatus(status);
         Application updatedApplication = applicationRepository.save(application);
+
+        // Notify Sender on Acceptance/Rejection
+        if (status == ApplicationStatus.ACCEPTED) {
+            notificationService.createNotificationForUser(
+                    application.getSender().getId(),
+                    com.webapp.domain.notification.enums.NotificationType.APPLICATION_ACCEPTED,
+                    "Application Accepted!",
+                    "Congratulations! Your application for " + application.getProperty().getTitle()
+                            + " has been accepted.",
+                    "/dashboard/applications" // Link to user dashboard
+            );
+        } else if (status == ApplicationStatus.REJECTED) {
+            notificationService.createNotificationForUser(
+                    application.getSender().getId(),
+                    com.webapp.domain.notification.enums.NotificationType.APPLICATION_REJECTED,
+                    "Application Update",
+                    "Your application for " + application.getProperty().getTitle() + " was not accepted.",
+                    "/dashboard/applications" // Link to user dashboard
+            );
+        }
+
         return applicationMapper.toResponse(updatedApplication);
     }
 

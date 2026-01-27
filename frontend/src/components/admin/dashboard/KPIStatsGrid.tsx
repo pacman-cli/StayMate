@@ -94,9 +94,9 @@ function Card({ metric }: { metric: any }) {
     : (isPositive ? "text-emerald-600 bg-emerald-50" : "text-red-600 bg-red-50")
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-dark-800 rounded-xl p-4 border border-slate-200 dark:border-dark-700 shadow-sm hover:shadow-elevation-mid transition-shadow">
       <div className="flex justify-between items-start mb-2">
-        <div className={`p-2 rounded-lg bg-${metric.color}-50 dark:bg-${metric.color}-900/20 text-${metric.color}-600 dark:text-${metric.color}-400`}>
+        <div className={`p-2 rounded-lg bg-${metric.color}-50 dark:bg-${metric.color}-900/30 text-${metric.color}-600 dark:text-${metric.color}-400 border border-${metric.color}-200 dark:border-${metric.color}-800/50`}>
           <metric.icon className="w-4 h-4" />
         </div>
         <div className={`flex items-center gap-0.5 text-xs font-semibold px-1.5 py-0.5 rounded-full ${trendColor}`}>

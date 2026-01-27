@@ -72,7 +72,7 @@ public class LandlordDashboardStrategy implements DashboardStrategy {
                                 .label("Occupancy Rate")
                                 .value(String.format("%.1f%%", occupancyRate))
                                 .type("percent")
-                                .change("+0%") // TODO: Calculate historical occupancy
+                                .change("+0%") // Historical occupancy not tracked yet
                                 .trend("neutral")
                                 .icon("activity")
                                 .color("rose")

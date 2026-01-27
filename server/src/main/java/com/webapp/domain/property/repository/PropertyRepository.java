@@ -15,10 +15,10 @@ import com.webapp.domain.property.enums.PropertyStatus;
 @Repository
 public interface PropertyRepository extends JpaRepository<Property, Long> {
 
-        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "owner" })
+        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "owner", "amenities" })
         List<Property> findAllByOwnerId(Long ownerId);
 
-        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "owner" })
+        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "owner", "amenities" })
         Page<Property> findAllByOwnerIdNot(Long userId, Pageable pageable);
 
         long countByOwnerId(Long ownerId);
@@ -41,7 +41,8 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
                         "(:maxPrice IS NULL OR p.priceAmount <= :maxPrice) AND " +
                         "(:minBeds IS NULL OR p.beds >= :minBeds) AND " +
                         "(:minBaths IS NULL OR p.baths >= :minBaths) AND " +
-                        "(:propertyType IS NULL OR CAST(p.propertyType as string) = :propertyType) AND "
+                        "(:propertyType IS NULL OR CAST(p.propertyType as string) = :propertyType) AND " +
+                        "(:amenityCount = 0 OR (SELECT COUNT(DISTINCT a.id) FROM p.amenities a WHERE a.id IN :amenityIds) = :amenityCount) AND "
                         +
                         "p.status IN :statuses")
         List<Property> searchProperties(
@@ -51,7 +52,9 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
                         @org.springframework.data.repository.query.Param("minBeds") Integer minBeds,
                         @org.springframework.data.repository.query.Param("minBaths") Integer minBaths,
                         @org.springframework.data.repository.query.Param("propertyType") String propertyType,
-                        @org.springframework.data.repository.query.Param("statuses") List<PropertyStatus> statuses);
+                        @org.springframework.data.repository.query.Param("statuses") List<PropertyStatus> statuses,
+                        @org.springframework.data.repository.query.Param("amenityIds") List<Long> amenityIds,
+                        @org.springframework.data.repository.query.Param("amenityCount") Long amenityCount);
 
         @org.springframework.data.jpa.repository.Query("SELECT SUM(p.priceAmount) FROM Property p WHERE p.owner.id = :ownerId AND p.status = 'RENTED'")
         BigDecimal sumRevenueByOwnerId(@org.springframework.data.repository.query.Param("ownerId") Long ownerId);
@@ -72,10 +75,10 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
         @org.springframework.data.jpa.repository.Query("SELECT SUM(p.beds) FROM Property p WHERE p.status = 'RENTED'")
         Long sumRentedBeds();
 
-        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "owner" })
+        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "owner", "amenities" })
         List<Property> findTop5ByOwnerIdOrderByCreatedAtDesc(Long ownerId);
 
-        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "owner" })
+        @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "owner", "amenities" })
         List<Property> findTop5ByStatusOrderByPriceAmountAsc(PropertyStatus status);
 
         @org.springframework.data.jpa.repository.Query("SELECT SUM(p.beds) FROM Property p")

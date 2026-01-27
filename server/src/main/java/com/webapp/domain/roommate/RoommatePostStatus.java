@@ -4,5 +4,6 @@ public enum RoommatePostStatus {
   PENDING,
   APPROVED,
   REJECTED,
+  MATCHED,
   CLOSED
 }

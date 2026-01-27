@@ -29,6 +29,7 @@ public class BookingResponse {
     private Long propertyId;
     private String propertyTitle;
     private String propertyLocation;
+    private String propertyImageUrl;
 
     private LocalDate startDate;
     private LocalDate endDate;

@@ -20,6 +20,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
   @Query("SELECT AVG(r.rating) FROM Review r WHERE r.receiver.id = :userId")
   Double getAverageRatingByReceiverId(@Param("userId") Long userId);
 
+  List<Review> findByPropertyIdIn(List<Long> propertyIds);
+
   // Legacy/Existing methods
   @Query("SELECT r FROM Review r WHERE r.receiver.id = :userId")
   Page<Review> findByReceiverId(@Param("userId") Long userId, Pageable pageable);
@@ -35,4 +37,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
   @Query("SELECT AVG(r.rating) FROM Review r")
   Double getAverageRating();
+
+  long countByPropertyId(@Param("propertyId") Long propertyId);
 }

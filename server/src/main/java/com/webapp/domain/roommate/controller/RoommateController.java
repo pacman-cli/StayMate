@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.webapp.auth.security.UserPrincipal;
 import com.webapp.domain.roommate.RoommatePostDto;
-import com.webapp.domain.roommate.RoommatePostStatus;
 import com.webapp.domain.roommate.RoommateService;
 
 import lombok.RequiredArgsConstructor;
@@ -92,11 +91,36 @@ public class RoommateController {
     return ResponseEntity.ok(roommateService.getAllPosts());
   }
 
-  @PutMapping("/{id}/status")
-  @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<RoommatePostDto> updateStatus(
-      @PathVariable Long id,
-      @RequestParam RoommatePostStatus status) {
-    return ResponseEntity.ok(roommateService.updateStatus(id, status));
+  @PostMapping("/request/{targetUserId}")
+  public ResponseEntity<Void> sendRequest(
+      @AuthenticationPrincipal UserPrincipal userPrincipal,
+      @PathVariable Long targetUserId,
+      @RequestBody(required = false) java.util.Map<String, String> body) {
+    String message = body != null ? body.get("message") : null;
+    roommateService.sendRoommateRequest(userPrincipal.getId(), targetUserId, message);
+    return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("/request/{requestId}/respond")
+  public ResponseEntity<Void> respondToRequest(
+      @AuthenticationPrincipal UserPrincipal userPrincipal,
+      @PathVariable Long requestId,
+      @RequestParam boolean accept) {
+    roommateService.respondToRequest(userPrincipal.getId(), requestId, accept);
+    return ResponseEntity.ok().build();
+  }
+
+  @GetMapping("/requests/incoming")
+  public ResponseEntity<List<com.webapp.domain.roommate.RoommateRequest>> getIncomingRequests(
+      @AuthenticationPrincipal UserPrincipal userPrincipal) {
+    return ResponseEntity.ok(roommateService.getIncomingRequests(userPrincipal.getId()));
+  }
+
+  @GetMapping("/request/{targetUserId}/status")
+  public ResponseEntity<String> getRequestStatus(
+      @AuthenticationPrincipal UserPrincipal userPrincipal,
+      @PathVariable Long targetUserId) {
+    String status = roommateService.getRoommateRequestStatus(userPrincipal.getId(), targetUserId);
+    return ResponseEntity.ok(status);
   }
 }

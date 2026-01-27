@@ -205,6 +205,20 @@ export interface Booking {
     createdAt: string
 }
 
+export interface BookingRequest {
+    id: number
+    propertyId: number
+    propertyTitle: string
+    tenantName: string
+    tenantEmail: string
+    tenantProfilePictureUrl?: string
+    startDate: string
+    endDate: string
+    status: 'PENDING' | 'CONFIRMED' | 'REJECTED' | 'CANCELLED'
+    notes?: string
+    createdAt: string
+}
+
 
 
 // Role-specific Dashboard DTOs
@@ -308,6 +322,12 @@ export interface RoommatePostResponse {
     smoking: boolean
     pets: boolean
     occupation: string
+    alcohol?: boolean
+    stayDuration?: string
+    guestsAllowed?: string
+    cookingHabits?: string
+    budgetMin?: number
+    budgetMax?: number
 
     // AI Fields
     cleanliness?: CleanlinessLevel
@@ -321,6 +341,8 @@ export interface RoommatePostResponse {
     createdAt: string
     matchScore?: number
 }
+
+export type RoommateRequestStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "MATCHED" | "NONE" | "SENT_PENDING" | "RECEIVED_PENDING"
 
 export interface Expense {
     id: number
@@ -432,6 +454,23 @@ export interface SendMessageRequest {
     propertyId?: number
     propertyTitle?: string
     subject?: string
+}
+
+export interface PropertyRequest {
+    title: string
+    description: string
+    price: number
+    location: string
+    address: string
+    beds: number
+    baths: number
+    sqft: number
+    latitude: number
+    longitude: number
+    area: number
+    propertyType: string
+    images?: string[]
+    amenityIds?: number[]
 }
 
 export interface CreateConversationRequest {
@@ -628,6 +667,11 @@ export interface ApplicationResponse {
     createdAt: string
 }
 
+export interface ApplicationRequest {
+    propertyId: number
+    message?: string
+}
+
 export interface VerificationRequest {
     id: number
     user: User
@@ -718,6 +762,8 @@ export interface PropertySeatSummary {
     availableBeds: number
     seats: SeatDto[]
     imageUrl: string
+    status: "Vacant" | "Booked"
+    reviews: ReviewResponse[]
 }
 
 export interface ReviewResponse {
@@ -747,6 +793,22 @@ export interface PayoutMethodDto {
     isDefault: boolean
 }
 
+export interface RoommateRequest {
+    id: number
+    requester: User
+    receiver: User
+    status: RoommateRequestStatus
+    message?: string
+    createdAt: string
+}
+
+export interface Amenity {
+    id: number
+    name: string
+    iconName?: string
+    category?: string
+}
+
 export interface PayoutMethodRequest {
     bankName: string
     accountNumber: string
@@ -762,8 +824,8 @@ export interface EarningDto {
     amount: number
     commission: number
     netAmount: number
-    status: "PENDING" | "AVAILABLE" | "REQUESTED" | "PAID"
     date: string
+    status: "PENDING" | "AVAILABLE" | "PAID"
 }
 
 export interface PaymentDto {
@@ -823,4 +885,5 @@ export interface MaintenanceResponseDto {
     createdAt: string
     updatedAt: string
 }
+
 

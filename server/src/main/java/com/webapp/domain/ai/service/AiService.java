@@ -36,6 +36,21 @@ public class AiService {
     }
 
     public String generateResponse(String prompt) {
+        // Check for Simulation Header (Load Testing)
+        try {
+            org.springframework.web.context.request.ServletRequestAttributes attributes = (org.springframework.web.context.request.ServletRequestAttributes) org.springframework.web.context.request.RequestContextHolder
+                    .getRequestAttributes();
+            if (attributes != null) {
+                String simulationMode = attributes.getRequest().getHeader("X-Simulation-Mode");
+                if ("true".equalsIgnoreCase(simulationMode)) {
+                    log.info("Simulation Mode detected. Returning mock AI response.");
+                    return "{\"score\": 85, \"strengths\": [\"Mock Strength 1\", \"Mock Strength 2\"], \"concerns\": [\"Mock Concern 1\"], \"summary\": \"(Simulation) Compatible match based on lifestyle.\"}";
+                }
+            }
+        } catch (Exception e) {
+            // Context might be missing in async calls or tests, ignore
+        }
+
         // Generates response; falls back on failure
         try {
             OllamaRequest request = OllamaRequest.builder()
@@ -71,7 +86,7 @@ public class AiService {
             return performFallback("AI Service Unavailable");
         }
     }
-    
+
     /**
      * Checks Ollama service health; logs failures
      */
@@ -93,7 +108,8 @@ public class AiService {
     }
 
     private String performFallback(String reason) {
-        // Return a safe fallback message or throw a structured exception depending on use
+        // Return a safe fallback message or throw a structured exception depending on
+        // use
         // case
         // For matching, we might return empty string or null to indicate "no AI data"
         return null;

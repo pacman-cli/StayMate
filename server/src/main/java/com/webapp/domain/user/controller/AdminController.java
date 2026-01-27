@@ -8,11 +8,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.webapp.auth.security.UserPrincipal;
+import com.webapp.domain.admin.service.SystemSettingService;
 import com.webapp.domain.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -33,18 +37,7 @@ public class AdminController {
     private final com.webapp.domain.property.service.PropertyService propertyService;
     private final com.webapp.domain.verification.service.VerificationService verificationService;
     private final com.webapp.domain.report.service.ReportService reportService;
-    private final com.webapp.domain.setting.service.SystemSettingService settingService;
-    // bookingRepository is declared below but needs to be in constructor/Lombok
-    // args
-    // We will rely on Lombok @RequiredArgsConstructor but need to remove the field
-    // declaration below and move it up,
-    // OR just move it up now to be safe. I'll move it up.
-
-    // ==================== Dashboard Stats ====================
-
-    // ==================== Dashboard Stats ====================
-    // MOVED TO: com.webapp.domain.admin.controller.AdminDashboardController
-    // to resolve ambiguous mapping error.
+    private final SystemSettingService settingService;
 
     // ==================== Property Management ====================
 
@@ -70,39 +63,30 @@ public class AdminController {
         return ResponseEntity.ok(propertyService.updatePropertyStatus(id, "Rejected", currentUser.getId()));
     }
 
-    // ==================== Analytics (Stub) ====================
-
-    // ==================== Analytics (Real) ====================
-
-    // ==================== Analytics (Real) handled in AdminAnalyticsController
-    // ====================
-
-    // ==================== Reports (Stub) ====================
-
-    // ==================== Reports (Stub) ====================
+    // ==================== Reports ====================
 
     @GetMapping("/reports")
     public ResponseEntity<List<com.webapp.domain.report.entity.Report>> getReports() {
         return ResponseEntity.ok(reportService.getAllReports());
     }
 
-    @org.springframework.web.bind.annotation.PostMapping("/reports/{id}/resolve")
+    @PostMapping("/reports/{id}/resolve")
     public ResponseEntity<com.webapp.domain.report.entity.Report> resolveReport(
-            @PathVariable @org.springframework.lang.NonNull Long id,
-            @org.springframework.web.bind.annotation.RequestBody Map<String, String> body) {
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
         String notes = body.get("notes");
         return ResponseEntity.ok(reportService.resolveReport(id, notes));
     }
 
-    @org.springframework.web.bind.annotation.PostMapping("/reports/{id}/dismiss")
+    @PostMapping("/reports/{id}/dismiss")
     public ResponseEntity<com.webapp.domain.report.entity.Report> dismissReport(
-            @PathVariable @org.springframework.lang.NonNull Long id,
-            @org.springframework.web.bind.annotation.RequestBody Map<String, String> body) {
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
         String notes = body.get("notes");
         return ResponseEntity.ok(reportService.dismissReport(id, notes));
     }
 
-    // ==================== Verifications (Stub) ====================
+    // ==================== Verifications ====================
 
     @GetMapping("/verifications")
     public ResponseEntity<List<com.webapp.domain.verification.entity.VerificationRequest>> getVerifications() {
@@ -111,18 +95,18 @@ public class AdminController {
 
     @PutMapping("/verifications/{id}/approve")
     public ResponseEntity<com.webapp.domain.verification.entity.VerificationRequest> approveVerification(
-            @PathVariable @org.springframework.lang.NonNull Long id) {
+            @PathVariable Long id) {
         return ResponseEntity.ok(verificationService.approveRequest(id));
     }
 
     @PutMapping("/verifications/{id}/reject")
     public ResponseEntity<com.webapp.domain.verification.entity.VerificationRequest> rejectVerification(
-            @PathVariable @org.springframework.lang.NonNull Long id,
-            @org.springframework.web.bind.annotation.RequestParam String reason) {
+            @PathVariable Long id,
+            @RequestParam String reason) {
         return ResponseEntity.ok(verificationService.rejectRequest(id, reason));
     }
 
-    // ==================== Settings (Stub) ====================
+    // ==================== Settings ====================
 
     @GetMapping("/settings")
     public ResponseEntity<Map<String, String>> getSettings() {
@@ -131,20 +115,16 @@ public class AdminController {
 
     @PutMapping("/settings")
     public ResponseEntity<Map<String, String>> updateSettings(
-            @org.springframework.web.bind.annotation.RequestBody Map<String, String> settings) {
-        settingService.bulkUpdate(settings);
-        return ResponseEntity.ok(settingService.getAllSettings());
+            @RequestBody Map<String, String> settings) {
+        return ResponseEntity.ok(settingService.updateSettings(settings));
     }
+
+    // ==================== User Management ====================
 
     @PutMapping("/users/{id}/status")
     public ResponseEntity<Void> updateUserStatus(
-            @PathVariable @org.springframework.lang.NonNull Long id,
-            @org.springframework.web.bind.annotation.RequestParam com.webapp.domain.user.enums.AccountStatus status) {
-        // Map User entity to UserResponse DTO required
-        // Since we don't have a mapper here handy, we returns OK or generic response?
-        // Let's use generic ResponseEntity.ok() with the user (serialized) if possible,
-        // or simpler DTO.
-        // Assuming User can be serialized or we just return ok.
+            @PathVariable Long id,
+            @RequestParam com.webapp.domain.user.enums.AccountStatus status) {
         userService.updateAccountStatus(id, status);
         return ResponseEntity.ok().build();
     }

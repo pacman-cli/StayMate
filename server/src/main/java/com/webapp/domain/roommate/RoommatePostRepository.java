@@ -18,8 +18,8 @@ public interface RoommatePostRepository extends JpaRepository<RoommatePost, Long
                         "(r.status = com.webapp.domain.roommate.RoommatePostStatus.APPROVED OR r.status = com.webapp.domain.roommate.RoommatePostStatus.PENDING) AND "
                         +
                         "(:location IS NULL OR LOWER(r.location) LIKE LOWER(CONCAT('%', :location, '%'))) AND " +
-                        "(:minBudget IS NULL OR r.budget >= :minBudget) AND " +
-                        "(:maxBudget IS NULL OR r.budget <= :maxBudget) AND " +
+                        "(:minBudget IS NULL OR r.budgetMax >= :minBudget) AND " +
+                        "(:maxBudget IS NULL OR r.budgetMin <= :maxBudget) AND " +
                         "(:genderPreference IS NULL OR r.genderPreference = :genderPreference)")
         List<RoommatePost> searchPosts(
                         @Param("location") String location,
@@ -29,4 +29,8 @@ public interface RoommatePostRepository extends JpaRepository<RoommatePost, Long
 
         @Query("SELECT r FROM RoommatePost r JOIN FETCH r.user")
         List<RoommatePost> findAllWithUser();
+
+        @org.springframework.data.jpa.repository.Modifying
+        @org.springframework.data.jpa.repository.Query("DELETE FROM RoommatePost r WHERE r.user.id = :userId")
+        void deleteByUserId(@Param("userId") Long userId);
 }

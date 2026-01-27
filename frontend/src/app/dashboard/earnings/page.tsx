@@ -1,12 +1,14 @@
 "use client"
 
 import { financeApi } from "@/lib/api"
+import { formatCurrency } from "@/lib/utils"
 import { EarningDto, EarningsSummaryResponse, PayoutMethodDto } from "@/types/auth"
 import { format } from "date-fns"
 import { CheckCircle, CreditCard, DollarSign, Download, Plus, Trash2, Wallet } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
 import AddPayoutMethodModal from "./AddPayoutMethodModal"
+import RevenueChart from "./RevenueChart"
 
 export default function EarningsPage() {
   const [summary, setSummary] = useState<EarningsSummaryResponse | null>(null)
@@ -21,12 +23,13 @@ export default function EarningsPage() {
       const [summaryData, methodsData, historyData] = await Promise.all([
         financeApi.getEarningsSummary(),
         financeApi.getPayoutMethods(),
-        financeApi.getHistory(0, 20) // First 20
+        financeApi.getHistory(0, 100) // Increase to 100 for chart
       ])
       setSummary(summaryData)
       setPayoutMethods(methodsData)
-      // @ts-ignore - API returns Page object, need to handle content
-      setHistory(historyData.content || [])
+      setPayoutMethods(methodsData)
+      const historyResponse = historyData as unknown as { content: EarningDto[] }
+      setHistory(historyResponse.content || [])
       setIsLoading(false)
     } catch (error) {
       console.error("Failed to fetch earnings data", error)
@@ -49,7 +52,7 @@ export default function EarningsPage() {
       return
     }
 
-    if (!confirm("Are you sure you want to request a payout of $" + summary.availableBalance + "?")) return
+    if (!confirm("Are you sure you want to request a payout of " + formatCurrency(summary.availableBalance) + "?")) return
 
     setIsRequestingPayout(true)
     try {
@@ -119,59 +122,59 @@ export default function EarningsPage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Total Warnings */}
-        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+        {/* Total Earnings */}
+        <div className="bg-white dark:bg-dark-800 p-6 rounded-2xl border border-slate-200 dark:border-dark-700 shadow-sm relative overflow-hidden group hover:shadow-elevation-low transition-all">
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <DollarSign className="w-24 h-24 text-green-500" />
           </div>
           <div className="flex items-center gap-4 mb-4 relative z-10">
-            <div className="w-10 h-10 bg-green-100 dark:bg-green-500/20 text-green-600 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800/50 rounded-full flex items-center justify-center">
               <DollarSign className="w-5 h-5" />
             </div>
             <h3 className="font-medium text-slate-700 dark:text-slate-300">Total Earnings</h3>
           </div>
           <p className="text-3xl font-bold text-slate-900 dark:text-white relative z-10">
-            ${summary?.totalEarnings?.toLocaleString()}
+            {formatCurrency(summary?.totalEarnings)}
           </p>
-          <p className="text-sm text-green-600 flex items-center gap-1 mt-2 relative z-10">
+          <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1 mt-2 relative z-10">
             <CheckCircle className="w-4 h-4" />
             Lifetime Gross Revenue
           </p>
         </div>
 
         {/* Available Balance */}
-        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
+        <div className="bg-white dark:bg-dark-800 p-6 rounded-2xl border border-slate-200 dark:border-dark-700 shadow-sm relative overflow-hidden hover:shadow-elevation-low transition-all">
           <div className="absolute top-0 right-0 p-4 opacity-10">
             <Wallet className="w-24 h-24 text-blue-500" />
           </div>
           <div className="flex items-center gap-4 mb-4 relative z-10">
-            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-500/20 text-blue-600 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50 rounded-full flex items-center justify-center">
               <Wallet className="w-5 h-5" />
             </div>
             <h3 className="font-medium text-slate-700 dark:text-slate-300">Available Payout</h3>
           </div>
           <p className="text-3xl font-bold text-slate-900 dark:text-white relative z-10">
-            ${summary?.availableBalance?.toLocaleString()}
+            {formatCurrency(summary?.availableBalance)}
           </p>
           <button
             onClick={handleRequestPayout}
             disabled={!summary?.availableBalance || summary.availableBalance <= 0 || isRequestingPayout}
-            className="mt-4 w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 relative z-10"
+            className="mt-4 w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 relative z-10 shadow-lg shadow-blue-900/20"
           >
             {isRequestingPayout ? "Processing..." : "Request Payout"}
           </button>
           {summary?.pendingEarnings ? (
             <p className="text-xs text-slate-500 mt-2 text-center relative z-10">
-              ${summary.pendingEarnings.toLocaleString()} pending clearance
+              {formatCurrency(summary.pendingEarnings)} pending clearance
             </p>
           ) : null}
         </div>
 
         {/* Payout Method */}
-        <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+        <div className="bg-white dark:bg-dark-800 p-6 rounded-2xl border border-slate-200 dark:border-dark-700 shadow-sm flex flex-col justify-between hover:shadow-elevation-low transition-all">
           <div>
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-10 h-10 bg-purple-100 dark:bg-purple-500/20 text-purple-600 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800/50 rounded-full flex items-center justify-center">
                 <CreditCard className="w-5 h-5" />
               </div>
               <h3 className="font-medium text-slate-700 dark:text-slate-300">Bank Account</h3>
@@ -190,7 +193,7 @@ export default function EarningsPage() {
           {payoutMethods.length > 0 ? (
             <button
               onClick={() => handleDeleteMethod(payoutMethods[0].id)}
-              className="w-full py-2 border border-red-200 dark:border-red-900/30 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm font-medium transition flex justify-center items-center gap-2"
+              className="w-full py-2 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm font-medium transition flex justify-center items-center gap-2"
             >
               <Trash2 className="w-4 h-4" /> Remove Account
             </button>
@@ -205,9 +208,15 @@ export default function EarningsPage() {
         </div>
       </div>
 
+      {/* Revenue Chart */}
+      <div className="bg-white dark:bg-dark-800 rounded-2xl border border-slate-200 dark:border-dark-700 p-6">
+        <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-6">Revenue Trend</h3>
+        <RevenueChart earnings={history} />
+      </div>
+
       {/* Transactions History */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-        <div className="p-6 border-b border-slate-200 dark:border-slate-800">
+      <div className="bg-white dark:bg-dark-800 rounded-2xl border border-slate-200 dark:border-dark-700 overflow-hidden">
+        <div className="p-6 border-b border-slate-200 dark:border-dark-700">
           <h3 className="font-bold text-lg text-slate-900 dark:text-white">Transaction History</h3>
         </div>
 
@@ -219,7 +228,7 @@ export default function EarningsPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 font-medium">
+              <thead className="bg-slate-50 dark:bg-dark-750 text-slate-500 font-medium">
                 <tr>
                   <th className="p-4">Date</th>
                   <th className="p-4">Description</th>
@@ -228,30 +237,30 @@ export default function EarningsPage() {
                   <th className="p-4 text-right">Net</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-slate-100 dark:divide-dark-700">
                 {history.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition">
+                  <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-dark-750/50 transition">
                     <td className="p-4 text-slate-500">
-                      {format(new Date(item.date), 'MMM dd, yyyy')}
+                      {item.date ? format(new Date(item.date), 'MMM dd, yyyy') : 'N/A'}
                     </td>
                     <td className="p-4">
                       <p className="font-medium text-slate-900 dark:text-white">Booking #{item.bookingId}</p>
                       <p className="text-xs text-slate-500">{item.propertyTitle}</p>
                     </td>
                     <td className="p-4">
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${item.status === 'AVAILABLE' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' :
-                        item.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400' :
-                          item.status === 'PAID' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' :
-                            'bg-slate-100 text-slate-700'
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${item.status === 'AVAILABLE' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200 dark:border-blue-800' :
+                        item.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-800' :
+                          item.status === 'PAID' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800' :
+                            'bg-slate-100 text-slate-700 border border-slate-200'
                         }`}>
                         {item.status}
                       </span>
                     </td>
                     <td className="p-4 text-right text-slate-500">
-                      ${item.amount.toLocaleString()}
+                      {formatCurrency(item.amount)}
                     </td>
                     <td className="p-4 text-right font-medium text-slate-900 dark:text-white">
-                      +${item.netAmount.toLocaleString()}
+                      +{formatCurrency(item.netAmount)}
                     </td>
                   </tr>
                 ))}

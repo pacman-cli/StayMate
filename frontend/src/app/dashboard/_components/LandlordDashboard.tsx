@@ -110,7 +110,19 @@ export function LandlordDashboard({ stats: initialStats, isDark }: LandlordDashb
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* 2. Main Area: Property & Seat Management (2/3 width) */}
         <div className="lg:col-span-2 space-y-8">
-          <PropertyCommandCenter properties={properties} onToggleSeat={handleToggleSeat} />
+          {/* Vacant Properties ("Active" / "Pending" / etc but NOT "Booked") */}
+          <PropertyCommandCenter
+            title="Vacant Properties"
+            properties={properties.filter(p => !p.status || p.status === 'Vacant')}
+            onToggleSeat={handleToggleSeat}
+          />
+
+          {/* Booked Properties */}
+          <PropertyCommandCenter
+            title="Booked Properties"
+            properties={properties.filter(p => p.status === 'Booked')}
+            onToggleSeat={handleToggleSeat}
+          />
         </div>
 
         {/* 3. Sidebar: Requests & Reputation (1/3 width) */}

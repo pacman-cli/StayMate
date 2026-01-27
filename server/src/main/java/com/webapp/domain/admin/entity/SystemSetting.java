@@ -1,24 +1,24 @@
-package com.webapp.domain.setting.entity;
+package com.webapp.domain.admin.entity;
 
 import java.time.LocalDateTime;
-
-import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Entity
+@Table(name = "system_settings")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "system_settings")
 public class SystemSetting {
 
   @Id
@@ -28,8 +28,15 @@ public class SystemSetting {
   @Column(name = "setting_value", columnDefinition = "TEXT")
   private String value;
 
+  @Column(name = "description")
   private String description;
 
-  @UpdateTimestamp
+  @Column(name = "updated_at")
   private LocalDateTime updatedAt;
+
+  @PrePersist
+  @PreUpdate
+  protected void onUpdate() {
+    updatedAt = LocalDateTime.now();
+  }
 }

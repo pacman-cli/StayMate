@@ -21,6 +21,7 @@ public class PropertyResponse {
     private double rating;
     private boolean verified;
     private String status;
+    private int reviewsCount;
     private int views;
     private int inquiries;
     private java.math.BigDecimal priceAmount;
@@ -31,5 +32,6 @@ public class PropertyResponse {
     private Double latitude;
     private Double longitude;
     private String propertyType;
+    private java.util.Set<com.webapp.domain.property.entity.Amenity> amenities;
     private boolean isSaved;
 }
