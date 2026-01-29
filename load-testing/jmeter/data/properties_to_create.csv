@@ -1,0 +1,6 @@
+title,description,price,location,latitude,longitude,beds,baths,sqft,propertyType,amenities
+Modern Apartment,Beautiful city view,1200,Dhaka,23.8103,90.4125,2,2,1000,APARTMENT,WIFI|AC
+Cozy Studio,Near university,800,Chittagong,22.3569,91.7832,1,1,500,STUDIO,WIFI
+Luxury Villa,Private pool and garden,5000,Sylhet,24.8949,91.8687,4,4,3000,HOUSE,POOL|PARKING|WIFI
+Shared Room,Affordable student housing,300,Rajshahi,24.3636,88.6241,1,1,200,DORM,WIFI
+Spacious Flat,Family friendly area,1500,Khulna,22.8456,89.5403,3,2,1200,APARTMENT,PARKING|AC

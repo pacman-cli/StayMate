@@ -1,0 +1,11 @@
+property_id,property_type,location,price,bedrooms
+1,Apartment,New York,1500,2
+2,House,San Francisco,2500,3
+3,Condo,Chicago,1200,1
+4,Studio,Boston,900,0
+5,Apartment,Austin,1100,2
+6,House,Seattle,2000,4
+7,Condo,Denver,1300,1
+8,Apartment,Miami,1400,2
+9,Studio,Portland,800,0
+10,House,Atlanta,1800,3

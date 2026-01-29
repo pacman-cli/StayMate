@@ -1,0 +1,11 @@
+email,password,firstName,lastName,location,budget
+loadtest_tenant_001@test.com,TestPassword123+,Test,Tenant001,New York,1500
+loadtest_tenant_002@test.com,TestPassword123+,Test,Tenant002,San Francisco,2000
+loadtest_tenant_003@test.com,TestPassword123+,Test,Tenant003,Chicago,1200
+loadtest_tenant_004@test.com,TestPassword123+,Test,Tenant004,Boston,1800
+loadtest_tenant_005@test.com,TestPassword123+,Test,Tenant005,Austin,1000
+loadtest_tenant_006@test.com,TestPassword123+,Test,Tenant006,Seattle,1600
+loadtest_tenant_007@test.com,TestPassword123+,Test,Tenant007,Denver,1300
+loadtest_tenant_008@test.com,TestPassword123+,Test,Tenant008,Miami,1400
+loadtest_tenant_009@test.com,TestPassword123+,Test,Tenant009,Portland,1100
+loadtest_tenant_010@test.com,TestPassword123+,Test,Tenant010,Atlanta,900

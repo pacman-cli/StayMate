@@ -1,0 +1,6 @@
+email,password,firstName,lastName,properties_count
+loadtest_landlord_001@test.com,TestPassword123+,Test,Landlord001,5
+loadtest_landlord_002@test.com,TestPassword123+,Test,Landlord002,3
+loadtest_landlord_003@test.com,TestPassword123+,Test,Landlord003,7
+loadtest_landlord_004@test.com,TestPassword123+,Test,Landlord004,2
+loadtest_landlord_005@test.com,TestPassword123+,Test,Landlord005,4
