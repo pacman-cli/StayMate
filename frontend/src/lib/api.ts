@@ -1132,6 +1132,12 @@ export const roommateApi = {
 
     getRequestStatus: (targetUserId: number) =>
         api.get<string>(`/api/roommates/request/${targetUserId}/status`).then((res) => res.data),
+
+    finalizeMatch: () =>
+        api.post("/api/roommates/finalize-match").then((res) => res.data),
+
+    cancelMatch: (requestId: number) =>
+        api.post(`/api/roommates/matches/${requestId}/cancel`).then((res) => res.data),
 }
 
 export const amenityApi = {

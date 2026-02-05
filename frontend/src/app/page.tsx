@@ -1,44 +1,39 @@
-"use client"
+import FluidGradient from '@/components/cinematic/FluidGradient'
+import SceneAILogic from '@/components/scenes/SceneAILogic'
+import SceneEcosystem from '@/components/scenes/SceneEcosystem'
+import SceneLivingSpaces from '@/components/scenes/SceneLivingSpaces'
+import ScenePhilosophy from '@/components/scenes/ScenePhilosophy'
+import SceneResolution from '@/components/scenes/SceneResolution'
+import SceneSilentHero from '@/components/scenes/SceneSilentHero'
+import SceneTrust from '@/components/scenes/SceneTrust'
 
-import Footer from "@/components/Footer"
-import Navbar from "@/components/Navbar"
-import {
-    HeroSection,
-    HexPatternBackground,
-    ProblemsSection
-} from "@/components/landing"
-import { useTheme } from "@/context/ThemeContext"
-import dynamic from "next/dynamic"
+export default function Home() {
+  return (
+    <main className="relative min-h-screen selection:bg-lux-indigo/30 selection:text-white">
+      {/* 1. Atmospheric Background Layer */}
+      <FluidGradient />
 
-// Lazy load below-the-fold components
-const FeaturesSection = dynamic(() => import("@/components/landing/FeaturesSection"))
-const HowItWorksSection = dynamic(() => import("@/components/landing/HowItWorksSection"))
-const UserTypesSection = dynamic(() => import("@/components/landing/UserTypesSection"))
-const AmenitiesSection = dynamic(() => import("@/components/landing/AmenitiesSection"))
-const TestimonialsSection = dynamic(() => import("@/components/landing/TestimonialsSection"))
-const FAQSection = dynamic(() => import("@/components/landing/FAQSection"))
-
-export default function LandingPage() {
-    const { isDark } = useTheme()
-
-    return (
-        <div className={`min-h-screen transition-colors duration-300 bg-transparent`}>
-            <HexPatternBackground />
-
-            <Navbar />
-
-            <main>
-                <HeroSection />
-                <ProblemsSection />
-                <FeaturesSection />
-                <HowItWorksSection />
-                <UserTypesSection />
-                <AmenitiesSection />
-                <TestimonialsSection />
-                <FAQSection />
-            </main>
-
-            <Footer />
+      {/* 2. Navigation (Minimalist / Silent) */}
+      <nav className="fixed top-0 inset-x-0 z-50 p-6 flex justify-between items-center mix-blend-difference text-white opacity-80">
+        <span className="font-display font-bold tracking-tighter text-xl">STAYMATE.</span>
+        <div className="hidden md:flex gap-8 text-xs font-mono uppercase tracking-widest">
+          <span>Philosophy</span>
+          <span>Spaces</span>
+          <span>Account</span>
         </div>
-    )
+      </nav>
+
+      {/* 3. The Narrative Timeline (Scenes) */}
+      <div className="relative z-10 flex flex-col">
+        <SceneSilentHero />
+        <ScenePhilosophy />
+        <SceneAILogic />
+        <SceneLivingSpaces />
+        <SceneEcosystem />
+        <SceneTrust />
+        <SceneResolution />
+      </div>
+
+    </main>
+  )
 }

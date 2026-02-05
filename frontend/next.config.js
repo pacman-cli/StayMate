@@ -2,6 +2,8 @@
 const nextConfig = {
     reactStrictMode: true,
     output: "standalone",
+    // Fix for leaflet CSS - transpile the package
+    transpilePackages: ['leaflet', 'react-leaflet'],
     async rewrites() {
         console.log("DEBUG: process.env.BACKEND_URL =", process.env.BACKEND_URL)
         const backendUrl = process.env.BACKEND_URL || "http://localhost:8080"

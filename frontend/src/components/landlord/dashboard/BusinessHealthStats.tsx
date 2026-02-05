@@ -1,5 +1,5 @@
 import { LandlordOverviewStats } from "@/types/auth"
-import { Bed, Home, Star, TrendingUp } from "lucide-react"
+import { Bed, DollarSign, Home, Star, TrendingUp } from "lucide-react"
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts"
 
 interface BusinessHealthStatsProps {
@@ -14,7 +14,7 @@ export const BusinessHealthStats = ({ stats }: BusinessHealthStatsProps) => {
   ]
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
       <div className="bg-white dark:bg-dark-800 p-6 rounded-xl border border-slate-200 dark:border-dark-700 shadow-sm relative overflow-hidden group hover:shadow-elevation-low transition-all">
         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
           <Home className="w-16 h-16 text-blue-600" />
@@ -63,6 +63,21 @@ export const BusinessHealthStats = ({ stats }: BusinessHealthStatsProps) => {
         </div>
         <div className="mt-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
           {stats.occupiedSeats} occupied / {stats.vacantSeats} vacant
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-dark-800 p-6 rounded-xl border border-slate-200 dark:border-dark-700 shadow-sm relative overflow-hidden group hover:shadow-elevation-low transition-all">
+        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+          <DollarSign className="w-16 h-16 text-emerald-600" />
+        </div>
+        <div className="flex flex-col">
+          <span className="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider">Earnings</span>
+          <span className="text-3xl font-bold text-slate-900 dark:text-white mt-1">
+            ${(stats.totalEarnings || 0).toLocaleString()}
+          </span>
+          <div className="mt-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center">
+            Pending: ${(stats.pendingPayouts || 0).toLocaleString()}
+          </div>
         </div>
       </div>
 

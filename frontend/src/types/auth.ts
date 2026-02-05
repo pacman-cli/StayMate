@@ -744,6 +744,8 @@ export interface LandlordOverviewStats {
     occupancyRate: number
     averageRating: number
     totalReviews: number
+    totalEarnings: number
+    pendingPayouts: number
 }
 
 export interface SeatDto {
@@ -764,6 +766,7 @@ export interface PropertySeatSummary {
     imageUrl: string
     status: "Vacant" | "Booked"
     reviews: ReviewResponse[]
+    averageRating?: number
 }
 
 export interface ReviewResponse {
