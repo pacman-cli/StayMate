@@ -34,6 +34,13 @@ module.exports = {
                     indigo: "#4F46E5",
                     violet: "#7C3AED",
                     glow: "#818CF8",
+                },
+                electric: {
+                    400: "#22d3ee", // Cyan-ish Electric
+                    500: "#06b6d4", // Main Accent
+                    600: "#0891b2", // Darker Hover
+                    violet: "#8b5cf6", // For gradients
+                    blue: "#3b82f6",   // For gradients
                 }
             },
             fontFamily: {
