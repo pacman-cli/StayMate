@@ -8,14 +8,23 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test") // Use test profile to avoid strict prod settings if needed, but we want to
-                        // check config applied
-// Actually SecurityConfig applies generally.
+@ActiveProfiles("test")
+@MockBean(io.minio.MinioClient.class)
+@TestPropertySource(properties = {
+    "minio.bucket-name=test-bucket",
+    "minio.url=http://localhost:9005",
+    "minio.access-key=minioadmin",
+    "minio.secret-key=minioadmin",
+    "minio.public-url=http://localhost:9005",
+    "app.file.upload-dir=uploads"
+})
 public class SecurityHeadersTest {
 
   @Autowired

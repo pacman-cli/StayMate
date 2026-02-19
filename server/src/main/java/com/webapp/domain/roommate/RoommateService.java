@@ -49,6 +49,7 @@ public class RoommateService {
 
         User user = userService.getUserById(userId);
 
+        // Builds roommate post with user‑provided location and budget
         RoommatePost post = RoommatePost.builder()
                 .user(user)
                 .location(request.getLocation())
@@ -71,7 +72,7 @@ public class RoommateService {
                 .sleepSchedule(request.getSleepSchedule())
                 .personalityTags(request.getPersonalityTags())
                 .interests(request.getInterests())
-                .status(RoommatePostStatus.APPROVED) // Requires Admin Approval
+                .status(RoommatePostStatus.OPEN) // Default to OPEN
                 .build();
 
         RoommatePost savedPost = roommatePostRepository.save(post);
@@ -94,9 +95,8 @@ public class RoommateService {
         RoommatePost myPost = myPosts.isEmpty() ? null : myPosts.get(0);
 
         return posts.stream()
-                .filter(post -> currentUserId == null || !post.getUser().getId().equals(currentUserId)) // Fix: Exclude
-                                                                                                        // own
-                // posts
+                .filter(post -> currentUserId == null || !post.getUser().getId().equals(currentUserId))
+                .filter(post -> post.getStatus() == RoommatePostStatus.OPEN) // Only show OPEN posts
                 .map(post -> {
                     RoommatePostDto dto = mapToDto(post);
                     // Calculate score if we have a baseline and it's not our own post
@@ -235,7 +235,7 @@ public class RoommateService {
                     .filter(post -> !post.getUser().getId().equals(userId))
                     .filter(
                             post -> post.getStatus() == RoommatePostStatus.APPROVED
-                                    || post.getStatus() == RoommatePostStatus.PENDING)
+                                    || post.getStatus() == RoommatePostStatus.OPEN)
                     .map(this::mapToDto)
                     .collect(Collectors.toList());
         }
@@ -248,7 +248,7 @@ public class RoommateService {
                 .filter(post -> !post.getUser().getId().equals(userId)) // Exclude self
                 .filter(
                         post -> post.getStatus() == RoommatePostStatus.APPROVED
-                                || post.getStatus() == RoommatePostStatus.PENDING)
+                                || post.getStatus() == RoommatePostStatus.OPEN)
                 .map(post -> {
                     int score = calculateMatchScore(myPost, post);
                     // log.debug("Scored post {}: {}", post.getId(), score);
@@ -465,8 +465,15 @@ public class RoommateService {
         // Check if posts exist
         roommatePostRepository.findByUserId(requesterId).stream().findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("You need a roommate post first"));
-        roommatePostRepository.findByUserId(receiverId).stream().findFirst()
+
+        RoommatePost targetPost = roommatePostRepository.findByUserId(receiverId).stream().findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Target user has no post"));
+
+        // Check if target post is OPEN
+        if (targetPost.getStatus() != RoommatePostStatus.OPEN
+                && targetPost.getStatus() != RoommatePostStatus.APPROVED) {
+            throw new IllegalStateException("This user is not accepting new requests right now.");
+        }
 
         if (roommateRequestRepository.findExistingRequest(requesterId, receiverId).isPresent()) {
             throw new IllegalStateException("Request already exists");
@@ -507,19 +514,31 @@ public class RoommateService {
             throw new SecurityException("Not authorized");
         }
 
+        // Lock the post interaction
+        RoommatePost myPost = roommatePostRepository.findByUserId(userId).stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("Your roommate post was not found"));
+
         if (accept) {
+            // CRITICAL: Check if Post is still OPEN
+            if (myPost.getStatus() != RoommatePostStatus.OPEN && myPost.getStatus() != RoommatePostStatus.APPROVED) {
+                throw new IllegalStateException("Cannot accept requests in current state: " + myPost.getStatus());
+            }
+
             req.setStatus(RoommateRequestStatus.ACCEPTED);
 
-            // Close posts!
-            // Instead of closing, we mark as MATCHED so they are hidden from search but
-            // visible to each other
-            setPostStatusForUser(req.getRequester().getId(), RoommatePostStatus.MATCHED);
-            setPostStatusForUser(req.getReceiver().getId(), RoommatePostStatus.MATCHED);
+            // Update Post State -> PENDING_MATCH
+            myPost.setStatus(RoommatePostStatus.PENDING_MATCH);
+            myPost.setAcceptedRequest(req);
+            roommatePostRepository.save(myPost);
+
+            // Optional: Reject or Lock other requests?
+            // For now, we leave them PENDING but they can't be accepted because status is
+            // no longer OPEN.
+
         } else {
             req.setStatus(RoommateRequestStatus.REJECTED);
+            roommateRequestRepository.save(req);
         }
-
-        roommateRequestRepository.save(req);
 
         // Notify requester of the decision
         try {
@@ -539,16 +558,48 @@ public class RoommateService {
         }
     }
 
-    private void setPostStatusForUser(Long userId, RoommatePostStatus status) {
-        List<RoommatePost> posts = roommatePostRepository.findByUserId(userId);
-        for (RoommatePost p : posts) {
-            p.setStatus(status);
-            roommatePostRepository.save(p);
+    @Transactional
+    public void cancelMatch(Long userId, Long requestId) {
+        RoommateRequest req = roommateRequestRepository.findById(requestId)
+                .orElseThrow(() -> new IllegalArgumentException("Request not found"));
+
+        // Only the receiver (ad owner) can cancel via this flow? Or the requester too?
+        // Requirement: Owner cancelling a match.
+        if (!req.getReceiver().getId().equals(userId) && !req.getRequester().getId().equals(userId)) {
+            throw new SecurityException("Not authorized to cancel this match");
+        }
+
+        req.setStatus(RoommateRequestStatus.CANCELLED);
+        roommateRequestRepository.save(req);
+
+        // If this was the accepted request, reopen the post
+        RoommatePost post = roommatePostRepository.findByUserId(req.getReceiver().getId()).stream().findFirst()
+                .orElse(null);
+        if (post != null && post.getAcceptedRequest() != null && post.getAcceptedRequest().getId().equals(requestId)) {
+            post.setStatus(RoommatePostStatus.OPEN);
+            post.setAcceptedRequest(null);
+            roommatePostRepository.save(post);
         }
     }
 
+    @Transactional
+    public void finalizeMatch(Long userId) {
+        RoommatePost post = roommatePostRepository.findByUserId(userId).stream().findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        if (post.getStatus() != RoommatePostStatus.PENDING_MATCH) {
+            throw new IllegalStateException("Can only finalize from PENDING_MATCH state");
+        }
+
+        post.setStatus(RoommatePostStatus.MATCHED);
+        roommatePostRepository.save(post);
+    }
+
     public List<RoommateRequest> getIncomingRequests(Long userId) {
-        return roommateRequestRepository.findByReceiverIdAndStatus(userId, RoommateRequestStatus.PENDING);
+        return roommateRequestRepository.findByReceiverId(userId).stream()
+                .filter(req -> req.getStatus() == RoommateRequestStatus.PENDING
+                        || req.getStatus() == RoommateRequestStatus.ACCEPTED)
+                .collect(Collectors.toList());
     }
 
     public String getRoommateRequestStatus(Long currentUserId, Long targetUserId) {

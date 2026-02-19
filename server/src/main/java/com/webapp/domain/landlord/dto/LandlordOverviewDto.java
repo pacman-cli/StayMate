@@ -14,4 +14,6 @@ public class LandlordOverviewDto {
   private double occupancyRate;
   private double averageRating;
   private int totalReviews;
+  private java.math.BigDecimal totalEarnings;
+  private java.math.BigDecimal pendingPayouts;
 }

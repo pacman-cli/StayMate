@@ -110,7 +110,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         @Query("SELECT b FROM Booking b WHERE b.property.id = :propertyId AND b.status IN ('CONFIRMED', 'CHECKED_IN') AND b.startDate <= CURRENT_DATE AND b.endDate >= CURRENT_DATE")
         List<Booking> findActiveBookingsByPropertyId(@Param("propertyId") Long propertyId);
 
-        @Query("SELECT b FROM Booking b WHERE b.landlord.id = :landlordId AND b.status IN ('CONFIRMED', 'CHECKED_IN') AND b.startDate <= CURRENT_DATE AND b.endDate >= CURRENT_DATE")
+        @Query("SELECT b FROM Booking b WHERE b.landlord.id = :landlordId AND b.status IN ('CONFIRMED', 'CHECKED_IN') AND b.endDate >= CURRENT_DATE")
         List<Booking> findActiveBookingsByLandlordId(@Param("landlordId") Long landlordId);
 
         @Query("SELECT COUNT(DISTINCT b.property.id) FROM Booking b WHERE b.status IN ('CONFIRMED', 'CHECKED_IN') AND b.startDate <= CURRENT_DATE AND b.endDate >= CURRENT_DATE")

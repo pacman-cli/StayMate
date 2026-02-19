@@ -110,6 +110,21 @@ public class RoommateController {
     return ResponseEntity.ok().build();
   }
 
+  @PostMapping("/request/{requestId}/cancel")
+  public ResponseEntity<Void> cancelMatch(
+      @AuthenticationPrincipal UserPrincipal userPrincipal,
+      @PathVariable Long requestId) {
+    roommateService.cancelMatch(userPrincipal.getId(), requestId);
+    return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("/finalize")
+  public ResponseEntity<Void> finalizeMatch(
+      @AuthenticationPrincipal UserPrincipal userPrincipal) {
+    roommateService.finalizeMatch(userPrincipal.getId());
+    return ResponseEntity.ok().build();
+  }
+
   @GetMapping("/requests/incoming")
   public ResponseEntity<List<com.webapp.domain.roommate.RoommateRequest>> getIncomingRequests(
       @AuthenticationPrincipal UserPrincipal userPrincipal) {

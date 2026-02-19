@@ -2,22 +2,22 @@ package com.webapp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.*;
 
 /**
  * Main Spring Boot Application class.
- *
- * This class is placed at the root package (com.webapp) so that Spring Boot
- * can automatically scan all sub-packages (auth, domain) for components,
- * entities, and repositories.
+ * <p>
+ * This class is placed at the root package (com.webapp) so that Spring Boot can automatically scan all sub-packages
+ * (auth, domain) for components, entities, and repositories.
  */
 @SpringBootApplication(scanBasePackages = {
-                "com.webapp.auth",
-                "com.webapp.domain",
-                "com.webapp.service",
-                "com.webapp.config"
+        "com.webapp.auth",
+        "com.webapp.domain",
+        "com.webapp.service",
+        "com.webapp.config"
 })
-@org.springframework.scheduling.annotation.EnableScheduling
-@org.springframework.scheduling.annotation.EnableAsync
+@EnableScheduling
+@EnableAsync
 // Rely on default scanning for simpler maintenance
 // @EntityScan and @EnableJpaRepositories are removed to prevent duplication
 // errors
@@ -25,7 +25,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 // @SpringBootApplication
 public class Application {
 
-        public static void main(String[] args) {
-                SpringApplication.run(Application.class, args);
-        }
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
 }

@@ -9,6 +9,7 @@ import io.minio.MinioClient;
 import lombok.extern.slf4j.Slf4j;
 
 @Configuration
+@ConditionalOnProperty(name = "minio.enabled", havingValue = "true", matchIfMissing = true)
 @Slf4j
 public class MinioConfig {
 
@@ -22,7 +23,6 @@ public class MinioConfig {
   private String secretKey;
 
   @Bean
-  @ConditionalOnProperty(name = "minio.url")
   public MinioClient minioClient() {
     log.info("Initializing MinIO client with endpoint: {}", minioUrl);
     try {

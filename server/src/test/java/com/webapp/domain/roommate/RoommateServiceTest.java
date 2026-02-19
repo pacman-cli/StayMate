@@ -16,6 +16,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.webapp.domain.user.entity.User;
 import com.webapp.domain.user.service.UserService;
+import com.webapp.domain.verification.service.VerificationService;
 
 public class RoommateServiceTest {
 
@@ -24,6 +25,9 @@ public class RoommateServiceTest {
 
   @Mock
   private UserService userService;
+
+  @Mock
+  private VerificationService verificationService;
 
   @InjectMocks
   private RoommateService roommateService;

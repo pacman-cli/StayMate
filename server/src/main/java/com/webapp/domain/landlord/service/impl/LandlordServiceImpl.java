@@ -10,6 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.webapp.domain.booking.dto.BookingResponse;
 import com.webapp.domain.booking.entity.Booking;
 import com.webapp.domain.booking.repository.BookingRepository;
+import com.webapp.domain.finance.enums.PayoutStatus;
+import com.webapp.domain.finance.repository.EarningRepository;
+import com.webapp.domain.finance.repository.PayoutRequestRepository;
 import com.webapp.domain.landlord.dto.LandlordOverviewDto;
 import com.webapp.domain.landlord.dto.PropertySeatSummaryDto;
 import com.webapp.domain.landlord.service.LandlordService;
@@ -32,6 +35,8 @@ public class LandlordServiceImpl implements LandlordService {
   private final BookingRepository bookingRepository;
   private final SeatRepository seatRepository;
   private final ReviewRepository reviewRepository;
+  private final EarningRepository earningRepository;
+  private final PayoutRequestRepository payoutRequestRepository;
 
   @Override
   @Transactional(readOnly = true)
@@ -42,7 +47,12 @@ public class LandlordServiceImpl implements LandlordService {
       totalSeats = 0L;
 
     List<Booking> activeBookings = bookingRepository.findActiveBookingsByLandlordId(landlord.getId());
-    long occupiedSeats = activeBookings.size();
+    // Fix: Occupancy should count unique units (seats or properties) that have
+    // active/future bookings
+    long occupiedSeats = activeBookings.stream()
+        .map(b -> b.getSeat() != null ? "S" + b.getSeat().getId() : "P" + b.getProperty().getId())
+        .distinct()
+        .count();
 
     long vacantSeats = Math.max(0, totalSeats - occupiedSeats);
     long longTermVacant = 0; // Placeholder for complex logic
@@ -51,6 +61,15 @@ public class LandlordServiceImpl implements LandlordService {
 
     Double avgRating = reviewRepository.getAverageRatingByReceiverId(landlord.getId());
     int totalReviews = reviewRepository.findByReceiverIdOrderByCreatedAtDesc(landlord.getId()).size();
+
+    java.math.BigDecimal totalEarnings = earningRepository.sumTotalEarningsByUserId(landlord.getId());
+    if (totalEarnings == null)
+      totalEarnings = java.math.BigDecimal.ZERO;
+
+    java.math.BigDecimal pendingPayouts = payoutRequestRepository.sumAmountByUserIdAndStatus(landlord.getId(),
+        PayoutStatus.PENDING);
+    if (pendingPayouts == null)
+      pendingPayouts = java.math.BigDecimal.ZERO;
 
     return LandlordOverviewDto.builder()
         .totalProperties(totalProperties)
@@ -61,6 +80,8 @@ public class LandlordServiceImpl implements LandlordService {
         .occupancyRate(occupancyRate)
         .averageRating(avgRating != null ? avgRating : 0.0)
         .totalReviews(totalReviews)
+        .totalEarnings(totalEarnings)
+        .pendingPayouts(pendingPayouts)
         .build();
   }
 
@@ -128,6 +149,7 @@ public class LandlordServiceImpl implements LandlordService {
           .availableBeds((int) availableBeds)
           .seats(seatDtos)
           .imageUrl(p.getImageUrl())
+          .averageRating(p.getRating())
           .build());
     }
 

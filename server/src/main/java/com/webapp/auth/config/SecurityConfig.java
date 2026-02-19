@@ -109,7 +109,10 @@ public class SecurityConfig {
                                                                 "/api/properties/recommended",
                                                                 "/api/properties/{id:[0-9]+}", // Only allow numeric IDs
                                                                                                // publicly
-                                                                "/api/roommates/**")
+                                                                "/api/roommates/**",
+                                                                "/swagger-ui/**",
+                                                                "/swagger-ui.html",
+                                                                "/v3/api-docs/**")
                                                 .permitAll()
                                                 // Admin only endpoints
                                                 .requestMatchers("/api/admin/**")
@@ -146,7 +149,11 @@ public class SecurityConfig {
                                 .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                                 .addFilterAfter(maintenanceModeFilter, UsernamePasswordAuthenticationFilter.class)
-                                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
+                                .headers(headers -> headers.addHeaderWriter((request, response) -> {
+                                        response.setHeader("X-Content-Type-Options", "nosniff");
+                                        response.setHeader("X-Frame-Options", "SAMEORIGIN");
+                                        response.setHeader("X-XSS-Protection", "0");
+                                }));
 
                 return http.build();
         }

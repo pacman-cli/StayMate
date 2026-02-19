@@ -111,6 +111,10 @@ public class RoommatePost {
     updatedAt = LocalDateTime.now();
   }
 
+  @jakarta.persistence.OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "accepted_request_id")
+  private RoommateRequest acceptedRequest;
+
   @PreUpdate
   protected void onUpdate() {
     updatedAt = LocalDateTime.now();

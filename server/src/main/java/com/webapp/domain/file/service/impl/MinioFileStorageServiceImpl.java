@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -24,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Primary
+@ConditionalOnProperty(name = "minio.enabled", havingValue = "true", matchIfMissing = true)
 @Slf4j
 public class MinioFileStorageServiceImpl implements FileStorageService {
 

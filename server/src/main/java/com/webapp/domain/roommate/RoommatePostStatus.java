@@ -2,8 +2,10 @@ package com.webapp.domain.roommate;
 
 public enum RoommatePostStatus {
   PENDING,
-  APPROVED,
+  OPEN,
+  APPROVED, // Deprecated, mapped to OPEN
   REJECTED,
+  PENDING_MATCH,
   MATCHED,
   CLOSED
 }

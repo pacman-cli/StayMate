@@ -18,6 +18,8 @@ public interface RoommateRequestRepository extends JpaRepository<RoommateRequest
 
   List<RoommateRequest> findByRequesterId(Long requesterId);
 
+  List<RoommateRequest> findByReceiverId(Long receiverId);
+
   @org.springframework.data.jpa.repository.Modifying
   @org.springframework.data.jpa.repository.Query("DELETE FROM RoommateRequest r WHERE r.requester.id = :userId OR r.receiver.id = :userId")
   void deleteAllByUserId(@Param("userId") Long userId);
