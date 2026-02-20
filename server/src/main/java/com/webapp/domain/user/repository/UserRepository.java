@@ -18,12 +18,12 @@ import com.webapp.domain.user.enums.RoleName;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-        @Query("SELECT new com.webapp.domain.admin.dto.UserAcquisitionPoint(function('date_format', u.createdAt, '%Y-%m-%d'), r, COUNT(u)) "
+        @Query("SELECT new com.webapp.domain.admin.dto.UserAcquisitionPoint(function('TO_CHAR', u.createdAt, 'YYYY-MM-DD'), r, COUNT(u)) "
                         +
                         "FROM User u JOIN u.roles r " +
                         "WHERE r IN ('ROLE_USER', 'ROLE_HOUSE_OWNER') " +
-                        "GROUP BY function('date_format', u.createdAt, '%Y-%m-%d'), r " +
-                        "ORDER BY function('date_format', u.createdAt, '%Y-%m-%d') ASC")
+                        "GROUP BY function('TO_CHAR', u.createdAt, 'YYYY-MM-DD'), r " +
+                        "ORDER BY function('TO_CHAR', u.createdAt, 'YYYY-MM-DD') ASC")
         List<com.webapp.domain.admin.dto.UserAcquisitionPoint> getUserGrowthStats();
 
         @Query(value = "SELECT DISTINCT u FROM User u LEFT JOIN u.roles r", countQuery = "SELECT COUNT(DISTINCT u) FROM User u LEFT JOIN u.roles r")
