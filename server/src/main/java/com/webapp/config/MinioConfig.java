@@ -29,8 +29,18 @@ public class MinioConfig {
   public MinioClient minioClient() {
     log.info("Initializing MinIO client with endpoint: {}", minioUrl);
     try {
+      // MinIO SDK strictly rejects URLs that contain paths (like Supabase's
+      // /storage/v1/s3)
+      // We must extract only the scheme and authority (e.g. https://xyz.supabase.co)
+      String baseUrl = minioUrl;
+      if (minioUrl != null && minioUrl.contains("supabase.co")) {
+        java.net.URL url = new java.net.URL(minioUrl);
+        baseUrl = url.getProtocol() + "://" + url.getAuthority();
+        log.info("Parsed base URL for MinIO: {}", baseUrl);
+      }
+
       io.minio.MinioClient.Builder builder = MinioClient.builder()
-          .endpoint(minioUrl)
+          .endpoint(baseUrl)
           .credentials(accessKey, secretKey);
 
       if (region != null && !region.trim().isEmpty()) {
