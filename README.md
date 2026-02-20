@@ -138,6 +138,7 @@ docker-compose up -d --build
 - **Frontend**: [http://localhost:3000](http://localhost:3000)
 - **Backend API**: [http://localhost:8080](http://localhost:8080)
 - **MinIO Console**: [http://localhost:9006](http://localhost:9006)
+- **HealthCheck**: [https://staymate-backend-e9w1.onrender.com/actuator/health](https://staymate-backend-e9w1.onrender.com/actuator/health)
 
 ### Manual Local Dev
 1. **Infrastructure**: `docker-compose up -d mysql-db minio`
