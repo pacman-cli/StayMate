@@ -1,0 +1,115 @@
+name: Update Contribution Stats
+
+on:
+  schedule:
+    # Run weekly on Sunday at midnight UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch: # Allow manual trigger
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/update-contributions.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-stats:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get contribution statistics
+        id: stats
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get repository statistics
+          REPO="pacman-cli/StayMate"
+
+          echo "Fetching GitHub statistics..."
+
+          # Get total commits
+          TOTAL_COMMITS=$(git rev-list --count HEAD 2>/dev/null || echo "N/A")
+          echo "total_commits=$TOTAL_COMMITS" >> $GITHUB_OUTPUT
+
+          # Get contributor count
+          CONTRIBUTOR_COUNT=$(git log --format='%ae' | sort -u | wc -l | tr -d ' ')
+          echo "contributor_count=$CONTRIBUTOR_COUNT" >> $GITHUB_OUTPUT
+
+          # Get commits this month
+          MONTHLY_COMMITS=$(git rev-list --count --since="$(date -d 'last month' +%Y-%m-%d)" HEAD 2>/dev/null || echo "N/A")
+          echo "monthly_commits=$MONTHLY_COMMITS" >> $GITHUB_OUTPUT
+
+          # Get last commit date
+          LAST_COMMIT=$(git log -1 --format=%cd --date=short)
+          echo "last_commit=$LAST_COMMIT" >> $GITHUB_OUTPUT
+
+          echo "Statistics gathered successfully!"
+          echo "Total Commits: $TOTAL_COMMITS"
+          echo "Contributors: $CONTRIBUTOR_COUNT"
+          echo "Monthly Commits: $MONTHLY_COMMITS"
+          echo "Last Commit: $LAST_COMMIT"
+
+      - name: Generate contribution summary
+        run: |
+          mkdir -p mk-docs/docs/assets/stats
+
+          # Create JSON stats file
+          cat > mk-docs/docs/assets/stats/contribution-stats.json << EOF
+          {
+            "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "total_commits": "${{ steps.stats.outputs.total_commits }}",
+            "contributor_count": "${{ steps.stats.outputs.contributor_count }}",
+            "monthly_commits": "${{ steps.stats.outputs.monthly_commits }}",
+            "last_commit": "${{ steps.stats.outputs.last_commit }}"
+          }
+          EOF
+
+          echo "Stats file generated!"
+          cat mk-docs/docs/assets/stats/contribution-stats.json
+
+      - name: Get top contributors
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "## Top Contributors by Commits" > mk-docs/docs/assets/stats/top-contributors.md
+          echo "" >> mk-docs/docs/assets/stats/top-contributors.md
+          echo "| Rank | Author | Commits |" >> mk-docs/docs/assets/stats/top-contributors.md
+          echo "|:----:|--------|--------:|" >> mk-docs/docs/assets/stats/top-contributors.md
+
+          git shortlog -sn --no-merges HEAD | head -10 | nl -w2 -s'. ' | while read line; do
+            RANK=$(echo "$line" | awk '{print $1}')
+            COMMITS=$(echo "$line" | awk '{print $2}')
+            AUTHOR=$(echo "$line" | cut -d' ' -f3-)
+            echo "| $RANK | $AUTHOR | $COMMITS |" >> mk-docs/docs/assets/stats/top-contributors.md
+          done
+
+          echo "" >> mk-docs/docs/assets/stats/top-contributors.md
+          echo "*Last updated: $(date -u +%Y-%m-%d)*" >> mk-docs/docs/assets/stats/top-contributors.md
+
+          cat mk-docs/docs/assets/stats/top-contributors.md
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          git add mk-docs/docs/assets/stats/
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "docs: update contribution statistics [skip ci]"
+            git push
+          fi

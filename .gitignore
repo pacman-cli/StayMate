@@ -10,5 +10,11 @@ frontend/.next
 docs/
 staymate-mkdocs/
 staymate-load-test/
-load-testing/
+# load-testing/
 deploy/
+AWS_DEPLOYMENT_GUIDE.md
+AWS_DEPLOYMENT_GUIDE_COMPLETE.md
+AWS_MANUAL_SETUP_GUIDE.md
+COMPLETE_AWS_LOAD_TESTING_GUIDE.md
+DEPLOYMENT.md
+FRONTEND_ENHANCEMENT_SUMMARY.md
