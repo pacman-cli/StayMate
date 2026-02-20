@@ -124,7 +124,7 @@ export default function BookingRequestsPage() {
                 )}
               </div>
 
-              <div className="flex flex-col gap-2 justify-center border-l border-slate-200 dark:border-slate-700 pl-0 md:pl-6">
+              <div className="flex flex-row md:flex-col items-center justify-end gap-3 pt-4 md:pt-0 md:pl-6 border-t md:border-t-0 md:border-l border-slate-200 dark:border-dark-700 min-w-[140px]">
                 {request.status === 'PENDING' && (
                   <>
                     <button
