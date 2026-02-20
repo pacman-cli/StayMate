@@ -147,11 +147,11 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- MinIO -->
+        <!-- AWS S3 (Supabase Storage Compatible) -->
         <dependency>
-            <groupId>io.minio</groupId>
-            <artifactId>minio</artifactId>
-            <version>8.5.9</version>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.20.162</version>
         </dependency>
 
         <!-- Twilio -->
