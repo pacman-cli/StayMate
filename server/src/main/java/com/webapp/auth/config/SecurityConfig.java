@@ -103,7 +103,7 @@ public class SecurityConfig {
                                                                 "/ws/**",
                                                                 "/h2-console/**",
                                                                 "/error",
-                                                                "/api/uploads/**",
+                                                                "/uploads/**",
                                                                 "/api/v1/internal/sudo/**",
                                                                 "/api/properties/search",
                                                                 "/api/properties/recommended",
