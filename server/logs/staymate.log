@@ -1,60 +1,60 @@
-2026-02-21 06:06:32.547 INFO  [background-preinit] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
-2026-02-21 06:06:32.561 INFO  [main] c.w.auth.config.SecurityHeadersTest - Starting SecurityHeadersTest using Java 17.0.18 with PID 95933 (started by puspo in /Users/puspo/Desktop/SOFTWARE_PROJECT/StayMate/server)
-2026-02-21 06:06:32.562 DEBUG [main] c.w.auth.config.SecurityHeadersTest - Running with Spring Boot v3.2.0, Spring v6.1.1
-2026-02-21 06:06:32.562 INFO  [main] c.w.auth.config.SecurityHeadersTest - The following 1 profile is active: "test"
-2026-02-21 06:06:33.201 INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-02-21 06:06:33.270 INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 66 ms. Found 33 JPA repository interfaces.
-2026-02-21 06:06:33.699 INFO  [main] o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
-2026-02-21 06:06:33.750 INFO  [main] org.hibernate.Version - HHH000412: Hibernate ORM core version 6.3.1.Final
-2026-02-21 06:06:33.770 INFO  [main] o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
-2026-02-21 06:06:33.844 INFO  [main] o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-02-21 06:06:34.070 WARN  [main] org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-02-21 06:06:34.660 INFO  [main] o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-02-21 06:06:34.725 INFO  [main] o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-02-21 06:06:34.743 WARN  [main] o.s.aop.framework.CglibAopProxy - Unable to proxy interface-implementing method [public final void org.springframework.web.filter.OncePerRequestFilter.doFilter(jakarta.servlet.ServletRequest,jakarta.servlet.ServletResponse,jakarta.servlet.FilterChain) throws jakarta.servlet.ServletException,java.io.IOException] because it is marked as final, consider using interface-based JDK proxies instead.
-2026-02-21 06:06:34.743 WARN  [main] o.s.aop.framework.CglibAopProxy - Unable to proxy interface-implementing method [public final void org.springframework.web.filter.GenericFilterBean.init(jakarta.servlet.FilterConfig) throws jakarta.servlet.ServletException] because it is marked as final, consider using interface-based JDK proxies instead.
-2026-02-21 06:06:35.090 INFO  [main] o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
-2026-02-21 06:06:36.908 INFO  [main] c.w.d.f.s.i.S3FileStorageServiceImpl - Checking if S3 bucket exists: test-bucket
-2026-02-21 06:06:36.923 INFO  [main] c.w.d.f.s.i.S3FileStorageServiceImpl - Created S3 bucket: test-bucket
-2026-02-21 06:06:36.925 INFO  [main] c.w.d.f.s.i.S3FileStorageServiceImpl - Set public read policy on bucket: test-bucket
-2026-02-21 06:06:36.927 INFO  [main] c.w.d.f.s.i.LocalFileStorageServiceImpl - Initialized local file storage at /Users/puspo/Desktop/SOFTWARE_PROJECT/StayMate/server/uploads
-2026-02-21 06:06:37.359 WARN  [main] o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2026-02-21 06:06:37.428 INFO  [main] c.webapp.auth.config.SecurityConfig - Configuring Security Filter Chain with OAuth2...
-2026-02-21 06:06:37.645 INFO  [main] o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint(s) beneath base path '/actuator'
-2026-02-21 06:06:37.712 INFO  [main] o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@2224d1ad, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@359025d8, org.springframework.security.web.context.SecurityContextHolderFilter@779565e1, org.springframework.security.web.header.HeaderWriterFilter@618df156, org.springframework.web.filter.CorsFilter@6b91dbe2, org.springframework.security.web.authentication.logout.LogoutFilter@4870b38, org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter@4b41f611, org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter@59eabfd1, com.webapp.auth.config.RateLimitFilter@3d2abb1, com.webapp.auth.security.JwtAuthenticationFilter@3456b7e5, com.webapp.auth.security.MaintenanceModeFilter@6ddb5117, org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter@65b89738, org.springframework.security.web.authentication.ui.DefaultLogoutPageGeneratingFilter@2c8bc61, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@60e784de, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@389e267f, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@3642f705, org.springframework.security.web.session.SessionManagementFilter@2c708eed, org.springframework.security.web.access.ExceptionTranslationFilter@4cef1322, org.springframework.security.web.access.intercept.AuthorizationFilter@618519cf]
-2026-02-21 06:06:38.111 DEBUG [main] c.w.auth.config.RequestLoggingFilter - Filter 'requestLoggingFilter' configured for use
-2026-02-21 06:06:38.111 DEBUG [main] c.webapp.auth.config.RateLimitFilter - Filter 'rateLimitFilter' configured for use
-2026-02-21 06:06:38.112 DEBUG [main] c.w.a.s.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
-2026-02-21 06:06:38.112 DEBUG [main] c.w.a.security.MaintenanceModeFilter - Filter 'maintenanceModeFilter' configured for use
-2026-02-21 06:06:38.112 INFO  [main] o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
-2026-02-21 06:06:38.112 INFO  [main] o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
-2026-02-21 06:06:38.113 INFO  [main] o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
-2026-02-21 06:06:38.146 INFO  [main] o.s.m.s.b.SimpleBrokerMessageHandler - Starting...
-2026-02-21 06:06:38.146 INFO  [main] o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@26c0a3ed]]
-2026-02-21 06:06:38.147 INFO  [main] o.s.m.s.b.SimpleBrokerMessageHandler - Started.
-2026-02-21 06:06:38.155 INFO  [main] c.w.auth.config.SecurityHeadersTest - Started SecurityHeadersTest in 5.763 seconds (process running for 6.772)
-2026-02-21 06:06:38.162 INFO  [MessageBroker-1] c.w.d.a.s.impl.FraudServiceImpl - Scanning for duplicate listings...
-2026-02-21 06:06:38.162 INFO  [MessageBroker-2] c.w.d.a.s.impl.FraudServiceImpl - Scanning for spam messages...
-2026-02-21 06:06:38.162 INFO  [MessageBroker-3] c.w.d.a.s.impl.FraudServiceImpl - Scanning for emergency availability mismatches...
-2026-02-21 06:06:38.208 INFO  [main] c.w.d.p.service.AmenityService - Seeding default amenities...
-2026-02-21 06:06:38.236 INFO  [main] c.w.d.p.service.AmenityService - Seeded 14 amenities
-2026-02-21 06:06:38.253 DEBUG [main] o.s.security.web.FilterChainProxy - Securing GET /actuator/health
-2026-02-21 06:06:38.276 DEBUG [main] o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
-2026-02-21 06:06:38.278 DEBUG [main] o.s.security.web.FilterChainProxy - Secured GET /actuator/health
-2026-02-21 06:06:38.583 INFO  [main] c.w.d.n.c.NotificationController - User 1 deleting notification 1
-2026-02-21 06:06:38.584 INFO  [main] c.w.d.n.c.NotificationController - Getting notifications for user 1, page: 0, size: 20, filter: null
-2026-02-21 06:06:38.586 INFO  [main] c.w.d.n.c.NotificationController - User 1 marking notification 1 as read
-2026-02-21 06:06:38.587 INFO  [main] c.w.d.n.c.NotificationController - User 1 marking all notifications as read
-2026-02-21 06:06:38.589 INFO  [main] c.w.d.n.c.NotificationController - Getting unread count for user 1
-2026-02-21 06:06:39.079 INFO  [main] c.w.d.m.controller.MessageController - Creating conversation for user 1 with recipient 2
-2026-02-21 06:06:39.081 INFO  [main] c.w.d.m.controller.MessageController - User 1 deleting conversation 1
-2026-02-21 06:06:39.083 INFO  [main] c.w.d.m.controller.MessageController - Getting messages for conversation 1 for user 1, page: 0, size: 50
-2026-02-21 06:06:39.084 INFO  [main] c.w.d.m.controller.MessageController - Getting conversation 1 for user 1
-2026-02-21 06:06:39.085 INFO  [main] c.w.d.m.controller.MessageController - User 1 marking messages as read for conversation 1
-2026-02-21 06:06:39.086 INFO  [main] c.w.d.m.controller.MessageController - Getting conversations for user 1, page: 0, size: 20, search: null
-2026-02-21 06:06:39.087 INFO  [main] c.w.d.m.controller.MessageController - User 1 sending message to conversation 1 or recipient null
-2026-02-21 06:06:39.088 INFO  [main] c.w.d.m.controller.MessageController - Getting unread count for user 1
-2026-02-21 06:06:39.144 INFO  [SpringApplicationShutdownHook] o.s.m.s.b.SimpleBrokerMessageHandler - Stopping...
-2026-02-21 06:06:39.144 INFO  [SpringApplicationShutdownHook] o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@26c0a3ed]]
-2026-02-21 06:06:39.144 INFO  [SpringApplicationShutdownHook] o.s.m.s.b.SimpleBrokerMessageHandler - Stopped.
-2026-02-21 06:06:39.150 INFO  [SpringApplicationShutdownHook] o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-02-22 02:27:02.270 INFO  [background-preinit] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2026-02-22 02:27:02.285 INFO  [main] c.w.auth.config.SecurityHeadersTest - Starting SecurityHeadersTest using Java 17.0.18 with PID 19195 (started by puspo in /Users/puspo/Desktop/SOFTWARE_PROJECT/StayMate/server)
+2026-02-22 02:27:02.285 DEBUG [main] c.w.auth.config.SecurityHeadersTest - Running with Spring Boot v3.2.0, Spring v6.1.1
+2026-02-22 02:27:02.286 INFO  [main] c.w.auth.config.SecurityHeadersTest - The following 1 profile is active: "test"
+2026-02-22 02:27:03.118 INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-02-22 02:27:03.199 INFO  [main] o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 75 ms. Found 33 JPA repository interfaces.
+2026-02-22 02:27:04.170 INFO  [main] o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-02-22 02:27:04.211 INFO  [main] org.hibernate.Version - HHH000412: Hibernate ORM core version 6.3.1.Final
+2026-02-22 02:27:04.237 INFO  [main] o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-02-22 02:27:04.303 INFO  [main] o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-02-22 02:27:04.473 WARN  [main] org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-02-22 02:27:06.273 INFO  [main] o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-02-22 02:27:06.537 INFO  [main] o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-02-22 02:27:06.575 WARN  [main] o.s.aop.framework.CglibAopProxy - Unable to proxy interface-implementing method [public final void org.springframework.web.filter.OncePerRequestFilter.doFilter(jakarta.servlet.ServletRequest,jakarta.servlet.ServletResponse,jakarta.servlet.FilterChain) throws jakarta.servlet.ServletException,java.io.IOException] because it is marked as final, consider using interface-based JDK proxies instead.
+2026-02-22 02:27:06.576 WARN  [main] o.s.aop.framework.CglibAopProxy - Unable to proxy interface-implementing method [public final void org.springframework.web.filter.GenericFilterBean.init(jakarta.servlet.FilterConfig) throws jakarta.servlet.ServletException] because it is marked as final, consider using interface-based JDK proxies instead.
+2026-02-22 02:27:07.401 INFO  [main] o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-02-22 02:27:10.698 INFO  [main] c.w.d.f.s.i.S3FileStorageServiceImpl - Checking if S3 bucket exists: test-bucket
+2026-02-22 02:27:10.766 INFO  [main] c.w.d.f.s.i.S3FileStorageServiceImpl - Created S3 bucket: test-bucket
+2026-02-22 02:27:10.771 INFO  [main] c.w.d.f.s.i.S3FileStorageServiceImpl - Set public read policy on bucket: test-bucket
+2026-02-22 02:27:10.778 INFO  [main] c.w.d.f.s.i.LocalFileStorageServiceImpl - Initialized local file storage at /Users/puspo/Desktop/SOFTWARE_PROJECT/StayMate/server/uploads
+2026-02-22 02:27:11.461 WARN  [main] o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-02-22 02:27:11.565 INFO  [main] c.webapp.auth.config.SecurityConfig - Configuring Security Filter Chain with OAuth2...
+2026-02-22 02:27:11.957 INFO  [main] o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint(s) beneath base path '/actuator'
+2026-02-22 02:27:12.036 INFO  [main] o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@601714fc, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@13bc1400, org.springframework.security.web.context.SecurityContextHolderFilter@6e5aca9, org.springframework.security.web.header.HeaderWriterFilter@7cc16282, org.springframework.web.filter.CorsFilter@14272557, org.springframework.security.web.authentication.logout.LogoutFilter@65a0785, org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter@5239e578, org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter@1e32f53f, com.webapp.auth.config.RateLimitFilter@74cad6d, com.webapp.auth.security.JwtAuthenticationFilter@d7de580, com.webapp.auth.security.MaintenanceModeFilter@73ebf7cc, org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter@429bd63b, org.springframework.security.web.authentication.ui.DefaultLogoutPageGeneratingFilter@5c8e1a2f, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@1ef5a826, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@9dbcc95, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@2fe119aa, org.springframework.security.web.session.SessionManagementFilter@53ae9fe, org.springframework.security.web.access.ExceptionTranslationFilter@69f78605, org.springframework.security.web.access.intercept.AuthorizationFilter@4418f3a]
+2026-02-22 02:27:12.657 DEBUG [main] c.w.auth.config.RequestLoggingFilter - Filter 'requestLoggingFilter' configured for use
+2026-02-22 02:27:14.398 DEBUG [main] c.webapp.auth.config.RateLimitFilter - Filter 'rateLimitFilter' configured for use
+2026-02-22 02:27:14.402 DEBUG [main] c.w.a.s.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-02-22 02:27:14.403 DEBUG [main] c.w.a.security.MaintenanceModeFilter - Filter 'maintenanceModeFilter' configured for use
+2026-02-22 02:27:14.404 INFO  [main] o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-02-22 02:27:14.405 INFO  [main] o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-02-22 02:27:14.411 INFO  [main] o.s.t.w.s.TestDispatcherServlet - Completed initialization in 6 ms
+2026-02-22 02:27:14.536 INFO  [main] o.s.m.s.b.SimpleBrokerMessageHandler - Starting...
+2026-02-22 02:27:14.540 INFO  [main] o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=true, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@52ac8f5f]]
+2026-02-22 02:27:14.542 INFO  [main] o.s.m.s.b.SimpleBrokerMessageHandler - Started.
+2026-02-22 02:27:14.572 INFO  [main] c.w.auth.config.SecurityHeadersTest - Started SecurityHeadersTest in 12.473 seconds (process running for 13.628)
+2026-02-22 02:27:14.589 INFO  [MessageBroker-2] c.w.d.a.s.impl.FraudServiceImpl - Scanning for emergency availability mismatches...
+2026-02-22 02:27:14.589 INFO  [MessageBroker-3] c.w.d.a.s.impl.FraudServiceImpl - Scanning for spam messages...
+2026-02-22 02:27:14.589 INFO  [MessageBroker-1] c.w.d.a.s.impl.FraudServiceImpl - Scanning for duplicate listings...
+2026-02-22 02:27:14.734 INFO  [main] c.w.d.p.service.AmenityService - Seeding default amenities...
+2026-02-22 02:27:14.819 INFO  [main] c.w.d.p.service.AmenityService - Seeded 14 amenities
+2026-02-22 02:27:14.851 DEBUG [main] o.s.security.web.FilterChainProxy - Securing GET /actuator/health
+2026-02-22 02:27:14.874 DEBUG [main] o.s.s.w.a.AnonymousAuthenticationFilter - Set SecurityContextHolder to anonymous SecurityContext
+2026-02-22 02:27:14.875 DEBUG [main] o.s.security.web.FilterChainProxy - Secured GET /actuator/health
+2026-02-22 02:27:15.305 INFO  [main] c.w.d.n.c.NotificationController - User 1 deleting notification 1
+2026-02-22 02:27:15.307 INFO  [main] c.w.d.n.c.NotificationController - Getting notifications for user 1, page: 0, size: 20, filter: null
+2026-02-22 02:27:15.309 INFO  [main] c.w.d.n.c.NotificationController - User 1 marking notification 1 as read
+2026-02-22 02:27:15.310 INFO  [main] c.w.d.n.c.NotificationController - User 1 marking all notifications as read
+2026-02-22 02:27:15.313 INFO  [main] c.w.d.n.c.NotificationController - Getting unread count for user 1
+2026-02-22 02:27:16.109 INFO  [main] c.w.d.m.controller.MessageController - Creating conversation for user 1 with recipient 2
+2026-02-22 02:27:16.110 INFO  [main] c.w.d.m.controller.MessageController - User 1 deleting conversation 1
+2026-02-22 02:27:16.112 INFO  [main] c.w.d.m.controller.MessageController - Getting messages for conversation 1 for user 1, page: 0, size: 50
+2026-02-22 02:27:16.113 INFO  [main] c.w.d.m.controller.MessageController - Getting conversation 1 for user 1
+2026-02-22 02:27:16.114 INFO  [main] c.w.d.m.controller.MessageController - User 1 marking messages as read for conversation 1
+2026-02-22 02:27:16.116 INFO  [main] c.w.d.m.controller.MessageController - Getting conversations for user 1, page: 0, size: 20, search: null
+2026-02-22 02:27:16.117 INFO  [main] c.w.d.m.controller.MessageController - User 1 sending message to conversation 1 or recipient null
+2026-02-22 02:27:16.119 INFO  [main] c.w.d.m.controller.MessageController - Getting unread count for user 1
+2026-02-22 02:27:16.196 INFO  [SpringApplicationShutdownHook] o.s.m.s.b.SimpleBrokerMessageHandler - Stopping...
+2026-02-22 02:27:16.196 INFO  [SpringApplicationShutdownHook] o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@52ac8f5f]]
+2026-02-22 02:27:16.196 INFO  [SpringApplicationShutdownHook] o.s.m.s.b.SimpleBrokerMessageHandler - Stopped.
+2026-02-22 02:27:16.203 INFO  [SpringApplicationShutdownHook] o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'

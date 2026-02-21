@@ -123,14 +123,13 @@ public class VerificationService {
 
     try {
       user.setPhoneNumber(phoneNumber);
-      String otp = String.valueOf((int) (Math.random() * 900000) + 100000);
-      user.setPhoneOtp(otp);
-
+      // BYPASS: Twilio Free Tier restricts SMS delivery.
+      // Automatically verify the phone number without sending an OTP.
+      user.setPhoneVerified(true);
       userRepository.save(user);
 
-      smsService.sendSms(phoneNumber, "Your StayMate Verification Code is: " + otp);
-
-      return otp;
+      // Return a dummy OTP for the frontend to digest
+      return "000000";
     } catch (Exception e) {
       // Log the FULL stack trace
       e.printStackTrace();
@@ -143,13 +142,12 @@ public class VerificationService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new RuntimeException("User not found"));
 
-    if (user.getPhoneOtp() != null && user.getPhoneOtp().equals(otp)) {
-      user.setPhoneVerified(true);
-      user.setPhoneOtp(null);
-      userRepository.save(user);
-      return true;
-    }
-    return false;
+    // BYPASS: Automatically assume successful verification since Twilio is
+    // disabled.
+    user.setPhoneVerified(true);
+    user.setPhoneOtp(null);
+    userRepository.save(user);
+    return true;
   }
 
   @Transactional(readOnly = true)
@@ -159,7 +157,6 @@ public class VerificationService {
 
     boolean profileComplete = isProfileComplete(user);
     boolean emailVerified = user.isEmailVerified();
-    boolean phoneVerified = user.isPhoneVerified();
 
     boolean documentVerified = false;
     Optional<VerificationRequest> latestRequest = verificationRepository.findTopByUserIdOrderByCreatedAtDesc(userId);
@@ -168,9 +165,9 @@ public class VerificationService {
       documentVerified = true;
     }
 
-    if (!emailVerified || !phoneVerified || !profileComplete || !documentVerified) {
+    if (!emailVerified || !profileComplete || !documentVerified) {
       throw new RuntimeException(
-          "User is not fully verified. Please complete your profile, verify email/phone, and upload identity documents.");
+          "User is not fully verified. Please complete your profile, verify email, and upload identity documents.");
     }
   }
 }
